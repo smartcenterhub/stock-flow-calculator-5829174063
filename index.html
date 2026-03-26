@@ -1127,6 +1127,73 @@ function checkNotHtml(txt, label) {
   }
 }
 
+// ── fc_예측 시트에서 휴일 날짜 감지 ─────────────
+// row4(요일행)가 표준 요일('월'~'일') 이 아닌 값이거나
+// 해당 날짜의 모든 품목 fc 합계가 0이면 휴일로 간주
+const HOLIDAY_DATES = new Set(); // 'YYYY-MM-DD' 형식
+
+function detectHolidaysFromFc(txt) {
+  const rows = parseCSV(txt);
+  if(rows.length < 6) return;
+  const dowRow  = rows[3]||[];
+  const dateRow = rows[4]||[];
+  const monthRow= rows[1]||[];
+  const STD_DOWS = new Set(['월','화','수','목','금','토','일']);
+
+  let dsc=3;
+  for(let c=3;c<dateRow.length;c++){
+    if(/^\d+$/.test((dateRow[c]||'').trim())){dsc=c;break;}
+  }
+  let cm='';
+  const mByC={};
+  for(let c=dsc;c<monthRow.length;c++){
+    const v=(monthRow[c]||'').trim();if(v)cm=v;mByC[c]=cm;
+  }
+  for(let c=dsc;c<dateRow.length;c++){
+    const dn=(dateRow[c]||'').trim();
+    const dow=(dowRow[c]||'').trim();
+    const m=mByC[c]||'';
+    if(!m||!/^\d+$/.test(dn)) continue;
+    const pm=m.match(/(\d{4})년\s*(\d{1,2})월/);
+    if(!pm) continue;
+    const dateKey=`${pm[1]}-${pm[2].padStart(2,'0')}-${dn.padStart(2,'0')}`;
+    // 요일이 표준이 아니거나 '휴', '공휴' 포함 → 휴일
+    if(dow && !STD_DOWS.has(dow)){
+      HOLIDAY_DATES.add(dateKey);
+      continue;
+    }
+    // fc 합계가 0인 평일 → 휴일 가능성 높음
+    if(['월','화','수','목','금'].includes(dow)){
+      let sum=0;
+      for(let r=6;r<rows.length;r++){
+        const row=rows[r];if(!row||!row[0]) continue;
+        const v=parseFloat((row[c]||'').trim().replace(/,/g,''));
+        if(!isNaN(v)) sum+=v;
+      }
+      if(sum===0) HOLIDAY_DATES.add(dateKey);
+    }
+  }
+}
+
+// 현재 주 FC.days에 HOLIDAY_DATES 자동 적용
+function applyHolidaysToWeek(){
+  if(!FC.days.length) return;
+  let changed=false;
+  FC.days.forEach((day,i)=>{
+    if(HOLIDAY_DATES.has(day.date)){
+      if(day.holiday!=='공휴일 당일'){
+        // 전날/다음날 먼저 초기화
+        FC.days.forEach(d=>{if(d.holiday==='공휴일 전날'||d.holiday==='공휴일 다음날')d.holiday=null;});
+        day.holiday='공휴일 당일';
+        if(i>0) FC.days[i-1].holiday='공휴일 전날';
+        if(i<FC.days.length-1) FC.days[i+1].holiday='공휴일 다음날';
+        changed=true;
+      }
+    }
+  });
+  if(changed) fcRecalc();
+}
+
 async function loadAll() {
   const btn=document.getElementById('loadBtn');
   btn.disabled=true;
@@ -1138,15 +1205,16 @@ async function loadAll() {
       fetchCsvByGid(GIDS.ac),
     ]);
 
+    // 휴일 자동 감지 (fc_예측 기준)
+    detectHolidaysFromFc(fcTxt);
+
     const fcP = parseSheetData(fcTxt);
     const acP = parseSheetData(acTxt);
 
-    // Merge dates & dinfo
     const allDates = new Set([...fcP.dates, ...acP.dates]);
     D.dates = [...allDates].sort();
     D.dateInfo = {...fcP.dinfo, ...acP.dinfo};
 
-    // Store items
     D.fc={};
     CODES.forEach(c => { D.fc[c]= fcP.items[c]||{}; });
     D.ac={};
@@ -1154,13 +1222,11 @@ async function loadAll() {
 
     D.loaded = true;
 
-    // UI updates
     if (D.dates.length) {
       document.getElementById('dateRangeTxt').textContent = `${D.dates[0]} ~ ${D.dates[D.dates.length-1]}`;
       document.getElementById('lastUpdTxt').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
     }
 
-    // Populate detail select
     const sel = document.getElementById('detailSel');
     sel.innerHTML = '<option value="">품목 선택</option>';
     CODES.forEach(c => {
@@ -1172,6 +1238,9 @@ async function loadAll() {
     renderOverview();
     renderCoeff();
 
+    // 주간 예측표가 열려 있으면 휴일 자동 적용
+    applyHolidaysToWeek();
+
   } catch(e) {
     const msg = (e.message||'알 수 없는 오류');
     document.getElementById('ovTable').innerHTML =
@@ -1182,6 +1251,7 @@ async function loadAll() {
   btn.disabled=false;
   btn.innerHTML='↻ 데이터 로드';
 }
+
 
 // ════════════════════════════════════════
 // ERROR HELPERS
@@ -2089,14 +2159,10 @@ function renderBGroup(label,blist){
       </select>
     </div>`;
 
-    // 4. Promo drop zone
-    const dropZone=`<div class="fbc-drop" id="fbcDrop_${b.id}"
-      ondragover="fbcDragOver(event,'${b.id}')" ondragleave="fbcDragLeave(event,'${b.id}')" ondrop="fbcDrop(event,'${b.id}')"
-    >${pi
-      ?`🎉 ${st.promo} ×${pi.v.toFixed(3)} <span onclick="fbcRemovePromo('${b.id}',event)" style="cursor:pointer;opacity:.6;margin-left:5px">✕</span>`
-      :'🎉 행사계수 드롭 / 칩 선택 후 카드 클릭'}</div>`;
+    // 4. Promo drop zone — REMOVED (행사는 행사불러오기 패널에서 자동 적용)
+    // 행사 적용된 경우 promoTag로 표시됨
 
-    const body=itemGrid+dayBreak+ctrl+dropZone;
+    const body=itemGrid+dayBreak+ctrl;
 
     h+=`<div class="fc-bcard${b.isMain?' is-main':''}${pi?' has-promo':''}${st.open?' open':''}"
       id="fbc_${b.id}"
@@ -2321,6 +2387,8 @@ function evClear(){
 function fcSetWeek(mon){
   FC.monDate=mon;document.getElementById('fcMonDate').value=dateStr(mon);
   FC.days=DOW_KO.map((dow,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return{date:dateStr(d),dow,holiday:null,open:false};});
+  // 로드된 휴일 자동 적용
+  applyHolidaysToWeek();
   // Re-apply events when week changes (if sheet already loaded)
   if(EV_RAW.length) evAutoApplyForWeek(); else fcRecalc();
 }
@@ -2456,9 +2524,7 @@ function fcToggleEdit(){
 
 // ── Init ──────────────────────────────────
 (async function initForecast(){
-  // 1. 마스터 데이터 먼저 로드 (품목계수·상품구성 시트 연동)
   await loadMasterData();
-  // 2. 로드된 BUNDLES로 FC.bundles 초기화
   fcRenderPalette();fcInitBundles();
   const mon=fcMonday(new Date());FC.monDate=mon;
   document.getElementById('fcMonDate').value=dateStr(mon);
@@ -2467,8 +2533,10 @@ function fcToggleEdit(){
 })();
 
 // ════════════════════════════════════════
-// Init
+// Init — 페이지 로드 시 데이터 자동 로드
 renderCoeff();
+// 약간의 딜레이 후 자동 로드 (DOM 완성 대기)
+setTimeout(()=>{ loadAll(); }, 500);
 </script>
 </body>
 </html>
