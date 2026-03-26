@@ -373,6 +373,7 @@ canvas{display:block}
   <div class="sb-foot">
     <div>X = <span class="x-pill" id="xBadge">100</span></div>
     <div style="margin-top:4px;font-size:10.5px" id="lastUpdTxt">데이터 미로드</div>
+    <div style="margin-top:5px;font-size:9.5px;line-height:1.4" id="masterLoadStatus" style="color:var(--t4)">📦 마스터 로드 중...</div>
   </div>
 </aside>
 
@@ -625,6 +626,29 @@ canvas{display:block}
         <button class="btn" onclick="fcHideRef()" style="padding:3px 10px">✕ 닫기</button>
       </div>
       <div id="refLastUpdated" style="font-size:10.5px;color:var(--t4);margin-bottom:14px"></div>
+      <!-- Apps Script 연동 설정 -->
+      <div style="background:rgba(58,58,240,0.06);border:1px solid rgba(58,58,240,0.2);border-radius:var(--r-lg);padding:12px 14px;margin-bottom:16px">
+        <div style="font-size:11.5px;font-weight:700;color:var(--accent);margin-bottom:6px">⚙️ 연동 설정 — Apps Script에 아래 코드 추가 (로컬 파일에서 실행 시 필요)</div>
+        <div style="font-size:10px;color:var(--t3);margin-bottom:6px">Apps Script 편집기 → <b>기존 doGet 함수 맨 앞</b>에 아래 블록 삽입 → 저장 → 재배포</div>
+        <pre style="background:rgba(0,0,0,0.05);border-radius:6px;padding:10px;font-size:10px;overflow-x:auto;color:var(--t2);line-height:1.6;margin:0;white-space:pre-wrap">if (e.parameter.action === 'getCsv') {
+  var ss = SpreadsheetApp.openById(e.parameter.id);
+  var sheets = ss.getSheets();
+  var sheet = sheets.filter(function(s){
+    return String(s.getSheetId()) === e.parameter.gid;
+  })[0];
+  if (!sheet) return ContentService
+    .createTextOutput('').setMimeType(ContentService.MimeType.TEXT);
+  var csv = sheet.getDataRange().getValues()
+    .map(function(r){ return r.map(function(c){
+      return '"' + String(c).replace(/"/g,'""') + '"';
+    }).join(','); }).join('\n');
+  return ContentService.createTextOutput(csv)
+    .setMimeType(ContentService.MimeType.TEXT);
+}</pre>
+        <div style="margin-top:8px;font-size:10px;color:var(--t4)">
+          <a href="https://script.google.com/macros/s/AKfycbworflKoEjhTLwbHY0XEZRYmjMHYwsy_HMsA1wofFaYbj0IL5Fmq7VXt6B-52G5Oc3Eqw/exec" target="_blank" style="color:var(--accent)">Apps Script 열기 →</a>
+        </div>
+      </div>
       <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">📅 요일 계수</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px" id="refDowChips"></div>
       <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">🎉 행사 계수</div>
@@ -706,45 +730,225 @@ canvas{display:block}
 // CONSTANTS & CONFIG
 // ════════════════════════════════════════
 const SHEET_ID = '1Y5xDhV_6UcdNOtivYdkOO6bduYgdkNmB6_w4zfPXXQM';
-const GIDS = { fc:250741762, ac:1725354971, evInfo:611987186, evSid:598629104 };
+const GIDS = {
+  fc:250741762, ac:1725354971,
+  evInfo:611987186, evSid:598629104,
+  itemMaster:1280336969,   // ◆품목기준표
+  skuMaster:1480827801,    // ◆sku_기준표
+};
 
-const TAG = {
-  'Y-P-00':'플','Y-S-00':'소','Y-V-A0':'알','Y-V-M0':'말','Y-V-L0':'라',
-  'Y-P-BR':'블','Y-P-AP':'애','Y-P-OG':'오','Y-S-CR':'크','Y-P-KK':'카',
-  'Y-P-PR':'푸','Y-S-CC':'초','D-P-S0':'마S','D-P-L0':'마L',
-  'T-3-BR':'블토','T-3-CR':'크토','T-3-CC':'초토','T-3-ST':'딸토','T-3-KK':'카토',
-  'T-1-HS':'꿀'
-};
-const NAME = {
-  'Y-P-00':'플레인 100g','Y-S-00':'소프트 100g','Y-V-A0':'알룰로스 100g',
-  'Y-V-M0':'말차 100g','Y-V-L0':'카페라떼 100g','Y-P-BR':'블루베리 130g',
-  'Y-P-AP':'애플시나몬 130g','Y-P-OG':'오그래놀라 115g','Y-S-CR':'크리스피 120g',
-  'Y-P-KK':'카카오 120g','Y-P-PR':'푸룬 130g','Y-S-CC':'초코소보로 120g',
-  'D-P-S0':'마시는 750ml','D-P-L0':'마시는 1.8L',
-  'T-3-BR':'블루베리토핑','T-3-CR':'크리스피토핑','T-3-CC':'초코소보로토핑',
-  'T-3-ST':'딸기토핑','T-3-KK':'카카오토핑','T-1-HS':'꿀스틱'
-};
-const GRP = {
-  'Y-P-00':'yogurt','Y-S-00':'yogurt','Y-V-A0':'yogurt','Y-V-M0':'yogurt','Y-V-L0':'yogurt',
-  'Y-P-BR':'yogurt','Y-P-AP':'yogurt','Y-P-OG':'yogurt','Y-S-CR':'yogurt','Y-P-KK':'yogurt',
-  'Y-P-PR':'yogurt','Y-S-CC':'yogurt','D-P-S0':'drink','D-P-L0':'drink',
-  'T-3-BR':'topping','T-3-CR':'topping','T-3-CC':'topping','T-3-ST':'topping','T-3-KK':'topping','T-1-HS':'topping'
-};
-const CODES = Object.keys(TAG);
-const DOWS = ['월','화','수','목','금'];
+// ── 분류코드 → 그룹 매핑 헬퍼 ─────────────────
+function codeToGrp(code){
+  if(!code) return 'yogurt';
+  if(code.startsWith('D-')) return 'drink';
+  if(code.startsWith('T-')) return 'topping';
+  if(code.startsWith('G-')) return 'goods';
+  return 'yogurt';
+}
 
-let CFG = {
-  X: 100,
-  dow: {'월':1.600,'화':1.200,'수':0.800,'목':0.800,'금':0.600},
-  item: {
+// ── 기본값 (fallback — 시트 로드 실패 시 사용) ──
+const _DEF = {
+  TAG:{
+    'Y-P-00':'플','Y-S-00':'소','Y-V-A0':'알','Y-V-M0':'말','Y-V-L0':'라',
+    'Y-P-BR':'블','Y-P-AP':'애','Y-P-OG':'오','Y-S-CR':'크','Y-P-KK':'카',
+    'Y-P-PR':'푸','Y-S-CC':'초','D-P-S0':'마S','D-P-L0':'마L',
+    'T-3-BR':'블토','T-3-CR':'크토','T-3-CC':'초토','T-3-ST':'딸토','T-3-KK':'카토',
+    'T-1-HS':'꿀'
+  },
+  NAME:{
+    'Y-P-00':'플레인 100g','Y-S-00':'소프트 100g','Y-V-A0':'알룰로스 100g',
+    'Y-V-M0':'말차 100g','Y-V-L0':'카페라떼 100g','Y-P-BR':'블루베리 130g',
+    'Y-P-AP':'애플시나몬 130g','Y-P-OG':'오그래놀라 115g','Y-S-CR':'크리스피 120g',
+    'Y-P-KK':'카카오 120g','Y-P-PR':'푸룬 130g','Y-S-CC':'초코소보로 120g',
+    'D-P-S0':'마시는 750ml','D-P-L0':'마시는 1.8L',
+    'T-3-BR':'블루베리토핑','T-3-CR':'크리스피토핑','T-3-CC':'초코소보로토핑',
+    'T-3-ST':'딸기토핑','T-3-KK':'카카오토핑','T-1-HS':'꿀스틱'
+  },
+  GRP:{
+    'Y-P-00':'yogurt','Y-S-00':'yogurt','Y-V-A0':'yogurt','Y-V-M0':'yogurt','Y-V-L0':'yogurt',
+    'Y-P-BR':'yogurt','Y-P-AP':'yogurt','Y-P-OG':'yogurt','Y-S-CR':'yogurt','Y-P-KK':'yogurt',
+    'Y-P-PR':'yogurt','Y-S-CC':'yogurt','D-P-S0':'drink','D-P-L0':'drink',
+    'T-3-BR':'topping','T-3-CR':'topping','T-3-CC':'topping','T-3-ST':'topping','T-3-KK':'topping','T-1-HS':'topping'
+  },
+  ITEM_COEFF:{
     'Y-P-00':2.500,'Y-S-00':1.660,'Y-V-A0':0.360,'Y-V-M0':0.520,'Y-V-L0':0.400,
     'Y-P-BR':0.500,'Y-P-AP':0.360,'Y-P-OG':0.360,'Y-S-CR':0.360,'Y-P-KK':0.360,
     'Y-P-PR':0.180,'Y-S-CC':0,'D-P-S0':0.060,'D-P-L0':0.020,
     'T-3-BR':0.075,'T-3-CR':0.040,'T-3-CC':0.050,'T-3-ST':0.025,'T-3-KK':0.025,'T-1-HS':0.025
   },
-  promo: {'없음':1.000,'슈퍼적립':1.166,'+세일':1.250,'자체행사':1.360,'신상품런칭':1.800,'한입발견회':1.623,'푸드페스타':1.875,'오늘끝딜':3.249},
+  DOW_COEFF:{'월':1.600,'화':1.200,'수':0.800,'목':0.800,'금':0.600},
+  BUNDLES:[
+    {id:'11186574097',name:'요6+토핑1', isMain:true, comp:{'Y-P-00':6,'Y-S-00':6,'T-3-BR':1,'T-3-CR':1,'T-3-CC':1},compDesc:'플or소×6 + 블토or크토or초토×1'},
+    {id:'10273725144',name:'체험 8종',  isMain:true, comp:{'Y-P-00':1,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1,'Y-P-AP':1,'Y-P-OG':1,'Y-S-CR':1},compDesc:'플·소·알·말·블·애·오·크 각×1'},
+    {id:'12863905642',name:'플4+요4',   isMain:true, comp:{'Y-P-00':4,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1},compDesc:'플×4 + 소·알·말·블 각×1'},
+    {id:'11809718890',name:'플4+4+블1', isMain:true, comp:{'Y-P-00':8,'Y-P-BR':1},compDesc:'플×8 + 블×1'},
+    {id:'10301450854',name:'소10+꿀10', isMain:true, comp:{'Y-S-00':10,'T-1-HS':10},compDesc:'소×10 + 꿀×10'},
+    {id:'11470622749',name:'알4+플4',   isMain:false,comp:{'Y-V-A0':4,'Y-P-00':4},compDesc:'알×4 + 플×4'},
+    {id:'12409281824',name:'알5+플1',   isMain:false,comp:{'Y-V-A0':5,'Y-P-00':1},compDesc:'알×5 + 플×1'},
+    {id:'11438362925',name:'오3+플3',   isMain:false,comp:{'Y-P-OG':3,'Y-P-00':3},compDesc:'오×3 + 플×3'},
+    {id:'12580366413',name:'라5+플1',   isMain:false,comp:{'Y-V-L0':5,'Y-P-00':1},compDesc:'라×5 + 플×1'},
+    {id:'7587925609', name:'블5+소1',   isMain:false,comp:{'Y-P-BR':5,'Y-S-00':1},compDesc:'블×5 + 소×1'},
+    {id:'12580546874',name:'말5+초토3', isMain:false,comp:{'Y-V-M0':5,'T-3-CC':1},compDesc:'말×5 + 초토×1'},
+    {id:'12835060307',name:'플3+소3',   isMain:false,comp:{'Y-P-00':3,'Y-S-00':3},compDesc:'플×3 + 소×3'},
+    {id:'12794215123',name:'푸3+플3',   isMain:false,comp:{'Y-P-PR':3,'Y-P-00':3},compDesc:'푸×3 + 플×3'},
+    {id:'11838572943',name:'카4+플4',   isMain:false,comp:{'Y-P-KK':4,'Y-P-00':4},compDesc:'카×4 + 플×4'},
+    {id:'12739207913',name:'푸5',        isMain:false,comp:{'Y-P-PR':5},compDesc:'푸×5'},
+    {id:'10994518732',name:'토핑6+6',   isMain:false,comp:{'T-3-BR':2,'T-3-CR':2,'T-3-CC':2,'T-3-ST':1,'T-3-KK':1},compDesc:'블토·크토·초토×2 + 딸토·카토×1'},
+    {id:'13049647929',name:'마S2+메이커',isMain:false,comp:{'D-P-S0':2},compDesc:'마S×2 + 메이커×1'},
+    {id:'13049680413',name:'마S2+토핑6', isMain:false,comp:{'D-P-S0':2,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2},compDesc:'마S×2 + 블토·크토·초토×2'},
+    {id:'12448492587',name:'[선물]6+6',  isMain:false,comp:{'Y-P-00':3,'Y-S-00':3,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2},compDesc:'플·소×3 + 블토·크토·초토×2'},
+    {id:'12541261594',name:'말3+플3+초토',isMain:false,comp:{'Y-V-M0':3,'Y-P-00':3,'T-3-CC':1},compDesc:'말×3 + 플×3 + 초토×1'},
+  ]
+};
+
+// ── 런타임 변수 (시트에서 덮어씀) ──────────────
+let TAG   = Object.assign({}, _DEF.TAG);
+let NAME  = Object.assign({}, _DEF.NAME);
+let GRP   = Object.assign({}, _DEF.GRP);
+let CODES = Object.keys(TAG);
+let BUNDLES = _DEF.BUNDLES.slice();
+const DOWS = ['월','화','수','목','금'];
+
+let CFG = {
+  X: 100,
+  dow:     Object.assign({}, _DEF.DOW_COEFF),
+  item:    Object.assign({}, _DEF.ITEM_COEFF),
+  promo:   {'없음':1.000,'슈퍼적립':1.166,'+세일':1.250,'자체행사':1.360,'신상품런칭':1.800,'한입발견회':1.623,'푸드페스타':1.875,'오늘끝딜':3.249},
   holiday: {'없음':1.000,'공휴일 전날':1.150,'공휴일 당일':0.787,'공휴일 다음날':0.800,'연휴 기간':0.787}
 };
+
+// 마스터 데이터 로드 상태
+let MASTER = { loaded:false, itemSrc:'기본값(하드코딩)', bundleSrc:'기본값(하드코딩)' };
+
+// ════════════════════════════════════════
+// MASTER DATA LOADER (품목기준표 + sku_기준표)
+// ════════════════════════════════════════
+async function loadMasterData() {
+  const statusEl = document.getElementById('masterLoadStatus');
+  if(statusEl) statusEl.textContent = '📦 마스터 데이터 로드 중...';
+
+  let itemOk = false, bundleOk = false;
+
+  // ── ① 품목기준표 → TAG, NAME, GRP, CFG.item ──────
+  try {
+    const txt = await fetchCsvByGid(GIDS.itemMaster);
+    const rows = parseCSV(txt);
+    if(rows.length > 1) {
+      const hdr = rows[0].map(c => (c||'').trim().toLowerCase());
+      // 유연한 컬럼 감지
+      const ci = kws => { const i=hdr.findIndex(h=>kws.some(k=>h.includes(k))); return i>=0?i:null; };
+      const iCode  = ci(['코드','code','sku']);
+      const iName  = ci(['품목명','name','상품명']);
+      const iTag   = ci(['태그','tag','약칭','단축']);
+      const iCoeff = ci(['품목계수','계수','coeff','coefficient']);
+      const iGrp   = ci(['분류','category','그룹','group','type']);
+
+      if(iCode !== null) {
+        const newTAG={}, newNAME={}, newGRP={}, newITEM={};
+        rows.slice(1).forEach(r => {
+          const code = (r[iCode]||'').trim();
+          if(!code || code.startsWith('#')) return; // 빈행·주석 스킵
+          const tag   = iTag  !==null ? (r[iTag]  ||'').trim() : code;
+          const name  = iName !==null ? (r[iName] ||'').trim() : code;
+          const grp   = iGrp  !==null ? (r[iGrp]  ||'').trim() : '';
+          const coeff = iCoeff!==null ? parseFloat((r[iCoeff]||'0').replace(/,/g,'')) : (_DEF.ITEM_COEFF[code]||0);
+
+          // 분류 → 그룹 정규화
+          let grpKey = 'yogurt';
+          if(grp.includes('마시는')||grp.includes('drink')||code.startsWith('D-')) grpKey='drink';
+          else if(grp.includes('토핑')||grp.includes('topping')||code.startsWith('T-')) grpKey='topping';
+          else if(grp.includes('굿즈')||grp.includes('goods')||code.startsWith('G-')) grpKey='goods';
+
+          newTAG[code]  = tag;
+          newNAME[code] = name;
+          newGRP[code]  = grpKey;
+          newITEM[code] = isNaN(coeff) ? 0 : coeff;
+        });
+
+        if(Object.keys(newTAG).length > 0) {
+          Object.assign(TAG, newTAG);
+          Object.assign(NAME, newNAME);
+          Object.assign(GRP, newGRP);
+          Object.assign(CFG.item, newITEM);
+          CODES = Object.keys(TAG);
+          itemOk = true;
+          MASTER.itemSrc = '✅ 구글 시트 (품목기준표)';
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('품목기준표 로드 실패 (fallback 사용):', e.message);
+    MASTER.itemSrc = '⚠️ 기본값 사용 (' + e.message.slice(0,40) + ')';
+  }
+
+  // ── ② sku_기준표 → BUNDLES ─────────────────────
+  try {
+    const txt = await fetchCsvByGid(GIDS.skuMaster);
+    const rows = parseCSV(txt);
+    if(rows.length > 1) {
+      const hdr = rows[0].map(c => (c||'').trim().toLowerCase());
+      const ci = kws => { const i=hdr.findIndex(h=>kws.some(k=>h.includes(k))); return i>=0?i:null; };
+      const iSid  = ci(['sid','상품번호','id','product_id','상품id']);
+      const iName = ci(['상품명','name','bundle_name','묶음명']);
+      const iMain = ci(['메인','isMain','main','주력']);
+      const iDesc = ci(['구성','desc','description','컴포지션','composition']);
+      // 품목코드 컬럼들: 나머지 열에서 "코드:수량" 형식이거나 코드 자체인 열 찾기
+
+      if(iSid !== null && iName !== null) {
+        const newBundles = [];
+        rows.slice(1).forEach(r => {
+          const sid  = (r[iSid]  ||'').trim();
+          const name = (r[iName] ||'').trim();
+          if(!sid || !name) return;
+          const isMain = iMain!==null
+            ? ['1','true','yes','메인','y'].includes((r[iMain]||'').trim().toLowerCase())
+            : false;
+          const desc = iDesc!==null ? (r[iDesc]||'').trim() : name;
+
+          // 품목 구성 파싱: 열 이름이 품목코드이거나 "Y-P-00:수량" 형식
+          const comp = {};
+          hdr.forEach((h, ci) => {
+            if(ci===iSid||ci===iName||ci===iMain||ci===iDesc) return;
+            const val = (r[ci]||'').trim();
+            if(!val || val==='0') return;
+            // "코드:수량" 형식
+            if(val.includes(':')) {
+              const [code,qty] = val.split(':');
+              if(code.trim() && !isNaN(parseInt(qty))) comp[code.trim()]=parseInt(qty);
+            }
+            // 열 이름 자체가 품목코드 (Y-, T-, D- 시작)
+            else if(/^[YTD]-/.test(h.toUpperCase()) && !isNaN(parseInt(val))) {
+              comp[h.toUpperCase()] = parseInt(val);
+            }
+          });
+
+          newBundles.push({id:sid, name, isMain, comp, compDesc:desc});
+        });
+
+        if(newBundles.length > 0) {
+          BUNDLES = newBundles;
+          bundleOk = true;
+          MASTER.bundleSrc = '✅ 구글 시트 (sku_기준표)';
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('sku_기준표 로드 실패 (fallback 사용):', e.message);
+    MASTER.bundleSrc = '⚠️ 기본값 사용 (' + e.message.slice(0,40) + ')';
+  }
+
+  MASTER.loaded = true;
+
+  // 사이드바 상태 업데이트
+  if(statusEl) {
+    const ok = itemOk && bundleOk;
+    statusEl.innerHTML = ok
+      ? '<span style="color:var(--green)">✅ 마스터 데이터 시트 연동 완료</span>'
+      : `<span style="color:var(--orange)">⚠️ 부분 연동 (${[!itemOk&&'품목',!bundleOk&&'상품'].filter(Boolean).join('·')} → 기본값)</span>`;
+  }
+
+  return { itemOk, bundleOk };
+}
 
 let D = { fc:{}, ac:{}, dates:[], dateInfo:{}, loaded:false };
 let curGrp = 'all';
@@ -768,34 +972,70 @@ function nav(id, el) {
 }
 
 // ════════════════════════════════════════
-// CSV FETCH — Apps Script proxy (CORS-free)
+// CSV FETCH
 // ════════════════════════════════════════
-// Apps Script가 같은 스프레드시트에서 CSV를 반환해줌 → CORS 문제 없음
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbworflKoEjhTLwbHY0XEZRYmjMHYwsy_HMsA1wofFaYbj0IL5Fmq7VXt6B-52G5Oc3Eqw/exec';
+// Apps Script에 아래 코드 추가 시 file:// 로컬에서도 동작:
+// function doGet(e) {
+//   if (e.parameter.action === 'getCsv') {
+//     var ss = SpreadsheetApp.openById(e.parameter.id);
+//     var sheet = ss.getSheets().filter(function(s){return ''+s.getSheetId()===e.parameter.gid;})[0];
+//     if (!sheet) return ContentService.createTextOutput('').setMimeType(ContentService.MimeType.TEXT);
+//     var csv = sheet.getDataRange().getValues().map(function(r){return r.map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+//     return ContentService.createTextOutput(csv).setMimeType(ContentService.MimeType.TEXT);
+//   }
+//   // ... 기존 doGet 코드 ...
+// }
 
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbworflKoEjhTLwbHY0XEZRYmjMHYwsy_HMsA1wofFaYbj0IL5Fmq7VXt6B-52G5Oc3Eqw/exec';
+const GITHUB_PAGES_URL = 'https://smartcenterhub.github.io/smartstore-dashboard-9037261845/';
+
+// 3가지 방법 순서대로 시도 — 하나라도 성공하면 반환
 async function fetchCsvByGid(gid) {
-  // 방법 1: Apps Script proxy (항상 사용 — CORS 문제 없음)
-  const proxyUrl = `${APPS_SCRIPT_URL}?action=getCsv&gid=${gid}&id=${SHEET_ID}`;
+  const isLocal = location.protocol === 'file:';
+  const errs = [];
+
+  // ① gviz/tq API — 공개 시트에서 CORS 없이 동작 (가장 안정적)
   try {
-    const r = await fetch(proxyUrl);
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
+    const r = await fetch(url, { redirect: 'follow', mode: 'cors' });
     if (r.ok) {
       const txt = await r.text();
-      if (txt && !txt.trimStart().startsWith('<') && txt.includes(',')) return txt;
+      if (txt && !txt.trimStart().startsWith('<') && txt.includes(','))
+        return txt;
     }
-  } catch(_) {}
-  // 방법 2: 직접 CSV export (GitHub Pages / HTTPS 환경)
-  const directUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
-  const r2 = await fetch(directUrl);
-  if (!r2.ok) throw new Error(`HTTP ${r2.status} (gid=${gid})`);
-  const txt2 = await r2.text();
-  if (!txt2 || txt2.trimStart().startsWith('<')) {
-    throw new Error(
-      `gid=${gid} — CSV가 아닌 HTML 응답을 받았습니다.\n` +
-      `구글 시트 공유 설정: 파일 → 공유 → 링크 있는 사람 → 뷰어\n` +
-      `또는 file:// 로컬 실행 시 python -m http.server 사용`
-    );
-  }
-  return txt2;
+  } catch(e) { errs.push('gviz:'+e.message.slice(0,40)); }
+
+  // ② 직접 export CSV — GitHub Pages / HTTPS 환경
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+    const r = await fetch(url, { redirect: 'follow' });
+    if (r.ok) {
+      const txt = await r.text();
+      if (txt && !txt.trimStart().startsWith('<') && txt.includes(','))
+        return txt;
+      errs.push('export: HTML 응답 (시트 공개 설정 확인 필요)');
+    } else { errs.push(`export: HTTP ${r.status}`); }
+  } catch(e) { errs.push('export:'+e.message.slice(0,40)); }
+
+  // ③ Apps Script proxy — Apps Script에 getCsv 핸들러 추가 필요
+  try {
+    const url = `${APPS_SCRIPT_URL}?action=getCsv&gid=${gid}&id=${SHEET_ID}`;
+    const r = await fetch(url, { redirect: 'follow' });
+    if (r.ok) {
+      const txt = await r.text();
+      if (txt && !txt.trimStart().startsWith('<') && txt.includes(','))
+        return txt;
+    }
+  } catch(e) { errs.push('apps-script:'+e.message.slice(0,40)); }
+
+  // 모두 실패
+  const msg = isLocal
+    ? `로컬 file:// 환경에서는 CORS 차단으로 시트 접근 불가.\n\n` +
+      `👉 해결: ${GITHUB_PAGES_URL} 에 이 파일을 업로드하면 바로 동작합니다.\n` +
+      `또는 터미널에서: python3 -m http.server 8080 → http://localhost:8080 접속`
+    : `시트 접근 실패 (gid=${gid})\n구글 시트 → 공유 → 링크 있는 사람 모두 → 뷰어 설정 확인\n오류: ${errs.join(' / ')}`;
+
+  throw new Error(msg);
 }
 function parseCSVRow(line) {
   if (!line) return [];
@@ -933,16 +1173,9 @@ async function loadAll() {
     renderCoeff();
 
   } catch(e) {
-    const msg = (e.message||'알 수 없는 오류').replace(/\n/g,'<br>');
-    const isLocal = location.protocol === 'file:';
+    const msg = (e.message||'알 수 없는 오류');
     document.getElementById('ovTable').innerHTML =
-      `<div class="alert al-d" style="white-space:normal">
-        ❌ <b>데이터 로드 실패</b><br><br>
-        ${msg}<br><br>
-        ${isLocal
-          ? '⚠️ <b>로컬 파일(file://)에서는 CORS로 인해 구글 시트 fetch가 차단됩니다.</b><br>GitHub Pages 또는 로컬 서버(python -m http.server)에서 실행하세요.'
-          : '구글 시트 → 파일 → 공유 → <b>링크 있는 사람 누구나 → 뷰어</b> 설정 확인'}
-      </div>`;
+      `<div class="alert al-d" style="white-space:pre-wrap;line-height:1.7">❌ <b>데이터 로드 실패</b>\n\n${msg}\n\n👉 <a href="${GITHUB_PAGES_URL}" target="_blank" style="color:var(--accent)">${GITHUB_PAGES_URL}</a> 에 파일 업로드 후 실행하세요.</div>`;
     console.error(e);
   }
 
@@ -1567,29 +1800,10 @@ function renderHolCoeff() {
 // WEEKLY FORECAST v4
 // ════════════════════════════════════════
 
-// ── Bundle definitions ────────────────────
-const BUNDLES = [
-  { id:'11186574097', name:'요6+토핑1', isMain:true,  comp:{'Y-P-00':6,'Y-S-00':6,'T-3-BR':1,'T-3-CR':1,'T-3-CC':1}, compDesc:'플or소×6 + 블토or크토or초토×1' },
-  { id:'10273725144', name:'체험 8종',  isMain:true,  comp:{'Y-P-00':1,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1,'Y-P-AP':1,'Y-P-OG':1,'Y-S-CR':1}, compDesc:'플·소·알·말·블·애·오·크 각×1' },
-  { id:'12863905642', name:'플4+요4',   isMain:true,  comp:{'Y-P-00':4,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1}, compDesc:'플×4 + 소·알·말·블 각×1' },
-  { id:'11809718890', name:'플4+4+블1', isMain:true,  comp:{'Y-P-00':8,'Y-P-BR':1}, compDesc:'플×8 + 블×1' },
-  { id:'10301450854', name:'소10+꿀10', isMain:true,  comp:{'Y-S-00':10,'T-1-HS':10}, compDesc:'소×10 + 꿀×10' },
-  { id:'11470622749', name:'알4+플4',   isMain:false, comp:{'Y-V-A0':4,'Y-P-00':4}, compDesc:'알×4 + 플×4' },
-  { id:'12409281824', name:'알5+플1',   isMain:false, comp:{'Y-V-A0':5,'Y-P-00':1}, compDesc:'알×5 + 플×1' },
-  { id:'11438362925', name:'오3+플3',   isMain:false, comp:{'Y-P-OG':3,'Y-P-00':3}, compDesc:'오×3 + 플×3' },
-  { id:'12580366413', name:'라5+플1',   isMain:false, comp:{'Y-V-L0':5,'Y-P-00':1}, compDesc:'라×5 + 플×1' },
-  { id:'7587925609',  name:'블5+소1',   isMain:false, comp:{'Y-P-BR':5,'Y-S-00':1}, compDesc:'블×5 + 소×1' },
-  { id:'12580546874', name:'말5+초토3', isMain:false, comp:{'Y-V-M0':5,'T-3-CC':1}, compDesc:'말×5 + 초토×1' },
-  { id:'12835060307', name:'플3+소3',   isMain:false, comp:{'Y-P-00':3,'Y-S-00':3}, compDesc:'플×3 + 소×3' },
-  { id:'12794215123', name:'푸3+플3',   isMain:false, comp:{'Y-P-PR':3,'Y-P-00':3}, compDesc:'푸×3 + 플×3' },
-  { id:'11838572943', name:'카4+플4',   isMain:false, comp:{'Y-P-KK':4,'Y-P-00':4}, compDesc:'카×4 + 플×4' },
-  { id:'12739207913', name:'푸5',        isMain:false, comp:{'Y-P-PR':5}, compDesc:'푸×5' },
-  { id:'10994518732', name:'토핑6+6',   isMain:false, comp:{'T-3-BR':2,'T-3-CR':2,'T-3-CC':2,'T-3-ST':1,'T-3-KK':1}, compDesc:'블토·크토·초토×2 + 딸토·카토×1' },
-  { id:'13049647929', name:'마S2+메이커',isMain:false, comp:{'D-P-S0':2}, compDesc:'마S×2 + 메이커×1' },
-  { id:'13049680413', name:'마S2+토핑6', isMain:false, comp:{'D-P-S0':2,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2}, compDesc:'마S×2 + 블토·크토·초토×2' },
-  { id:'12448492587', name:'[선물]6+6',  isMain:false, comp:{'Y-P-00':3,'Y-S-00':3,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2}, compDesc:'플·소×3 + 블토·크토·초토×2' },
-  { id:'12541261594', name:'말3+플3+초토',isMain:false,comp:{'Y-V-M0':3,'Y-P-00':3,'T-3-CC':1}, compDesc:'말×3 + 플×3 + 초토×1' },
-];
+// ── Bundle definitions (런타임 — loadMasterData가 sku_기준표로 덮어씀) ──
+// 아래는 initForecast 전에 BUNDLES가 이미 _DEF로 초기화되어 있으므로 별도 선언 불필요.
+// FC_PROMO / FC_HOL 는 CFG.promo / CFG.holiday 와 형식이 다르므로 별도 유지
+
 
 const FC_PROMO = {
   '슈퍼적립':{v:1.166,c:'#1a8a4a',bg:'rgba(26,138,74,0.10)'},
@@ -2077,10 +2291,8 @@ async function evLoadSheet(){
         : `<span style="color:var(--t3)">✅ ${EV_RAW.length}개 로드 · 이번 주 해당 행사 없음</span>`;
 
   }catch(err){
-    const isLocal=location.protocol==='file:';
     document.getElementById('evSheetStatus').innerHTML=
-      `<span style="color:var(--red)">❌ 로드 실패: ${(err.message||'').replace(/\n/g,'<br>')}</span>`+
-      (isLocal?'<br><span style="color:var(--orange);font-size:10.5px">⚠️ 로컬 file:// → python -m http.server 실행 필요</span>':'');
+      `<span style="color:var(--red)">❌ ${(err.message||'').replace(/\n/g,'<br>')}</span>`;
   }
   btn.disabled=false;btn.textContent='🔄 시트 불러오기';
 }
@@ -2243,7 +2455,10 @@ function fcToggleEdit(){
 }
 
 // ── Init ──────────────────────────────────
-(function initForecast(){
+(async function initForecast(){
+  // 1. 마스터 데이터 먼저 로드 (품목계수·상품구성 시트 연동)
+  await loadMasterData();
+  // 2. 로드된 BUNDLES로 FC.bundles 초기화
   fcRenderPalette();fcInitBundles();
   const mon=fcMonday(new Date());FC.monDate=mon;
   document.getElementById('fcMonDate').value=dateStr(mon);
