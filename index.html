@@ -661,45 +661,19 @@ canvas{display:block}
       <div class="ev-panel" id="evPanel">
         <div class="ev-hd" onclick="evToggle()">
           <div class="ev-hd-l">
-            <span class="ev-panel-title">🎉 행사 불러오기 (구글 시트 연동)</span>
+            <span class="ev-panel-title">🎉 이번 주 행사 자동 적용</span>
             <div class="ev-applied" id="evApplied"></div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
             <button class="btn no-print" onclick="event.stopPropagation();evLoadSheet()" id="evLoadBtn" style="padding:3px 10px;font-size:11px">🔄 시트 불러오기</button>
+            <button class="btn no-print" onclick="event.stopPropagation();evClear()" style="padding:3px 8px;font-size:11px;color:var(--red)">✕</button>
             <span id="evArr" style="font-size:10px;color:var(--t4);transition:transform .2s">▼</span>
           </div>
         </div>
         <div class="ev-panel-body" id="evBody">
-          <div id="evSheetStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px">시트를 불러오면 실제 행사 목록이 표시됩니다.</div>
-          <div class="ev-row" id="evSelectRow" style="display:none">
-            <span class="ev-lbl">행사 선택</span>
-            <select class="ev-sel" id="evSheetSel" onchange="evOnSheetSelect()" style="flex:1;max-width:360px">
-              <option value="">— 행사를 선택하세요 —</option>
-            </select>
-          </div>
-          <!-- 선택된 행사 상세 -->
-          <div id="evDetail" style="display:none">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0">
-              <div style="background:var(--glass-bg-dark);border-radius:var(--r);padding:8px 10px">
-                <div style="font-size:10px;color:var(--t4);font-weight:600">행사 유형</div>
-                <div id="evDtType" style="font-size:13px;font-weight:700;margin-top:2px">—</div>
-              </div>
-              <div style="background:var(--glass-bg-dark);border-radius:var(--r);padding:8px 10px">
-                <div style="font-size:10px;color:var(--t4);font-weight:600">기간</div>
-                <div id="evDtPeriod" style="font-size:12px;font-weight:700;margin-top:2px">—</div>
-              </div>
-            </div>
-            <div style="font-size:11px;color:var(--t3);margin-bottom:4px">적용 요일 <span id="evDtDays" style="font-size:11px"></span></div>
-            <div style="font-size:11px;color:var(--t3);font-weight:600;margin-bottom:5px">
-              행사 상품 &amp; 등급 <span style="font-weight:400;color:var(--t4)">(메인×1.5 · 서브대×1.2 · 서브소×1.1)</span>
-            </div>
-            <div class="ev-bgrp" id="evBGrid"></div>
-            <div style="display:flex;gap:7px;margin-top:9px">
-              <button class="btn btn-p" onclick="evApply()" style="padding:5px 14px">✓ 행사 적용</button>
-              <button class="btn" onclick="evClear()" style="color:var(--red)">✕ 행사 초기화</button>
-            </div>
-          </div>
-          <!-- fallback manual — REMOVED per request -->
+          <div id="evSheetStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px">시트를 불러오면 이번 주 행사가 자동 적용됩니다.</div>
+          <!-- 자동 적용 결과 카드들 -->
+          <div id="evResultCards"></div>
         </div>
       </div>
       <!-- DAY CARDS -->
@@ -1941,8 +1915,119 @@ function fcUpdateTable(){
   fcUpdateTitle();
 }
 
-// ── Event sheet loading ────────────────────
+// ── Event sheet loading & auto-apply ──────
 let EV_RAW=[];
+
+// Parse date string "2026.03.24" or "2026-03-24" → Date
+function evParseDate(s){
+  if(!s) return null;
+  const n=s.replace(/\./g,'-').trim();
+  if(!/\d{4}-\d{2}-\d{2}/.test(n)) return null;
+  return new Date(n+'T00:00:00');
+}
+
+// Check if event overlaps with current week
+function evOverlapsWeek(ev){
+  if(!ev.start) return false;
+  const evS=evParseDate(ev.start);
+  const evE=evParseDate(ev.end||ev.start);
+  if(!evS||!evE) return false;
+  const wkS=new Date(FC.days[0].date+'T00:00:00');
+  const wkE=new Date(FC.days[FC.days.length-1].date+'T00:00:00');
+  return evS<=wkE && evE>=wkS;
+}
+
+// Find which weekdays (in FC.days) fall within the event period
+function evActiveDays(ev){
+  const evS=evParseDate(ev.start);
+  const evE=evParseDate(ev.end||ev.start);
+  if(!evS||!evE) return [];
+  return FC.days.filter(d=>{
+    const dt=new Date(d.date+'T00:00:00');
+    return dt>=evS && dt<=evE;
+  });
+}
+
+// Auto-apply all events that overlap with current week
+function evAutoApplyForWeek(){
+  if(!EV_RAW.length || !FC.days.length) return;
+
+  // Reset bundle promos first (only those set by prev auto-apply)
+  BUNDLES.forEach(b=>{ if(FC.bundles[b.id]) FC.bundles[b.id].promo=null; });
+
+  const thisWeekEvs = EV_RAW.filter(evOverlapsWeek);
+
+  if(!thisWeekEvs.length){
+    document.getElementById('evApplied').innerHTML=
+      '<span style="font-size:11px;color:var(--t4)">이번 주 행사 없음</span>';
+    document.getElementById('evResultCards').innerHTML='';
+    fcRecalc();
+    return;
+  }
+
+  // Build result cards HTML and apply to bundles
+  let resultHtml='';
+
+  thisWeekEvs.forEach(ev=>{
+    const pi=FC_PROMO[ev.type]||null;
+    const activeDays=evActiveDays(ev);
+
+    // --- Apply to matching bundles ---
+    const matchedIds=new Set(ev.sids);
+    const appliedBundles=[];
+    BUNDLES.forEach(b=>{
+      // Match by SID list; if no SIDs recorded, apply to main bundles only
+      const shouldApply = ev.sids.length>0 ? matchedIds.has(b.id) : b.isMain;
+      if(shouldApply && FC.bundles[b.id]){
+        FC.bundles[b.id].promo = ev.type||null;
+        FC.bundles[b.id].rank  = b.isMain ? 'main' : 'sub1';
+        if(FC.bundles[b.id].qty===0) FC.bundles[b.id].qty=10;
+        appliedBundles.push(b.name);
+      }
+    });
+
+    // --- Build result card ---
+    const piC  = pi?pi.c  :'var(--t2)';
+    const piBg = pi?pi.bg :'rgba(0,0,0,0.04)';
+    const piV  = pi?pi.v  :1;
+
+    const dayBadges = activeDays.map(d=>
+      `<span style="padding:1px 6px;border-radius:10px;background:${DOW_COLORS[d.dow]}20;color:${DOW_COLORS[d.dow]};font-weight:700;font-size:10px">${d.dow} ${d.date.slice(5)}</span>`
+    ).join(' ');
+
+    const bundleTags = appliedBundles.slice(0,6).map(n=>
+      `<span style="padding:1px 6px;border-radius:8px;background:var(--glass-bg-dark);color:var(--t2);font-size:9.5px;font-weight:600">${n}</span>`
+    ).join(' ')+(appliedBundles.length>6?` <span style="color:var(--t4);font-size:9.5px">+${appliedBundles.length-6}개</span>`:'');
+
+    resultHtml+=`
+      <div style="background:${piBg};border:1px solid ${piC}33;border-radius:var(--r-lg);padding:10px 12px;margin-bottom:7px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:800;color:${piC}">${ev.name}</span>
+          <span style="padding:2px 8px;border-radius:20px;background:${piBg};color:${piC};border:1px solid ${piC}44;font-size:10.5px;font-weight:700">${ev.type||'유형미상'} ×${piV.toFixed(3)}</span>
+          <span style="font-size:10px;color:var(--t4)">${ev.start}${ev.end&&ev.end!==ev.start?' ~ '+ev.end:''}</span>
+        </div>
+        <div style="margin-bottom:5px;display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:9.5px;color:var(--t4);font-weight:600">이번 주 적용 요일</span>
+          ${dayBadges||'<span style="color:var(--t4);font-size:9.5px">해당 없음</span>'}
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:9.5px;color:var(--t4);font-weight:600">적용 상품 (${appliedBundles.length}개)</span>
+          ${bundleTags||'<span style="color:var(--t4);font-size:9.5px">없음</span>'}
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('evResultCards').innerHTML=resultHtml;
+
+  // Update evApplied summary badge
+  document.getElementById('evApplied').innerHTML=thisWeekEvs.map(ev=>{
+    const pi=FC_PROMO[ev.type]||{c:'var(--t2)',bg:'var(--glass-bg-dark)',v:1};
+    return`<span class="ev-tag" style="background:${pi.bg};color:${pi.c}">${ev.name}</span>`;
+  }).join('');
+
+  fcRecalc();
+}
+
 async function evLoadSheet(){
   const btn=document.getElementById('evLoadBtn');
   btn.disabled=true;btn.textContent='로딩중...';
@@ -1954,110 +2039,69 @@ async function evLoadSheet(){
     ]);
 
     // Parse SID table: each row = [행사명, SID1, SID2, ...]
-    const sidRows=parseCSV(evSidTxt).filter(r=>r&&r[0]&&r[0].trim());
+    const sidRows=parseCSV(evSidTxt).filter(r=>r&&r[0]&&(r[0]||'').trim());
     const sidMap={};
-    sidRows.forEach(r=>{const k=r[0].trim();sidMap[k]=(r.slice(1).map(s=>(s||'').trim()).filter(Boolean));});
-    // Parse event info
+    sidRows.forEach(r=>{const k=(r[0]||'').trim();if(k)sidMap[k]=(r.slice(1).map(s=>(s||'').trim()).filter(Boolean));});
+
+    // Parse event info — flexible column detection
     const evRows=parseCSV(evInfoTxt).filter(r=>r&&r.length>0);
-    if(evRows.length<2) throw new Error('행사정보 시트 데이터가 비어있습니다 (행 수 부족)');
+    if(evRows.length<2) throw new Error('행사정보 시트 데이터 없음');
     const hdr=evRows[0].map(c=>(c||'').trim().toLowerCase());
-    if(!hdr.length) throw new Error('행사정보 헤더 행을 읽을 수 없습니다');
     const ci=kws=>{const idx=hdr.findIndex(h=>kws.some(k=>h.includes(k)));return idx>=0?idx:null;};
-    const iName=ci(['행사명','이름','name']);
-    const iType=ci(['유형','type','행사유형','종류']);
-    const iStart=ci(['시작','start','from','시작일']);
-    const iEnd=ci(['종료','end','to','종료일','마감']);
-    EV_RAW=evRows.slice(1).filter(r=>r&&r.some(c=>c&&c.trim())).map(r=>{
-      const nm=iName!==null?(r[iName]||'').trim():'';
-      const tp=iType!==null?(r[iType]||'').trim():'';
-      const st=iStart!==null?(r[iStart]||'').trim():'';
-      const en=iEnd!==null?(r[iEnd]||'').trim():'';
-      return{name:nm,type:tp,start:st,end:en,sids:sidMap[nm]||[]};
-    }).filter(e=>e.name);
-    const sel=document.getElementById('evSheetSel');
-    sel.innerHTML='<option value="">— 행사를 선택하세요 —</option>';
-    EV_RAW.forEach((ev,i)=>{
-      const o=document.createElement('option');
-      o.value=i;
-      o.textContent=`${ev.name}${ev.type?' ['+ev.type+']':''}${ev.start?' '+ev.start+'~'+ev.end:''}`;
-      sel.appendChild(o);
-    });
-    document.getElementById('evSelectRow').style.display='flex';
-    document.getElementById('evSheetStatus').textContent=`✅ ${EV_RAW.length}개 행사 로드 완료`;
+    const iName =ci(['행사명','이름','name','title']);
+    const iType =ci(['유형','type','행사유형','종류','category']);
+    const iStart=ci(['시작','start','from','시작일','date_start','날짜']);
+    const iEnd  =ci(['종료','end','to','종료일','마감','date_end']);
+
+    EV_RAW=evRows.slice(1)
+      .filter(r=>r&&r.some(c=>c&&(c||'').trim()))
+      .map(r=>{
+        const nm =iName !==null?(r[iName ]||'').trim():'';
+        const tp =iType !==null?(r[iType ]||'').trim():'';
+        const st =iStart!==null?(r[iStart]||'').trim():'';
+        const en =iEnd  !==null?(r[iEnd  ]||'').trim():'';
+        return{name:nm,type:tp,start:st,end:en,sids:sidMap[nm]||[]};
+      })
+      .filter(e=>e.name);
+
+    document.getElementById('evSheetStatus').innerHTML=
+      `<span style="color:var(--green)">✅ 전체 ${EV_RAW.length}개 행사 로드 완료 — 이번 주 행사 자동 적용 중...</span>`;
+
+    evAutoApplyForWeek();
+
+    // Update status with this-week count
+    const cnt=EV_RAW.filter(evOverlapsWeek).length;
+    document.getElementById('evSheetStatus').innerHTML=
+      cnt>0
+        ? `<span style="color:var(--green)">✅ ${EV_RAW.length}개 로드 · 이번 주 행사 ${cnt}개 자동 적용됨</span>`
+        : `<span style="color:var(--t3)">✅ ${EV_RAW.length}개 로드 · 이번 주 해당 행사 없음</span>`;
+
   }catch(err){
     const isLocal=location.protocol==='file:';
     document.getElementById('evSheetStatus').innerHTML=
-      `<span style="color:var(--red)">❌ 로드 실패: ${(err.message||'').replace(/\n/g,'<br>')}</span>
-       ${isLocal?'<br><span style="color:var(--orange);font-size:10.5px">⚠️ 로컬 file:// 환경에서는 CORS 차단 → GitHub Pages 또는 python -m http.server 실행 필요</span>':''}`;
+      `<span style="color:var(--red)">❌ 로드 실패: ${(err.message||'').replace(/\n/g,'<br>')}</span>`+
+      (isLocal?'<br><span style="color:var(--orange);font-size:10.5px">⚠️ 로컬 file:// → python -m http.server 실행 필요</span>':'');
   }
   btn.disabled=false;btn.textContent='🔄 시트 불러오기';
 }
-function evOnSheetSelect(){
-  const idx=parseInt(document.getElementById('evSheetSel').value);
-  if(isNaN(idx)){document.getElementById('evDetail').style.display='none';return;}
-  const ev=EV_RAW[idx];if(!ev)return;
-  const pi=FC_PROMO[ev.type]||null;
-  const piC=pi?pi.c:'var(--t2)',piBg=pi?pi.bg:'var(--glass-bg-dark)';
-  document.getElementById('evDtType').innerHTML=`<span style="background:${piBg};color:${piC};padding:2px 8px;border-radius:20px;font-size:13px;font-weight:700">${ev.type||'—'}</span>`;
-  document.getElementById('evDtPeriod').textContent=ev.start?(ev.start+(ev.end&&ev.end!==ev.start?' ~ '+ev.end:'')):'기간 정보 없음';
-  // week day badges
-  let dayBadges='';
-  if(ev.start){
-    const sD=new Date(ev.start.replace(/\./g,'-')+'T00:00:00');
-    const eD=new Date((ev.end||ev.start).replace(/\./g,'-')+'T00:00:00');
-    const active=FC.days.filter(d=>{const dt=new Date(d.date+'T00:00:00');return dt>=sD&&dt<=eD;});
-    dayBadges=active.map(d=>`<span style="background:${DOW_COLORS[d.dow]}20;color:${DOW_COLORS[d.dow]};padding:1px 7px;border-radius:20px;font-weight:700;font-size:10.5px;margin:1px">${d.dow} ${d.date.slice(5)}</span>`).join('');
-    if(!dayBadges) dayBadges='<span style="color:var(--t4);font-size:11px">이번 주 해당 없음</span>';
-  }
-  document.getElementById('evDtDays').innerHTML=dayBadges;
-  const matchedIds=new Set(ev.sids);
-  let bGrid='';
-  BUNDLES.forEach(b=>{
-    const matched=ev.sids.length>0?matchedIds.has(b.id):b.isMain;
-    const st=FC.bundles[b.id]||{rank:b.isMain?'main':'sub1'};
-    bGrid+=`<div class="ev-bi"><input type="checkbox" id="evb_${b.id}" ${matched?'checked':''}><span style="font-size:11px;font-weight:600">${b.name}</span>
-      <select class="bi-rank" id="evr_${b.id}" style="font-size:10px">
-        <option value="main" ${st.rank==='main'?'selected':''}>메인</option>
-        <option value="sub1" ${st.rank==='sub1'?'selected':''}>서브대</option>
-        <option value="sub2" ${st.rank==='sub2'?'selected':''}>서브소</option>
-      </select></div>`;
-  });
-  document.getElementById('evBGrid').innerHTML=bGrid;
-  document.getElementById('evDetail').style.display='block';
-}
-function evApply(){
-  const idx=parseInt(document.getElementById('evSheetSel').value);
-  if(isNaN(idx)){alert('행사를 선택하세요');return;}
-  const ev=EV_RAW[idx];if(!ev||!ev.type){alert('행사 유형 정보 없음');return;}
-  BUNDLES.forEach(b=>{
-    const cb=document.getElementById('evb_'+b.id);
-    const rb=document.getElementById('evr_'+b.id);
-    if(cb&&cb.checked&&FC.bundles[b.id]){
-      FC.bundles[b.id].promo=ev.type;
-      FC.bundles[b.id].rank=rb?rb.value:'sub1';
-      if(FC.bundles[b.id].qty===0) FC.bundles[b.id].qty=10;
-    }
-  });
-  const pi=FC_PROMO[ev.type]||{c:'var(--t2)',bg:'var(--glass-bg-dark)',v:1};
-  document.getElementById('evApplied').innerHTML=`<span class="ev-tag" style="background:${pi.bg};color:${pi.c}">${ev.name} \xb7 ${ev.type} \xd7${pi.v.toFixed(3)}</span>`;
-  document.getElementById('evBody').style.display='none';document.getElementById('evArr').style.transform='';FC.evOpen=false;
-  fcRecalc();
-}
+
 function evToggle(){
   const body=document.getElementById('evBody'),arr=document.getElementById('evArr');
   FC.evOpen=!FC.evOpen;body.style.display=FC.evOpen?'block':'none';arr.style.transform=FC.evOpen?'rotate(180deg)':'';
 }
-// stubs to avoid reference errors (manual form removed)
+// stubs
 function evOnType(){}
 function evBuildManualGrid(){}
 function evApplyManual(){}
 function evCheckDays(){}
+function evOnSheetSelect(){}
+function evApply(){}
 function evClear(){
+  EV_RAW=[];
   BUNDLES.forEach(b=>{if(FC.bundles[b.id])FC.bundles[b.id].promo=null;});
   document.getElementById('evApplied').innerHTML='';
-  const sel=document.getElementById('evSheetSel');if(sel)sel.value='';
-  const et=document.getElementById('evType');if(et)et.value='';
-  const ed=document.getElementById('evDetail');if(ed)ed.style.display='none';
+  document.getElementById('evResultCards').innerHTML='';
+  document.getElementById('evSheetStatus').textContent='시트를 불러오면 이번 주 행사가 자동 적용됩니다.';
   fcRecalc();
 }
 
@@ -2065,7 +2109,8 @@ function evClear(){
 function fcSetWeek(mon){
   FC.monDate=mon;document.getElementById('fcMonDate').value=dateStr(mon);
   FC.days=DOW_KO.map((dow,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return{date:dateStr(d),dow,holiday:null,open:false};});
-  fcRecalc();
+  // Re-apply events when week changes (if sheet already loaded)
+  if(EV_RAW.length) evAutoApplyForWeek(); else fcRecalc();
 }
 function fcPrevWeek(){const d=FC.monDate?new Date(FC.monDate):fcMonday(new Date());d.setDate(d.getDate()-7);FC.overrides={};fcSetWeek(d);}
 function fcNextWeek(){const d=FC.monDate?new Date(FC.monDate):fcMonday(new Date());d.setDate(d.getDate()+7);FC.overrides={};fcSetWeek(d);}
