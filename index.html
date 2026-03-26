@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>요즘 물량 오차 분석 대시보드</title>
+<title>ìš”ì¦˜ ë¬¼ëŸ‰ ì˜¤ì°¨ ë¶„ì„ ëŒ€ì‹œë³´ë“œ</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
@@ -213,11 +213,11 @@ tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 /* chart canvas */
 canvas{display:block}
 
-/* ── FORECAST v3 ─────────────────────────────────── */
+/* â”€â”€ FORECAST v3 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .fc-layout{display:flex;gap:12px;align-items:flex-start}
 .fc-palette{width:196px;flex-shrink:0;position:sticky;top:50px;max-height:calc(100vh - 60px);overflow-y:auto}
 .fc-content{flex:1;min-width:0}
-/* Palette sections — collapsible */
+/* Palette sections â€” collapsible */
 .pal-sec{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r-lg);margin-bottom:6px;overflow:hidden;box-shadow:var(--glass-shadow)}
 .pal-hd{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;cursor:pointer;user-select:none}
 .pal-hd:hover{background:var(--glass-bg-dark)}
@@ -261,7 +261,7 @@ canvas{display:block}
 .fc-sum{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r-lg);box-shadow:var(--glass-shadow);padding:9px 13px;flex:1;min-width:80px}
 .fc-sum .sl{font-size:10px;color:var(--t3);font-weight:600;margin-bottom:2px}
 .fc-sum .sv{font-size:17px;font-weight:700}
-/* DAY CARDS — collapsible, 1-line default */
+/* DAY CARDS â€” collapsible, 1-line default */
 .fc-day-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:9px}
 .fc-day-card{background:var(--glass-bg);border:2px solid var(--glass-border);border-radius:var(--r-lg);box-shadow:var(--glass-shadow);overflow:hidden;transition:border-color .15s}
 .fc-day-card.has-hol{border-color:rgba(196,90,16,.45)}
@@ -283,7 +283,7 @@ canvas{display:block}
 .fdc-drop:hover,.fdc-drop.dg-over{border-color:var(--orange);color:var(--orange);background:rgba(196,90,16,.04)}
 .fdc-pill{display:flex;align-items:center;justify-content:space-between;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;margin-top:5px}
 .fdc-pill .rm{cursor:pointer;font-size:9px;opacity:.5;padding-left:5px}.fdc-pill .rm:hover{opacity:1}
-/* BUNDLE CARDS — 5-per-row grid */
+/* BUNDLE CARDS â€” 5-per-row grid */
 .fc-bsec{margin-bottom:12px}
 .fc-bsec-lbl{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
 .fc-bcards{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
@@ -297,7 +297,7 @@ canvas{display:block}
 .fc-bcard.is-main.has-promo{border-color:rgba(58,58,240,.45)}
 .fc-bcard.dg-over{border-color:var(--accent)!important;background:var(--accent-l);box-shadow:0 0 0 3px rgba(58,58,240,.2)}
 .fc-bcard.chip-target{cursor:pointer;border-color:rgba(58,58,240,.55)!important;box-shadow:0 0 0 3px rgba(58,58,240,.15)!important}
-/* Card header — default 1-line compact */
+/* Card header â€” default 1-line compact */
 .fbc-hd{padding:8px 10px;cursor:pointer;user-select:none}
 .fbc-hd:hover{background:var(--glass-bg-dark)}
 .fbc-hd-top{display:flex;align-items:center;justify-content:space-between;gap:4px}
@@ -308,7 +308,7 @@ canvas{display:block}
 .fbc-ptag{display:inline-flex;padding:1px 6px;border-radius:20px;font-size:9px;font-weight:700;flex-shrink:0;white-space:nowrap}
 .fbc-mult{font-size:10.5px;font-weight:700;flex-shrink:0}
 .fbc-wk{font-size:14px;font-weight:800;color:var(--accent);display:block;margin-top:3px}
-/* Body — expanded */
+/* Body â€” expanded */
 .fbc-body{display:none;padding:8px 10px;border-top:1px solid var(--glass-border-subtle)}
 .fc-bcard.open .fbc-body{display:block}
 .fbc-comp-full{font-size:10.5px;color:var(--t3);margin-bottom:7px;line-height:1.6}
@@ -351,132 +351,132 @@ canvas{display:block}
 </head>
 <body>
 
-<!-- ─── SIDEBAR ───────────────────────────────── -->
+<!-- â”€â”€â”€ SIDEBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <aside class="sidebar">
   <div class="sb-brand">
-    <h1>🥛 요즘 오차 분석</h1>
-    <small>물량 예측 · 오차 · 계수 제안</small>
+    <h1>ðŸ¥› ìš”ì¦˜ ì˜¤ì°¨ ë¶„ì„</h1>
+    <small>ë¬¼ëŸ‰ ì˜ˆì¸¡ Â· ì˜¤ì°¨ Â· ê³„ìˆ˜ ì œì•ˆ</small>
   </div>
   <nav class="sb-nav">
-    <div class="nav-grp">오차 분석</div>
-    <div class="ni on" onclick="nav('overview',this)"><span class="ico">📊</span> 오차 현황</div>
-    <div class="ni" onclick="nav('factors',this)"><span class="ico">🔍</span> 요인 분석</div>
-    <div class="ni" onclick="nav('suggest',this)"><span class="ico">💡</span> 계수 제안</div>
-    <div class="nav-grp">데이터</div>
-    <div class="ni" onclick="nav('trend',this)"><span class="ico">📈</span> 트렌드</div>
-    <div class="ni" onclick="nav('detail',this)"><span class="ico">🔎</span> 품목 상세</div>
-    <div class="nav-grp">예측</div>
-    <div class="ni" onclick="nav('forecast',this)"><span class="ico">🗓️</span> 주간 예측표</div>
-    <div class="nav-grp">설정</div>
-    <div class="ni" onclick="nav('coeff',this)"><span class="ico">⚙️</span> 계수 설정</div>
+    <div class="nav-grp">ì˜¤ì°¨ ë¶„ì„</div>
+    <div class="ni on" onclick="nav('overview',this)"><span class="ico">ðŸ“Š</span> ì˜¤ì°¨ í˜„í™©</div>
+    <div class="ni" onclick="nav('factors',this)"><span class="ico">ðŸ”</span> ìš”ì¸ ë¶„ì„</div>
+    <div class="ni" onclick="nav('suggest',this)"><span class="ico">ðŸ’¡</span> ê³„ìˆ˜ ì œì•ˆ</div>
+    <div class="nav-grp">ë°ì´í„°</div>
+    <div class="ni" onclick="nav('trend',this)"><span class="ico">ðŸ“ˆ</span> íŠ¸ë Œë“œ</div>
+    <div class="ni" onclick="nav('detail',this)"><span class="ico">ðŸ”Ž</span> í’ˆëª© ìƒì„¸</div>
+    <div class="nav-grp">ì˜ˆì¸¡</div>
+    <div class="ni" onclick="nav('forecast',this)"><span class="ico">ðŸ—“ï¸</span> ì£¼ê°„ ì˜ˆì¸¡í‘œ</div>
+    <div class="nav-grp">ì„¤ì •</div>
+    <div class="ni" onclick="nav('coeff',this)"><span class="ico">âš™ï¸</span> ê³„ìˆ˜ ì„¤ì •</div>
   </nav>
   <div class="sb-foot">
     <div>X = <span class="x-pill" id="xBadge">100</span></div>
-    <div style="margin-top:4px;font-size:10.5px" id="lastUpdTxt">데이터 미로드</div>
+    <div style="margin-top:4px;font-size:10.5px" id="lastUpdTxt">ë°ì´í„° ë¯¸ë¡œë“œ</div>
   </div>
 </aside>
 
-<!-- ─── HISTBAR ───────────────────────────────── -->
+<!-- â”€â”€â”€ HISTBAR â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <div class="histbar">
-  <span class="hb-title">요즘 물량 예측 오차 분석 대시보드</span>
+  <span class="hb-title">ìš”ì¦˜ ë¬¼ëŸ‰ ì˜ˆì¸¡ ì˜¤ì°¨ ë¶„ì„ ëŒ€ì‹œë³´ë“œ</span>
   <span class="hb-sep"></span>
-  <span class="hb-info" id="dateRangeTxt">—</span>
+  <span class="hb-info" id="dateRangeTxt">â€”</span>
   <div class="hb-right">
-    <button class="btn btn-p" id="loadBtn" onclick="loadAll()">↻ 데이터 로드</button>
+    <button class="btn btn-p" id="loadBtn" onclick="loadAll()">â†» ë°ì´í„° ë¡œë“œ</button>
   </div>
 </div>
 
-<!-- ─── MAIN ──────────────────────────────────── -->
+<!-- â”€â”€â”€ MAIN â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <main class="main">
 
-<!-- ══ PAGE: 오차 현황 ══════════════════════════ -->
+<!-- â•â• PAGE: ì˜¤ì°¨ í˜„í™© â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page on" id="page-overview">
   <div class="sh mb12">
-    <div><h2>📊 오차 현황</h2><div class="sub">예측(fc) vs 실제출고(ac) 품목별 정확도 요약</div></div>
+    <div><h2>ðŸ“Š ì˜¤ì°¨ í˜„í™©</h2><div class="sub">ì˜ˆì¸¡(fc) vs ì‹¤ì œì¶œê³ (ac) í’ˆëª©ë³„ ì •í™•ë„ ìš”ì•½</div></div>
     <div class="frow">
       <select id="ovPeriod" onchange="renderOverview()">
-        <option value="all">전체 기간</option>
-        <option value="30">최근 30일</option>
-        <option value="14">최근 14일</option>
-        <option value="7">최근 7일</option>
+        <option value="all">ì „ì²´ ê¸°ê°„</option>
+        <option value="30">ìµœê·¼ 30ì¼</option>
+        <option value="14">ìµœê·¼ 14ì¼</option>
+        <option value="7">ìµœê·¼ 7ì¼</option>
       </select>
     </div>
   </div>
 
   <div class="stats-row" id="ovStats">
-    <div class="stat-card"><div class="sl">분석 기간</div><div class="sv" id="sStat0">—</div><div class="ss">영업일</div></div>
-    <div class="stat-card" id="sDangerCard"><div class="sl">🔴 위험 품목</div><div class="sv" id="sStat1">—</div><div class="ss">오차율≥25% AND ≥10개</div></div>
-    <div class="stat-card" id="sWarnCard"><div class="sl">🟡 주의 품목</div><div class="sv" id="sStat2">—</div><div class="ss">오차율≥15% AND ≥5개</div></div>
-    <div class="stat-card" id="sOkCard"><div class="sl">🟢 정상 품목</div><div class="sv" id="sStat3">—</div><div class="ss">오차율 양호</div></div>
+    <div class="stat-card"><div class="sl">ë¶„ì„ ê¸°ê°„</div><div class="sv" id="sStat0">â€”</div><div class="ss">ì˜ì—…ì¼</div></div>
+    <div class="stat-card" id="sDangerCard"><div class="sl">ðŸ”´ ìœ„í—˜ í’ˆëª©</div><div class="sv" id="sStat1">â€”</div><div class="ss">ì˜¤ì°¨ìœ¨â‰¥25% AND â‰¥10ê°œ</div></div>
+    <div class="stat-card" id="sWarnCard"><div class="sl">ðŸŸ¡ ì£¼ì˜ í’ˆëª©</div><div class="sv" id="sStat2">â€”</div><div class="ss">ì˜¤ì°¨ìœ¨â‰¥15% AND â‰¥5ê°œ</div></div>
+    <div class="stat-card" id="sOkCard"><div class="sl">ðŸŸ¢ ì •ìƒ í’ˆëª©</div><div class="sv" id="sStat3">â€”</div><div class="ss">ì˜¤ì°¨ìœ¨ ì–‘í˜¸</div></div>
   </div>
 
   <div class="card mb12">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-      <div class="card-title" style="margin:0">품목별 오차 요약</div>
+      <div class="card-title" style="margin:0">í’ˆëª©ë³„ ì˜¤ì°¨ ìš”ì•½</div>
       <div class="tab-row">
-        <button class="tb on" onclick="setGrp('all',this)">전체</button>
-        <button class="tb" onclick="setGrp('yogurt',this)">요거트</button>
-        <button class="tb" onclick="setGrp('topping',this)">토핑</button>
-        <button class="tb" onclick="setGrp('drink',this)">마시는</button>
+        <button class="tb on" onclick="setGrp('all',this)">ì „ì²´</button>
+        <button class="tb" onclick="setGrp('yogurt',this)">ìš”ê±°íŠ¸</button>
+        <button class="tb" onclick="setGrp('topping',this)">í† í•‘</button>
+        <button class="tb" onclick="setGrp('drink',this)">ë§ˆì‹œëŠ”</button>
       </div>
     </div>
-    <div class="tbl-wrap" id="ovTable"><div class="empty"><div class="ico">📂</div><div>데이터를 로드하세요</div></div></div>
+    <div class="tbl-wrap" id="ovTable"><div class="empty"><div class="ico">ðŸ“‚</div><div>ë°ì´í„°ë¥¼ ë¡œë“œí•˜ì„¸ìš”</div></div></div>
   </div>
 
   <div class="g2">
     <div class="card">
-      <div class="card-title">품목별 평균 fc vs ac</div>
+      <div class="card-title">í’ˆëª©ë³„ í‰ê·  fc vs ac</div>
       <div style="position:relative;height:210px"><canvas id="cErrBar"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">일별 오차율% 추이 (상위 3 품목)</div>
+      <div class="card-title">ì¼ë³„ ì˜¤ì°¨ìœ¨% ì¶”ì´ (ìƒìœ„ 3 í’ˆëª©)</div>
       <div style="position:relative;height:210px"><canvas id="cErrLine"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- ══ PAGE: 요인 분석 ══════════════════════════ -->
+<!-- â•â• PAGE: ìš”ì¸ ë¶„ì„ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page" id="page-factors">
   <div class="sh mb12">
-    <div><h2>🔍 요인 분석</h2><div class="sub">요일별 · 품목×요일 오차 패턴 히트맵</div></div>
+    <div><h2>ðŸ” ìš”ì¸ ë¶„ì„</h2><div class="sub">ìš”ì¼ë³„ Â· í’ˆëª©Ã—ìš”ì¼ ì˜¤ì°¨ íŒ¨í„´ ížˆíŠ¸ë§µ</div></div>
   </div>
 
   <div class="g2 mb12">
     <div class="card">
-      <div class="card-title">요일별 평균 오차율 (전체 합산)</div>
-      <div id="dowBars"><div class="empty"><div class="ico">📅</div><div>데이터 로드 필요</div></div></div>
+      <div class="card-title">ìš”ì¼ë³„ í‰ê·  ì˜¤ì°¨ìœ¨ (ì „ì²´ í•©ì‚°)</div>
+      <div id="dowBars"><div class="empty"><div class="ico">ðŸ“…</div><div>ë°ì´í„° ë¡œë“œ í•„ìš”</div></div></div>
     </div>
     <div class="card">
-      <div class="card-title">요일별 fc vs ac 일평균</div>
+      <div class="card-title">ìš”ì¼ë³„ fc vs ac ì¼í‰ê· </div>
       <div style="position:relative;height:220px"><canvas id="cDow"></canvas></div>
     </div>
   </div>
 
   <div class="card mb12">
-    <div class="card-title">오차 히트맵 — 품목 × 요일 (평균 오차율%)</div>
-    <div class="tbl-wrap" id="heatmapDiv"><div class="empty"><div class="ico">🗂️</div><div>데이터 로드 필요</div></div></div>
+    <div class="card-title">ì˜¤ì°¨ ížˆíŠ¸ë§µ â€” í’ˆëª© Ã— ìš”ì¼ (í‰ê·  ì˜¤ì°¨ìœ¨%)</div>
+    <div class="tbl-wrap" id="heatmapDiv"><div class="empty"><div class="ico">ðŸ—‚ï¸</div><div>ë°ì´í„° ë¡œë“œ í•„ìš”</div></div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">pv 보정 상관분석 결과 (실데이터 기반)</div>
+    <div class="card-title">pv ë³´ì • ìƒê´€ë¶„ì„ ê²°ê³¼ (ì‹¤ë°ì´í„° ê¸°ë°˜)</div>
     <div id="pvCorrDiv">
       <div class="al-i alert">
-        ℹ️ <b>pv 보정 현재 미사용</b> — 대부분 품목에서 오차 증가. 상관계수 r ≥ 0.6 품목(카카오·크리스피)에만 선택 적용 검토.
+        â„¹ï¸ <b>pv ë³´ì • í˜„ìž¬ ë¯¸ì‚¬ìš©</b> â€” ëŒ€ë¶€ë¶„ í’ˆëª©ì—ì„œ ì˜¤ì°¨ ì¦ê°€. ìƒê´€ê³„ìˆ˜ r â‰¥ 0.6 í’ˆëª©(ì¹´ì¹´ì˜¤Â·í¬ë¦¬ìŠ¤í”¼)ì—ë§Œ ì„ íƒ ì ìš© ê²€í† .
         <br><br>
         <table style="width:100%;font-size:12px;border-collapse:collapse">
           <thead><tr>
-            <th style="text-align:left;padding:4px 8px;color:var(--t3);font-weight:600">품목</th>
-            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">pv-ac 상관 r</th>
-            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">fc 단독 오차%</th>
-            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">pv 보정 오차%</th>
-            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">결과</th>
+            <th style="text-align:left;padding:4px 8px;color:var(--t3);font-weight:600">í’ˆëª©</th>
+            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">pv-ac ìƒê´€ r</th>
+            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">fc ë‹¨ë… ì˜¤ì°¨%</th>
+            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">pv ë³´ì • ì˜¤ì°¨%</th>
+            <th style="text-align:right;padding:4px 8px;color:var(--t3);font-weight:600">ê²°ê³¼</th>
           </tr></thead>
           <tbody id="pvCorrTable">
-            <tr><td style="padding:4px 8px">플레인</td><td class="r">0.44</td><td class="r">30.6%</td><td class="r">63.8%</td><td class="r"><span class="badge bd">❌ 악화</span></td></tr>
-            <tr><td style="padding:4px 8px">소프트</td><td class="r">0.23</td><td class="r">50.3%</td><td class="r">84.6%</td><td class="r"><span class="badge bd">❌ 악화</span></td></tr>
-            <tr><td style="padding:4px 8px">알룰로스</td><td class="r">0.22</td><td class="r">44.4%</td><td class="r">69.6%</td><td class="r"><span class="badge bd">❌ 악화</span></td></tr>
-            <tr><td style="padding:4px 8px">카카오</td><td class="r" style="color:var(--green);font-weight:600">0.82</td><td class="r">324.6%</td><td class="r">156.3%</td><td class="r"><span class="badge bo">✅ 개선</span></td></tr>
-            <tr><td style="padding:4px 8px">크리스피</td><td class="r" style="color:var(--orange);font-weight:600">0.19</td><td class="r">253.8%</td><td class="r">149.9%</td><td class="r"><span class="badge bo">✅ 개선</span></td></tr>
+            <tr><td style="padding:4px 8px">í”Œë ˆì¸</td><td class="r">0.44</td><td class="r">30.6%</td><td class="r">63.8%</td><td class="r"><span class="badge bd">âŒ ì•…í™”</span></td></tr>
+            <tr><td style="padding:4px 8px">ì†Œí”„íŠ¸</td><td class="r">0.23</td><td class="r">50.3%</td><td class="r">84.6%</td><td class="r"><span class="badge bd">âŒ ì•…í™”</span></td></tr>
+            <tr><td style="padding:4px 8px">ì•Œë£°ë¡œìŠ¤</td><td class="r">0.22</td><td class="r">44.4%</td><td class="r">69.6%</td><td class="r"><span class="badge bd">âŒ ì•…í™”</span></td></tr>
+            <tr><td style="padding:4px 8px">ì¹´ì¹´ì˜¤</td><td class="r" style="color:var(--green);font-weight:600">0.82</td><td class="r">324.6%</td><td class="r">156.3%</td><td class="r"><span class="badge bo">âœ… ê°œì„ </span></td></tr>
+            <tr><td style="padding:4px 8px">í¬ë¦¬ìŠ¤í”¼</td><td class="r" style="color:var(--orange);font-weight:600">0.19</td><td class="r">253.8%</td><td class="r">149.9%</td><td class="r"><span class="badge bo">âœ… ê°œì„ </span></td></tr>
           </tbody>
         </table>
       </div>
@@ -484,222 +484,222 @@ canvas{display:block}
   </div>
 </div>
 
-<!-- ══ PAGE: 계수 제안 ══════════════════════════ -->
+<!-- â•â• PAGE: ê³„ìˆ˜ ì œì•ˆ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page" id="page-suggest">
   <div class="sh mb12">
-    <div><h2>💡 계수 제안</h2><div class="sub">실데이터 기반 — 현행 대비 ±5% 이상 차이 품목 표시</div></div>
+    <div><h2>ðŸ’¡ ê³„ìˆ˜ ì œì•ˆ</h2><div class="sub">ì‹¤ë°ì´í„° ê¸°ë°˜ â€” í˜„í–‰ ëŒ€ë¹„ Â±5% ì´ìƒ ì°¨ì´ í’ˆëª© í‘œì‹œ</div></div>
   </div>
 
   <div id="suggestAlerts" class="mb12"></div>
 
   <div class="g2 mb12">
     <div class="card">
-      <div class="card-title">X 기준값 제안</div>
-      <div id="xSuggestDiv"><div class="empty"><div class="ico">🔢</div><div>데이터 로드 필요</div></div></div>
+      <div class="card-title">X ê¸°ì¤€ê°’ ì œì•ˆ</div>
+      <div id="xSuggestDiv"><div class="empty"><div class="ico">ðŸ”¢</div><div>ë°ì´í„° ë¡œë“œ í•„ìš”</div></div></div>
     </div>
     <div class="card">
-      <div class="card-title">요일계수 제안</div>
-      <div id="dowSuggestDiv"><div class="empty"><div class="ico">📅</div><div>데이터 로드 필요</div></div></div>
+      <div class="card-title">ìš”ì¼ê³„ìˆ˜ ì œì•ˆ</div>
+      <div id="dowSuggestDiv"><div class="empty"><div class="ico">ðŸ“…</div><div>ë°ì´í„° ë¡œë“œ í•„ìš”</div></div></div>
     </div>
   </div>
 
   <div class="card mb12">
-    <div class="card-title">품목계수 제안 (현행 대비 — 데이터 기반 정규화)</div>
-    <div class="tbl-wrap" id="itemSuggestDiv"><div class="empty"><div class="ico">📊</div><div>데이터 로드 필요</div></div></div>
+    <div class="card-title">í’ˆëª©ê³„ìˆ˜ ì œì•ˆ (í˜„í–‰ ëŒ€ë¹„ â€” ë°ì´í„° ê¸°ë°˜ ì •ê·œí™”)</div>
+    <div class="tbl-wrap" id="itemSuggestDiv"><div class="empty"><div class="ico">ðŸ“Š</div><div>ë°ì´í„° ë¡œë“œ í•„ìš”</div></div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">⚠️ 미반영 보류 항목 (향후 검토)</div>
+    <div class="card-title">âš ï¸ ë¯¸ë°˜ì˜ ë³´ë¥˜ í•­ëª© (í–¥í›„ ê²€í† )</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
-      <div class="alert al-i" style="margin:0">행사전날예열 ×1.150 — 데이터 부족, 보류</div>
-      <div class="alert al-i" style="margin:0">행사종료+1일 ×1.260 — 반짝 수요 패턴 확인 후</div>
-      <div class="alert al-i" style="margin:0">연휴 첫날 별도 계수 — 데이터 더 쌓이면</div>
-      <div class="alert al-i" style="margin:0">계절 고정계수 — 12개월 이상 후 YoY 전환</div>
+      <div class="alert al-i" style="margin:0">í–‰ì‚¬ì „ë‚ ì˜ˆì—´ Ã—1.150 â€” ë°ì´í„° ë¶€ì¡±, ë³´ë¥˜</div>
+      <div class="alert al-i" style="margin:0">í–‰ì‚¬ì¢…ë£Œ+1ì¼ Ã—1.260 â€” ë°˜ì§ ìˆ˜ìš” íŒ¨í„´ í™•ì¸ í›„</div>
+      <div class="alert al-i" style="margin:0">ì—°íœ´ ì²«ë‚  ë³„ë„ ê³„ìˆ˜ â€” ë°ì´í„° ë” ìŒ“ì´ë©´</div>
+      <div class="alert al-i" style="margin:0">ê³„ì ˆ ê³ ì •ê³„ìˆ˜ â€” 12ê°œì›” ì´ìƒ í›„ YoY ì „í™˜</div>
     </div>
   </div>
 </div>
 
-<!-- ══ PAGE: 트렌드 ══════════════════════════════ -->
+<!-- â•â• PAGE: íŠ¸ë Œë“œ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page" id="page-trend">
   <div class="sh mb12">
-    <div><h2>📈 트렌드</h2><div class="sub">월별 출고량 추이 및 MoM 성장률</div></div>
+    <div><h2>ðŸ“ˆ íŠ¸ë Œë“œ</h2><div class="sub">ì›”ë³„ ì¶œê³ ëŸ‰ ì¶”ì´ ë° MoM ì„±ìž¥ë¥ </div></div>
   </div>
 
   <div class="stats-row mb12">
-    <div class="stat-card"><div class="sl">1월 일평균 ac</div><div class="sv ac-c" id="tr1">—</div><div class="ss">기준월</div></div>
-    <div class="stat-card"><div class="sl">2월 일평균 ac</div><div class="sv ac-c" id="tr2">—</div><div class="ss">×1.01 성장</div></div>
-    <div class="stat-card"><div class="sl">3월 일평균 ac</div><div class="sv ac-c" id="tr3">—</div><div class="ss">×1.27 성장</div></div>
-    <div class="stat-card"><div class="sl">최근 MoM 성장률</div><div class="sv" id="trMom">—</div><div class="ss">직전월 대비</div></div>
+    <div class="stat-card"><div class="sl">1ì›” ì¼í‰ê·  ac</div><div class="sv ac-c" id="tr1">â€”</div><div class="ss">ê¸°ì¤€ì›”</div></div>
+    <div class="stat-card"><div class="sl">2ì›” ì¼í‰ê·  ac</div><div class="sv ac-c" id="tr2">â€”</div><div class="ss">Ã—1.01 ì„±ìž¥</div></div>
+    <div class="stat-card"><div class="sl">3ì›” ì¼í‰ê·  ac</div><div class="sv ac-c" id="tr3">â€”</div><div class="ss">Ã—1.27 ì„±ìž¥</div></div>
+    <div class="stat-card"><div class="sl">ìµœê·¼ MoM ì„±ìž¥ë¥ </div><div class="sv" id="trMom">â€”</div><div class="ss">ì§ì „ì›” ëŒ€ë¹„</div></div>
   </div>
 
   <div class="card mb12">
-    <div class="card-title">월별 fc vs ac 일평균 합계</div>
+    <div class="card-title">ì›”ë³„ fc vs ac ì¼í‰ê·  í•©ê³„</div>
     <div style="position:relative;height:260px"><canvas id="cMonth"></canvas></div>
   </div>
 
   <div class="g2">
     <div class="card">
-      <div class="card-title">상위 5 품목 — 월별 일평균 ac</div>
+      <div class="card-title">ìƒìœ„ 5 í’ˆëª© â€” ì›”ë³„ ì¼í‰ê·  ac</div>
       <div style="position:relative;height:240px"><canvas id="cShare"></canvas></div>
     </div>
     <div class="card">
-      <div class="card-title">fc vs ac 오차율 월별 추이</div>
+      <div class="card-title">fc vs ac ì˜¤ì°¨ìœ¨ ì›”ë³„ ì¶”ì´</div>
       <div style="position:relative;height:240px"><canvas id="cMonthErr"></canvas></div>
     </div>
   </div>
 </div>
 
-<!-- ══ PAGE: 품목 상세 ══════════════════════════ -->
+<!-- â•â• PAGE: í’ˆëª© ìƒì„¸ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page" id="page-detail">
   <div class="sh mb12">
-    <div><h2>🔎 품목 상세</h2><div class="sub">선택 품목의 일별 fc/ac/오차 완전 조회</div></div>
+    <div><h2>ðŸ”Ž í’ˆëª© ìƒì„¸</h2><div class="sub">ì„ íƒ í’ˆëª©ì˜ ì¼ë³„ fc/ac/ì˜¤ì°¨ ì™„ì „ ì¡°íšŒ</div></div>
     <select id="detailSel" onchange="renderDetail()" style="padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12.5px;color:var(--tx)">
-      <option value="">품목 선택</option>
+      <option value="">í’ˆëª© ì„ íƒ</option>
     </select>
   </div>
-  <div id="detailContent"><div class="empty"><div class="ico">🔍</div><div>품목을 선택하고 데이터를 로드하세요</div></div></div>
+  <div id="detailContent"><div class="empty"><div class="ico">ðŸ”</div><div>í’ˆëª©ì„ ì„ íƒí•˜ê³  ë°ì´í„°ë¥¼ ë¡œë“œí•˜ì„¸ìš”</div></div></div>
 </div>
 
-<!-- ══ PAGE: 계수 설정 ══════════════════════════ -->
+<!-- â•â• PAGE: ê³„ìˆ˜ ì„¤ì • â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page" id="page-coeff">
   <div class="sh mb12">
-    <div><h2>⚙️ 계수 설정</h2><div class="sub">현행 계수 확인 · X 기준값 시뮬레이션</div></div>
+    <div><h2>âš™ï¸ ê³„ìˆ˜ ì„¤ì •</h2><div class="sub">í˜„í–‰ ê³„ìˆ˜ í™•ì¸ Â· X ê¸°ì¤€ê°’ ì‹œë®¬ë ˆì´ì…˜</div></div>
   </div>
 
   <div class="g2 mb12">
     <div class="card">
-      <div class="card-title">X 기준값 (전체 스케일 레버)</div>
+      <div class="card-title">X ê¸°ì¤€ê°’ (ì „ì²´ ìŠ¤ì¼€ì¼ ë ˆë²„)</div>
       <div style="display:flex;align-items:center;gap:14px;padding:8px 0">
         <input type="number" id="xInp" value="100" min="1" max="9999"
           style="width:88px;padding:8px;border-radius:var(--r);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-size:20px;font-weight:700;font-family:inherit;text-align:center;color:var(--accent)"
           onchange="doUpdateX()">
         <div>
-          <div style="color:var(--t2);font-size:12px">현재 X = <span class="x-pill" id="xDisp">100</span></div>
-          <div style="color:var(--t3);font-size:11px;margin-top:4px">전체 물량 ∝ X<br>X=100 기준 교차표 우측 확인</div>
+          <div style="color:var(--t2);font-size:12px">í˜„ìž¬ X = <span class="x-pill" id="xDisp">100</span></div>
+          <div style="color:var(--t3);font-size:11px;margin-top:4px">ì „ì²´ ë¬¼ëŸ‰ âˆ X<br>X=100 ê¸°ì¤€ êµì°¨í‘œ ìš°ì¸¡ í™•ì¸</div>
         </div>
       </div>
     </div>
     <div class="card">
-      <div class="card-title">요일 계수</div>
+      <div class="card-title">ìš”ì¼ ê³„ìˆ˜</div>
       <div id="dowCoeffDisp"></div>
     </div>
   </div>
 
   <div class="card mb12">
-    <div class="card-title">품목계수 교차표 (X = <span id="xCrossLbl">100</span> 기준)</div>
+    <div class="card-title">í’ˆëª©ê³„ìˆ˜ êµì°¨í‘œ (X = <span id="xCrossLbl">100</span> ê¸°ì¤€)</div>
     <div class="tbl-wrap" id="crossDiv"></div>
   </div>
 
   <div class="g2">
     <div class="card">
-      <div class="card-title">행사 계수 (CFS.promo)</div>
+      <div class="card-title">í–‰ì‚¬ ê³„ìˆ˜ (CFS.promo)</div>
       <div id="promoCoeffDiv"></div>
     </div>
     <div class="card">
-      <div class="card-title">공휴일 계수 (CFS.holiday)</div>
+      <div class="card-title">ê³µíœ´ì¼ ê³„ìˆ˜ (CFS.holiday)</div>
       <div id="holCoeffDiv"></div>
     </div>
   </div>
 </div>
 
-<!-- ══ PAGE: 주간 예측표 ══════════════════════════ -->
+<!-- â•â• PAGE: ì£¼ê°„ ì˜ˆì¸¡í‘œ â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
 <div class="page" id="page-forecast">
   <div class="sh mb12">
     <div>
-      <h2>🗓️ 주간 예측표</h2>
-      <div class="sub">상품 단위 행사 관리 · 요일별 공휴일 적용 · 품목 출고량 자동 산출</div>
+      <h2>ðŸ—“ï¸ ì£¼ê°„ ì˜ˆì¸¡í‘œ</h2>
+      <div class="sub">ìƒí’ˆ ë‹¨ìœ„ í–‰ì‚¬ ê´€ë¦¬ Â· ìš”ì¼ë³„ ê³µíœ´ì¼ ì ìš© Â· í’ˆëª© ì¶œê³ ëŸ‰ ìžë™ ì‚°ì¶œ</div>
     </div>
     <div style="display:flex;gap:6px" class="no-print">
-      <button class="btn" onclick="fcPrevWeek()">← 이전주</button>
-      <button class="btn" onclick="fcNextWeek()">다음주 →</button>
-      <button class="btn" onclick="fcResetAll()" style="color:var(--red)">🗑 초기화</button>
-      <button class="btn" onclick="fcShowRef()" title="계수 참고표 보기">📋 참고</button>
+      <button class="btn" onclick="fcPrevWeek()">â† ì´ì „ì£¼</button>
+      <button class="btn" onclick="fcNextWeek()">ë‹¤ìŒì£¼ â†’</button>
+      <button class="btn" onclick="fcResetAll()" style="color:var(--red)">ðŸ—‘ ì´ˆê¸°í™”</button>
+      <button class="btn" onclick="fcShowRef()" title="ê³„ìˆ˜ ì°¸ê³ í‘œ ë³´ê¸°">ðŸ“‹ ì°¸ê³ </button>
     </div>
   </div>
 
-  <!-- 참고 팝업 모달 -->
+  <!-- ì°¸ê³  íŒì—… ëª¨ë‹¬ -->
   <div id="fcRefModal" onclick="if(event.target===this)fcHideRef()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:500;align-items:center;justify-content:center">
     <div style="background:var(--glass-bg-strong);border:1px solid var(--glass-border);border-radius:var(--r-xl);box-shadow:var(--glass-shadow-float);padding:20px 22px;max-width:700px;width:92vw;max-height:82vh;overflow-y:auto;backdrop-filter:blur(20px)">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <div style="font-size:14px;font-weight:700">📋 계수 참고표</div>
-        <button class="btn" onclick="fcHideRef()" style="padding:3px 10px">✕ 닫기</button>
+        <div style="font-size:14px;font-weight:700">ðŸ“‹ ê³„ìˆ˜ ì°¸ê³ í‘œ</div>
+        <button class="btn" onclick="fcHideRef()" style="padding:3px 10px">âœ• ë‹«ê¸°</button>
       </div>
       <div id="refLastUpdated" style="font-size:10.5px;color:var(--t4);margin-bottom:14px"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">📅 요일 계수</div>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">ðŸ“… ìš”ì¼ ê³„ìˆ˜</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px" id="refDowChips"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">🎉 행사 계수</div>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">ðŸŽ‰ í–‰ì‚¬ ê³„ìˆ˜</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px" id="refPromoChips"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">🏖 공휴일 계수</div>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">ðŸ– ê³µíœ´ì¼ ê³„ìˆ˜</div>
       <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px" id="refHolChips"></div>
-      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">📦 품목 계수 (X·성장계수 현재값 기준)</div>
+      <div style="font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">ðŸ“¦ í’ˆëª© ê³„ìˆ˜ (XÂ·ì„±ìž¥ê³„ìˆ˜ í˜„ìž¬ê°’ ê¸°ì¤€)</div>
       <div id="refItemTable"></div>
     </div>
   </div>
 
   <div class="fc-layout" style="display:block">
-    <!-- ── CONTENT (palette removed — all reference moved to 참고 popup) ── -->
+    <!-- â”€â”€ CONTENT (palette removed â€” all reference moved to ì°¸ê³  popup) â”€â”€ -->
     <div class="fc-content" style="max-width:100%">
       <!-- WEEK BAR -->
       <div class="fc-week-bar no-print">
-        <label>기준주</label>
+        <label>ê¸°ì¤€ì£¼</label>
         <input type="date" id="fcMonDate" onchange="fcOnWeekChange()" style="padding:4px 8px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-size:12px;font-family:inherit;color:var(--tx)">
         <div class="fc-vsep"></div>
         <label>X</label>
         <input type="number" id="fcX" class="fn-inp" value="100" min="1" max="9999" style="width:58px;color:var(--accent)" onchange="fcRecalc()">
         <div class="fc-vsep"></div>
-        <label>성장</label>
+        <label>ì„±ìž¥</label>
         <input type="number" id="fcGrow" class="fn-inp" value="1.27" min="0.1" max="5" step="0.01" style="width:58px;color:var(--green)" onchange="fcRecalc()">
         <div class="fc-vsep"></div>
-        <button id="fcEditBtn" class="btn" onclick="fcToggleEdit()" title="셀 직접 편집 (클릭하여 편집 모드)" style="padding:3px 9px;font-size:15px;line-height:1;position:relative" aria-pressed="false">
-          🔒
-          <span id="fcEditLbl" style="font-size:9.5px;margin-left:3px;color:var(--t3)">고정</span>
+        <button id="fcEditBtn" class="btn" onclick="fcToggleEdit()" title="ì…€ ì§ì ‘ íŽ¸ì§‘ (í´ë¦­í•˜ì—¬ íŽ¸ì§‘ ëª¨ë“œ)" style="padding:3px 9px;font-size:15px;line-height:1;position:relative" aria-pressed="false">
+          ðŸ”’
+          <span id="fcEditLbl" style="font-size:9.5px;margin-left:3px;color:var(--t3)">ê³ ì •</span>
         </button>
         <input type="checkbox" id="fcEditMode" onchange="fcRecalc()" style="display:none">
-        <div style="margin-left:auto;font-size:10.5px;color:var(--t3)">칩 클릭→카드 클릭 적용</div>
+        <div style="margin-left:auto;font-size:10.5px;color:var(--t3)">ì¹© í´ë¦­â†’ì¹´ë“œ í´ë¦­ ì ìš©</div>
       </div>
-      <!-- 행사 불러오기 -->
+      <!-- í–‰ì‚¬ ë¶ˆëŸ¬ì˜¤ê¸° -->
       <div class="ev-panel" id="evPanel">
         <div class="ev-hd" onclick="evToggle()">
           <div class="ev-hd-l">
-            <span class="ev-panel-title">🎉 행사 불러오기 (구글 시트 연동)</span>
+            <span class="ev-panel-title">ðŸŽ‰ í–‰ì‚¬ ë¶ˆëŸ¬ì˜¤ê¸° (êµ¬ê¸€ ì‹œíŠ¸ ì—°ë™)</span>
             <div class="ev-applied" id="evApplied"></div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-            <button class="btn no-print" onclick="event.stopPropagation();evLoadSheet()" id="evLoadBtn" style="padding:3px 10px;font-size:11px">🔄 시트 불러오기</button>
-            <span id="evArr" style="font-size:10px;color:var(--t4);transition:transform .2s">▼</span>
+            <button class="btn no-print" onclick="event.stopPropagation();evLoadSheet()" id="evLoadBtn" style="padding:3px 10px;font-size:11px">ðŸ”„ ì‹œíŠ¸ ë¶ˆëŸ¬ì˜¤ê¸°</button>
+            <span id="evArr" style="font-size:10px;color:var(--t4);transition:transform .2s">â–¼</span>
           </div>
         </div>
         <div class="ev-panel-body" id="evBody">
-          <div id="evSheetStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px">시트를 불러오면 실제 행사 목록이 표시됩니다.</div>
+          <div id="evSheetStatus" style="font-size:11px;color:var(--t3);margin-bottom:8px">ì‹œíŠ¸ë¥¼ ë¶ˆëŸ¬ì˜¤ë©´ ì‹¤ì œ í–‰ì‚¬ ëª©ë¡ì´ í‘œì‹œë©ë‹ˆë‹¤.</div>
           <div class="ev-row" id="evSelectRow" style="display:none">
-            <span class="ev-lbl">행사 선택</span>
+            <span class="ev-lbl">í–‰ì‚¬ ì„ íƒ</span>
             <select class="ev-sel" id="evSheetSel" onchange="evOnSheetSelect()" style="flex:1;max-width:360px">
-              <option value="">— 행사를 선택하세요 —</option>
+              <option value="">â€” í–‰ì‚¬ë¥¼ ì„ íƒí•˜ì„¸ìš” â€”</option>
             </select>
           </div>
-          <!-- 선택된 행사 상세 -->
+          <!-- ì„ íƒëœ í–‰ì‚¬ ìƒì„¸ -->
           <div id="evDetail" style="display:none">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0">
               <div style="background:var(--glass-bg-dark);border-radius:var(--r);padding:8px 10px">
-                <div style="font-size:10px;color:var(--t4);font-weight:600">행사 유형</div>
-                <div id="evDtType" style="font-size:13px;font-weight:700;margin-top:2px">—</div>
+                <div style="font-size:10px;color:var(--t4);font-weight:600">í–‰ì‚¬ ìœ í˜•</div>
+                <div id="evDtType" style="font-size:13px;font-weight:700;margin-top:2px">â€”</div>
               </div>
               <div style="background:var(--glass-bg-dark);border-radius:var(--r);padding:8px 10px">
-                <div style="font-size:10px;color:var(--t4);font-weight:600">기간</div>
-                <div id="evDtPeriod" style="font-size:12px;font-weight:700;margin-top:2px">—</div>
+                <div style="font-size:10px;color:var(--t4);font-weight:600">ê¸°ê°„</div>
+                <div id="evDtPeriod" style="font-size:12px;font-weight:700;margin-top:2px">â€”</div>
               </div>
             </div>
-            <div style="font-size:11px;color:var(--t3);margin-bottom:4px">적용 요일 <span id="evDtDays" style="font-size:11px"></span></div>
+            <div style="font-size:11px;color:var(--t3);margin-bottom:4px">ì ìš© ìš”ì¼ <span id="evDtDays" style="font-size:11px"></span></div>
             <div style="font-size:11px;color:var(--t3);font-weight:600;margin-bottom:5px">
-              행사 상품 &amp; 등급 <span style="font-weight:400;color:var(--t4)">(메인×1.5 · 서브대×1.2 · 서브소×1.1)</span>
+              í–‰ì‚¬ ìƒí’ˆ &amp; ë“±ê¸‰ <span style="font-weight:400;color:var(--t4)">(ë©”ì¸Ã—1.5 Â· ì„œë¸ŒëŒ€Ã—1.2 Â· ì„œë¸Œì†ŒÃ—1.1)</span>
             </div>
             <div class="ev-bgrp" id="evBGrid"></div>
             <div style="display:flex;gap:7px;margin-top:9px">
-              <button class="btn btn-p" onclick="evApply()" style="padding:5px 14px">✓ 행사 적용</button>
-              <button class="btn" onclick="evClear()" style="color:var(--red)">✕ 행사 초기화</button>
+              <button class="btn btn-p" onclick="evApply()" style="padding:5px 14px">âœ“ í–‰ì‚¬ ì ìš©</button>
+              <button class="btn" onclick="evClear()" style="color:var(--red)">âœ• í–‰ì‚¬ ì´ˆê¸°í™”</button>
             </div>
           </div>
-          <!-- fallback manual — REMOVED per request -->
+          <!-- fallback manual â€” REMOVED per request -->
         </div>
       </div>
       <!-- DAY CARDS -->
@@ -709,16 +709,16 @@ canvas{display:block}
       <!-- TABLE -->
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
-          <div class="card-title" style="margin:0" id="fcTableTitle">품목별 출고 예측</div>
+          <div class="card-title" style="margin:0" id="fcTableTitle">í’ˆëª©ë³„ ì¶œê³  ì˜ˆì¸¡</div>
           <div class="tab-row no-print">
-            <button class="tb on" onclick="fcSetGrp('all',this)">전체</button>
-            <button class="tb" onclick="fcSetGrp('yogurt',this)">요거트</button>
-            <button class="tb" onclick="fcSetGrp('topping',this)">토핑</button>
-            <button class="tb" onclick="fcSetGrp('drink',this)">마시는</button>
+            <button class="tb on" onclick="fcSetGrp('all',this)">ì „ì²´</button>
+            <button class="tb" onclick="fcSetGrp('yogurt',this)">ìš”ê±°íŠ¸</button>
+            <button class="tb" onclick="fcSetGrp('topping',this)">í† í•‘</button>
+            <button class="tb" onclick="fcSetGrp('drink',this)">ë§ˆì‹œëŠ”</button>
           </div>
         </div>
         <div class="fc-tbl-wrap" id="fcTableWrap">
-          <div class="empty"><div class="ico">📅</div><div>날짜를 선택하세요</div></div>
+          <div class="empty"><div class="ico">ðŸ“…</div><div>ë‚ ì§œë¥¼ ì„ íƒí•˜ì„¸ìš”</div></div>
         </div>
       </div>
     </div>
@@ -728,27 +728,27 @@ canvas{display:block}
 </main>
 
 <script>
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CONSTANTS & CONFIG
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 const SHEET_ID = '1Y5xDhV_6UcdNOtivYdkOO6bduYgdkNmB6_w4zfPXXQM';
 const GIDS = { fc:250741762, ac:1725354971, evInfo:611987186, evSid:598629104 };
 
 const TAG = {
-  'Y-P-00':'플','Y-S-00':'소','Y-V-A0':'알','Y-V-M0':'말','Y-V-L0':'라',
-  'Y-P-BR':'블','Y-P-AP':'애','Y-P-OG':'오','Y-S-CR':'크','Y-P-KK':'카',
-  'Y-P-PR':'푸','Y-S-CC':'초','D-P-S0':'마S','D-P-L0':'마L',
-  'T-3-BR':'블토','T-3-CR':'크토','T-3-CC':'초토','T-3-ST':'딸토','T-3-KK':'카토',
-  'T-1-HS':'꿀'
+  'Y-P-00':'í”Œ','Y-S-00':'ì†Œ','Y-V-A0':'ì•Œ','Y-V-M0':'ë§','Y-V-L0':'ë¼',
+  'Y-P-BR':'ë¸”','Y-P-AP':'ì• ','Y-P-OG':'ì˜¤','Y-S-CR':'í¬','Y-P-KK':'ì¹´',
+  'Y-P-PR':'í‘¸','Y-S-CC':'ì´ˆ','D-P-S0':'ë§ˆS','D-P-L0':'ë§ˆL',
+  'T-3-BR':'ë¸”í† ','T-3-CR':'í¬í† ','T-3-CC':'ì´ˆí† ','T-3-ST':'ë”¸í† ','T-3-KK':'ì¹´í† ',
+  'T-1-HS':'ê¿€'
 };
 const NAME = {
-  'Y-P-00':'플레인 100g','Y-S-00':'소프트 100g','Y-V-A0':'알룰로스 100g',
-  'Y-V-M0':'말차 100g','Y-V-L0':'카페라떼 100g','Y-P-BR':'블루베리 130g',
-  'Y-P-AP':'애플시나몬 130g','Y-P-OG':'오그래놀라 115g','Y-S-CR':'크리스피 120g',
-  'Y-P-KK':'카카오 120g','Y-P-PR':'푸룬 130g','Y-S-CC':'초코소보로 120g',
-  'D-P-S0':'마시는 750ml','D-P-L0':'마시는 1.8L',
-  'T-3-BR':'블루베리토핑','T-3-CR':'크리스피토핑','T-3-CC':'초코소보로토핑',
-  'T-3-ST':'딸기토핑','T-3-KK':'카카오토핑','T-1-HS':'꿀스틱'
+  'Y-P-00':'í”Œë ˆì¸ 100g','Y-S-00':'ì†Œí”„íŠ¸ 100g','Y-V-A0':'ì•Œë£°ë¡œìŠ¤ 100g',
+  'Y-V-M0':'ë§ì°¨ 100g','Y-V-L0':'ì¹´íŽ˜ë¼ë–¼ 100g','Y-P-BR':'ë¸”ë£¨ë² ë¦¬ 130g',
+  'Y-P-AP':'ì• í”Œì‹œë‚˜ëª¬ 130g','Y-P-OG':'ì˜¤ê·¸ëž˜ë†€ë¼ 115g','Y-S-CR':'í¬ë¦¬ìŠ¤í”¼ 120g',
+  'Y-P-KK':'ì¹´ì¹´ì˜¤ 120g','Y-P-PR':'í‘¸ë£¬ 130g','Y-S-CC':'ì´ˆì½”ì†Œë³´ë¡œ 120g',
+  'D-P-S0':'ë§ˆì‹œëŠ” 750ml','D-P-L0':'ë§ˆì‹œëŠ” 1.8L',
+  'T-3-BR':'ë¸”ë£¨ë² ë¦¬í† í•‘','T-3-CR':'í¬ë¦¬ìŠ¤í”¼í† í•‘','T-3-CC':'ì´ˆì½”ì†Œë³´ë¡œí† í•‘',
+  'T-3-ST':'ë”¸ê¸°í† í•‘','T-3-KK':'ì¹´ì¹´ì˜¤í† í•‘','T-1-HS':'ê¿€ìŠ¤í‹±'
 };
 const GRP = {
   'Y-P-00':'yogurt','Y-S-00':'yogurt','Y-V-A0':'yogurt','Y-V-M0':'yogurt','Y-V-L0':'yogurt',
@@ -757,28 +757,28 @@ const GRP = {
   'T-3-BR':'topping','T-3-CR':'topping','T-3-CC':'topping','T-3-ST':'topping','T-3-KK':'topping','T-1-HS':'topping'
 };
 const CODES = Object.keys(TAG);
-const DOWS = ['월','화','수','목','금'];
+const DOWS = ['ì›”','í™”','ìˆ˜','ëª©','ê¸ˆ'];
 
 let CFG = {
   X: 100,
-  dow: {'월':1.600,'화':1.200,'수':0.800,'목':0.800,'금':0.600},
+  dow: {'ì›”':1.600,'í™”':1.200,'ìˆ˜':0.800,'ëª©':0.800,'ê¸ˆ':0.600},
   item: {
     'Y-P-00':2.500,'Y-S-00':1.660,'Y-V-A0':0.360,'Y-V-M0':0.520,'Y-V-L0':0.400,
     'Y-P-BR':0.500,'Y-P-AP':0.360,'Y-P-OG':0.360,'Y-S-CR':0.360,'Y-P-KK':0.360,
     'Y-P-PR':0.180,'Y-S-CC':0,'D-P-S0':0.060,'D-P-L0':0.020,
     'T-3-BR':0.075,'T-3-CR':0.040,'T-3-CC':0.050,'T-3-ST':0.025,'T-3-KK':0.025,'T-1-HS':0.025
   },
-  promo: {'없음':1.000,'슈퍼적립':1.166,'+세일':1.250,'자체행사':1.360,'신상품런칭':1.800,'한입발견회':1.623,'푸드페스타':1.875,'오늘끝딜':3.249},
-  holiday: {'없음':1.000,'공휴일 전날':1.150,'공휴일 당일':0.787,'공휴일 다음날':0.800,'연휴 기간':0.787}
+  promo: {'ì—†ìŒ':1.000,'ìŠˆí¼ì ë¦½':1.166,'+ì„¸ì¼':1.250,'ìžì²´í–‰ì‚¬':1.360,'ì‹ ìƒí’ˆëŸ°ì¹­':1.800,'í•œìž…ë°œê²¬íšŒ':1.623,'í‘¸ë“œíŽ˜ìŠ¤íƒ€':1.875,'ì˜¤ëŠ˜ëë”œ':3.249},
+  holiday: {'ì—†ìŒ':1.000,'ê³µíœ´ì¼ ì „ë‚ ':1.150,'ê³µíœ´ì¼ ë‹¹ì¼':0.787,'ê³µíœ´ì¼ ë‹¤ìŒë‚ ':0.800,'ì—°íœ´ ê¸°ê°„':0.787}
 };
 
 let D = { fc:{}, ac:{}, dates:[], dateInfo:{}, loaded:false };
 let curGrp = 'all';
 let charts = {};
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // NAVIGATION
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function nav(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
@@ -793,9 +793,9 @@ function nav(id, el) {
   }
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // CSV FETCH & PARSE
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function parseCSVRow(line) {
   const cols = []; let f='', inQ=false;
   for (let i=0;i<line.length;i++) {
@@ -846,7 +846,7 @@ function parseSheetData(txt) {
     const dow=(dowRow[c]||'').trim();
     const m=mByC[c]||'';
     if (m && /^\d+$/.test(dn)) {
-      const pm=m.match(/(\d{4})년\s*(\d{1,2})월/);
+      const pm=m.match(/(\d{4})ë…„\s*(\d{1,2})ì›”/);
       if (pm) {
         const k=`${pm[1]}-${pm[2].padStart(2,'0')}-${dn.padStart(2,'0')}`;
         dateKeys.push(k);
@@ -875,13 +875,13 @@ function parseSheetData(txt) {
   return {items, dates:dateKeys.filter(Boolean), dinfo};
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // LOAD DATA
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 async function loadAll() {
   const btn=document.getElementById('loadBtn');
   btn.disabled=true;
-  btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> 로딩중...';
+  btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> ë¡œë”©ì¤‘...';
 
   try {
     const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=`;
@@ -909,12 +909,12 @@ async function loadAll() {
     // UI updates
     if (D.dates.length) {
       document.getElementById('dateRangeTxt').textContent = `${D.dates[0]} ~ ${D.dates[D.dates.length-1]}`;
-      document.getElementById('lastUpdTxt').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
+      document.getElementById('lastUpdTxt').textContent = 'ì—…ë°ì´íŠ¸: ' + new Date().toLocaleTimeString('ko-KR');
     }
 
     // Populate detail select
     const sel = document.getElementById('detailSel');
-    sel.innerHTML = '<option value="">품목 선택</option>';
+    sel.innerHTML = '<option value="">í’ˆëª© ì„ íƒ</option>';
     CODES.forEach(c => {
       const o=document.createElement('option');
       o.value=c; o.textContent=`${TAG[c]} ${NAME[c]}`;
@@ -925,21 +925,21 @@ async function loadAll() {
     renderCoeff();
 
   } catch(e) {
-    const msg = e.message||'알 수 없는 오류';
+    const msg = e.message||'ì•Œ ìˆ˜ ì—†ëŠ” ì˜¤ë¥˜';
     document.getElementById('ovTable').innerHTML =
-      `<div class="alert al-d">❌ 데이터 로드 실패: ${msg}<br><br>` +
-      `<b>CORS 오류</b>인 경우 GitHub Pages에서 실행하세요.<br>` +
-      `현재 URL: ${location.href}</div>`;
+      `<div class="alert al-d">âŒ ë°ì´í„° ë¡œë“œ ì‹¤íŒ¨: ${msg}<br><br>` +
+      `<b>CORS ì˜¤ë¥˜</b>ì¸ ê²½ìš° GitHub Pagesì—ì„œ ì‹¤í–‰í•˜ì„¸ìš”.<br>` +
+      `í˜„ìž¬ URL: ${location.href}</div>`;
     console.error(e);
   }
 
   btn.disabled=false;
-  btn.innerHTML='↻ 데이터 로드';
+  btn.innerHTML='â†» ë°ì´í„° ë¡œë“œ';
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // ERROR HELPERS
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function errSt(abs, pct) {
   const a=Math.abs(abs), p=Math.abs(pct);
   if (p>=25 && a>=10) return 'danger';
@@ -973,9 +973,9 @@ function filtDates() {
 
 function avg(arr) { return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null; }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // OVERVIEW
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function setGrp(g, el) {
   curGrp=g;
   el.closest('.tab-row').querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));
@@ -995,7 +995,7 @@ function renderOvStats() {
   const dates=filtDates();
   let d=0,w=0,ok=0;
   CODES.forEach(c=>{ const s=itemSummary(c,dates); if(!s.n) return; if(s.st==='danger')d++; else if(s.st==='warn')w++; else ok++; });
-  const bdays=dates.filter(dt=>!['토','일'].includes(getDow(dt))).length;
+  const bdays=dates.filter(dt=>!['í† ','ì¼'].includes(getDow(dt))).length;
   document.getElementById('sStat0').textContent=bdays||dates.length;
   document.getElementById('sStat1').textContent=d;
   document.getElementById('sStat2').textContent=w;
@@ -1012,18 +1012,18 @@ function renderOverviewTable() {
   sums.sort((a,b)=>Math.abs(b.aPct)-Math.abs(a.aPct));
 
   if (!sums.length) {
-    document.getElementById('ovTable').innerHTML='<div class="empty"><div class="ico">📭</div><div>해당 기간 데이터 없음</div></div>';
+    document.getElementById('ovTable').innerHTML='<div class="empty"><div class="ico">ðŸ“­</div><div>í•´ë‹¹ ê¸°ê°„ ë°ì´í„° ì—†ìŒ</div></div>';
     return;
   }
   let h=`<table><thead><tr>
-    <th>품목</th><th class="r">평균 fc</th><th class="r">평균 ac</th>
-    <th class="r">평균 오차</th><th class="r">오차율%</th><th class="r">일수</th><th>상태</th>
+    <th>í’ˆëª©</th><th class="r">í‰ê·  fc</th><th class="r">í‰ê·  ac</th>
+    <th class="r">í‰ê·  ì˜¤ì°¨</th><th class="r">ì˜¤ì°¨ìœ¨%</th><th class="r">ì¼ìˆ˜</th><th>ìƒíƒœ</th>
   </tr></thead><tbody>`;
   sums.forEach(s=>{
     const pc=(s.aPct>=0?'+':'')+s.aPct.toFixed(1)+'%';
     const df=(s.aDiff>=0?'+':'')+s.aDiff.toFixed(1);
     const ec=s.st==='danger'?'ed':s.st==='warn'?'ew':'eo';
-    const badge=s.st==='danger'?'<span class="badge bd">🔴 위험</span>':s.st==='warn'?'<span class="badge bw">🟡 주의</span>':'<span class="badge bo">🟢 정상</span>';
+    const badge=s.st==='danger'?'<span class="badge bd">ðŸ”´ ìœ„í—˜</span>':s.st==='warn'?'<span class="badge bw">ðŸŸ¡ ì£¼ì˜</span>':'<span class="badge bo">ðŸŸ¢ ì •ìƒ</span>';
     h+=`<tr onclick="jumpDetail('${s.code}')" style="cursor:pointer">
       <td><b style="color:var(--tx)">${TAG[s.code]}</b> <span style="color:var(--t3)">${NAME[s.code]}</span></td>
       <td class="r fc-c">${s.aFc.toFixed(1)}</td>
@@ -1052,8 +1052,8 @@ function renderErrBar() {
   charts.errBar=new Chart(document.getElementById('cErrBar').getContext('2d'),{
     type:'bar',
     data:{labels:lbls,datasets:[
-      {label:'예측 fc',data:fv,backgroundColor:'rgba(58,58,240,0.6)',borderRadius:3},
-      {label:'실제 ac',data:av,backgroundColor:'rgba(26,138,74,0.6)',borderRadius:3}
+      {label:'ì˜ˆì¸¡ fc',data:fv,backgroundColor:'rgba(58,58,240,0.6)',borderRadius:3},
+      {label:'ì‹¤ì œ ac',data:av,backgroundColor:'rgba(26,138,74,0.6)',borderRadius:3}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
@@ -1091,9 +1091,9 @@ function renderErrLine() {
   });
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // FACTORS
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderFactors() {
   if (!D.loaded) return;
   renderDowBars();
@@ -1123,7 +1123,7 @@ function renderDowBars() {
       <div class="dow-val" style="color:${col}">${v>=0?'+':''}${v.toFixed(1)}%</div>
     </div>`;
   });
-  document.getElementById('dowBars').innerHTML=h||'<div class="empty">데이터 없음</div>';
+  document.getElementById('dowBars').innerHTML=h||'<div class="empty">ë°ì´í„° ì—†ìŒ</div>';
 }
 
 function renderDowChart() {
@@ -1140,8 +1140,8 @@ function renderDowChart() {
   charts.dow=new Chart(document.getElementById('cDow').getContext('2d'),{
     type:'bar',
     data:{labels:DOWS,datasets:[
-      {label:'예측 fc 평균',data:DOWS.map(d=>+(avg(fcD[d])||0).toFixed(0)),backgroundColor:'rgba(58,58,240,0.6)',borderRadius:4},
-      {label:'실제 ac 평균',data:DOWS.map(d=>+(avg(acD[d])||0).toFixed(0)),backgroundColor:'rgba(26,138,74,0.6)',borderRadius:4}
+      {label:'ì˜ˆì¸¡ fc í‰ê· ',data:DOWS.map(d=>+(avg(fcD[d])||0).toFixed(0)),backgroundColor:'rgba(58,58,240,0.6)',borderRadius:4},
+      {label:'ì‹¤ì œ ac í‰ê· ',data:DOWS.map(d=>+(avg(acD[d])||0).toFixed(0)),backgroundColor:'rgba(26,138,74,0.6)',borderRadius:4}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
@@ -1163,13 +1163,13 @@ function renderHeatmap() {
       if (fc>0) data[c][dow].push((ac/fc-1)*100);
     });
   });
-  let h=`<table><thead><tr><th>품목</th>${DOWS.map(d=>`<th class="r">${d}</th>`).join('')}</tr></thead><tbody>`;
+  let h=`<table><thead><tr><th>í’ˆëª©</th>${DOWS.map(d=>`<th class="r">${d}</th>`).join('')}</tr></thead><tbody>`;
   CODES.forEach(c=>{
     const vals=DOWS.map(d=>avg(data[c][d]));
     if (vals.every(v=>v===null)) return;
     h+=`<tr><td><b>${TAG[c]}</b></td>`;
     vals.forEach(v=>{
-      if (v===null){h+='<td class="r" style="color:var(--t4)">—</td>';return;}
+      if (v===null){h+='<td class="r" style="color:var(--t4)">â€”</td>';return;}
       const s=v>=0?'+':'', cls=Math.abs(v)>20?(v>0?'hc-hot':'hc-cold'):'';
       h+=`<td class="r ${cls}">${s}${v.toFixed(0)}%</td>`;
     });
@@ -1179,9 +1179,9 @@ function renderHeatmap() {
   document.getElementById('heatmapDiv').innerHTML=h;
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // SUGGEST
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderSuggest() {
   if (!D.loaded) return;
   renderXSuggest();
@@ -1207,12 +1207,12 @@ function renderXSuggest() {
   const need=dp>=5;
   document.getElementById('xSuggestDiv').innerHTML=`
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 0">
-      <div><div style="font-size:11px;color:var(--t3)">현행 X</div><div style="font-size:30px;font-weight:700;color:var(--accent)">${CFG.X}</div></div>
-      <div><div style="font-size:11px;color:var(--t3)">데이터 기반 제안</div><div style="font-size:30px;font-weight:700;color:${need?'var(--orange)':'var(--green)'}">${sugX}</div></div>
+      <div><div style="font-size:11px;color:var(--t3)">í˜„í–‰ X</div><div style="font-size:30px;font-weight:700;color:var(--accent)">${CFG.X}</div></div>
+      <div><div style="font-size:11px;color:var(--t3)">ë°ì´í„° ê¸°ë°˜ ì œì•ˆ</div><div style="font-size:30px;font-weight:700;color:${need?'var(--orange)':'var(--green)'}">${sugX}</div></div>
     </div>
     <div style="font-size:11.5px;color:var(--t3);margin-top:6px">
-      일평균 실적: <b style="color:var(--tx)">${avgAc.toFixed(0)}개</b> ·
-      ${need?`<span style="color:var(--orange)">⚠️ ${diff>0?'+':''}${diff} 조정 권장</span>`:'<span style="color:var(--green)">✅ 현행 유지</span>'}
+      ì¼í‰ê·  ì‹¤ì : <b style="color:var(--tx)">${avgAc.toFixed(0)}ê°œ</b> Â·
+      ${need?`<span style="color:var(--orange)">âš ï¸ ${diff>0?'+':''}${diff} ì¡°ì • ê¶Œìž¥</span>`:'<span style="color:var(--green)">âœ… í˜„í–‰ ìœ ì§€</span>'}
     </div>`;
 }
 
@@ -1227,12 +1227,12 @@ function renderDowSuggest() {
   });
   const avgs={};DOWS.forEach(d=>avgs[d]=avg(acD[d])||0);
   const tot=DOWS.reduce((s,d)=>s+avgs[d],0)/DOWS.length;
-  let h=`<table><thead><tr><th>요일</th><th class="r">현행</th><th class="r">제안</th><th class="r">차이</th></tr></thead><tbody>`;
+  let h=`<table><thead><tr><th>ìš”ì¼</th><th class="r">í˜„í–‰</th><th class="r">ì œì•ˆ</th><th class="r">ì°¨ì´</th></tr></thead><tbody>`;
   DOWS.forEach(d=>{
     const cur=CFG.dow[d], sug=tot>0?+(avgs[d]/tot).toFixed(3):cur;
     const dp=cur?(sug-cur)/cur*100:0;
     const cls=Math.abs(dp)>=5?(dp>0?'style="color:var(--green);font-weight:600"':'style="color:var(--red);font-weight:600"'):'';
-    h+=`<tr><td>${d}</td><td class="r">${cur.toFixed(3)}×</td><td class="r">${sug.toFixed(3)}×</td><td class="r" ${cls}>${dp>=0?'+':''}${dp.toFixed(1)}%</td></tr>`;
+    h+=`<tr><td>${d}</td><td class="r">${cur.toFixed(3)}Ã—</td><td class="r">${sug.toFixed(3)}Ã—</td><td class="r" ${cls}>${dp>=0?'+':''}${dp.toFixed(1)}%</td></tr>`;
   });
   h+='</tbody></table>';
   document.getElementById('dowSuggestDiv').innerHTML=h;
@@ -1251,8 +1251,8 @@ function renderItemSuggest() {
   });
 
   let h=`<table><thead><tr>
-    <th>품목</th><th class="r">현행 계수</th><th class="r">제안 계수</th>
-    <th class="r">차이%</th><th class="r">N일</th><th>판단</th>
+    <th>í’ˆëª©</th><th class="r">í˜„í–‰ ê³„ìˆ˜</th><th class="r">ì œì•ˆ ê³„ìˆ˜</th>
+    <th class="r">ì°¨ì´%</th><th class="r">Nì¼</th><th>íŒë‹¨</th>
   </tr></thead><tbody>`;
 
   const alerts=[];
@@ -1261,21 +1261,21 @@ function renderItemSuggest() {
     const sug=avg(norm[c]);
     if (sug===null){
       h+=`<tr><td><b>${TAG[c]}</b> <span style="color:var(--t3)">${NAME[c]}</span></td>
-        <td class="r">${cur.toFixed(3)}×</td><td class="r" style="color:var(--t4)">—</td>
-        <td class="r" style="color:var(--t4)">—</td><td class="r" style="color:var(--t4)">0</td>
-        <td style="color:var(--t4)">데이터 없음</td></tr>`;
+        <td class="r">${cur.toFixed(3)}Ã—</td><td class="r" style="color:var(--t4)">â€”</td>
+        <td class="r" style="color:var(--t4)">â€”</td><td class="r" style="color:var(--t4)">0</td>
+        <td style="color:var(--t4)">ë°ì´í„° ì—†ìŒ</td></tr>`;
       return;
     }
     const dp=cur?(sug-cur)/cur*100:0;
     const n=norm[c].length;
     const big=Math.abs(dp)>=5;
     const col=big?(dp>0?'var(--green)':'var(--red)'):'var(--t2)';
-    const verdict=big?(dp>0?'<span class="badge bo">↑ 상향 권장</span>':'<span class="badge bd">↓ 하향 권장</span>'):'<span class="badge bo">✅ 유지</span>';
+    const verdict=big?(dp>0?'<span class="badge bo">â†‘ ìƒí–¥ ê¶Œìž¥</span>':'<span class="badge bd">â†“ í•˜í–¥ ê¶Œìž¥</span>'):'<span class="badge bo">âœ… ìœ ì§€</span>';
     if (Math.abs(dp)>=10) alerts.push({c,dp,cur,sug});
     h+=`<tr>
       <td><b>${TAG[c]}</b> <span style="color:var(--t3)">${NAME[c]}</span></td>
-      <td class="r" style="color:var(--accent)">${cur.toFixed(3)}×</td>
-      <td class="r" style="color:${col}">${sug.toFixed(3)}×</td>
+      <td class="r" style="color:var(--accent)">${cur.toFixed(3)}Ã—</td>
+      <td class="r" style="color:${col}">${sug.toFixed(3)}Ã—</td>
       <td class="r" style="color:${big?col:'var(--t2)'}${big?';font-weight:600':''}">${dp>=0?'+':''}${dp.toFixed(1)}%</td>
       <td class="r" style="color:var(--t3)">${n}</td>
       <td>${verdict}</td>
@@ -1286,16 +1286,16 @@ function renderItemSuggest() {
 
   let al='';
   if (alerts.length) {
-    al=`<div class="alert al-w">⚠️ <b>${alerts.length}개 품목</b> 현행 대비 ±10% 이상: ${alerts.map(a=>`${TAG[a.c]}(${(a.dp>=0?'+':'')+a.dp.toFixed(0)}%)`).join(', ')}</div>`;
+    al=`<div class="alert al-w">âš ï¸ <b>${alerts.length}ê°œ í’ˆëª©</b> í˜„í–‰ ëŒ€ë¹„ Â±10% ì´ìƒ: ${alerts.map(a=>`${TAG[a.c]}(${(a.dp>=0?'+':'')+a.dp.toFixed(0)}%)`).join(', ')}</div>`;
   } else {
-    al=`<div class="alert al-o">✅ 모든 품목 계수가 현행 대비 ±10% 이내입니다.</div>`;
+    al=`<div class="alert al-o">âœ… ëª¨ë“  í’ˆëª© ê³„ìˆ˜ê°€ í˜„í–‰ ëŒ€ë¹„ Â±10% ì´ë‚´ìž…ë‹ˆë‹¤.</div>`;
   }
   document.getElementById('suggestAlerts').innerHTML=al;
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // TREND
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function renderTrend() {
   if (!D.loaded) return;
   // Group by month
@@ -1324,14 +1324,14 @@ function renderTrend() {
 
   const fcAvg=months.map(m=>bym[m].days?+(bym[m].fc/bym[m].days).toFixed(0):0);
   const acAvg=months.map(m=>bym[m].days?+(bym[m].ac/bym[m].days).toFixed(0):0);
-  const lbl=months.map(m=>m.replace('-','년 ')+'월');
+  const lbl=months.map(m=>m.replace('-','ë…„ ')+'ì›”');
 
   if(charts.month) charts.month.destroy();
   charts.month=new Chart(document.getElementById('cMonth').getContext('2d'),{
     type:'bar',
     data:{labels:lbl,datasets:[
-      {label:'예측 fc 일평균',data:fcAvg,backgroundColor:'rgba(58,58,240,0.6)',borderRadius:5},
-      {label:'실제 ac 일평균',data:acAvg,backgroundColor:'rgba(26,138,74,0.6)',borderRadius:5,
+      {label:'ì˜ˆì¸¡ fc ì¼í‰ê· ',data:fcAvg,backgroundColor:'rgba(58,58,240,0.6)',borderRadius:5},
+      {label:'ì‹¤ì œ ac ì¼í‰ê· ',data:acAvg,backgroundColor:'rgba(26,138,74,0.6)',borderRadius:5,
        type:'line',tension:0.3,borderColor:'rgba(26,138,74,1)',fill:false,borderWidth:2,pointRadius:4}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
@@ -1373,7 +1373,7 @@ function renderTrend() {
   charts.mErr=new Chart(document.getElementById('cMonthErr').getContext('2d'),{
     type:'bar',
     data:{labels:lbl,datasets:[{
-      label:'오차율%',data:errPcts,
+      label:'ì˜¤ì°¨ìœ¨%',data:errPcts,
       backgroundColor:errPcts.map(v=>v>=0?'rgba(26,138,74,0.65)':'rgba(212,32,32,0.65)'),borderRadius:5
     }]},
     options:{responsive:true,maintainAspectRatio:false,
@@ -1385,23 +1385,23 @@ function renderTrend() {
   });
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // DETAIL
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function jumpDetail(code) {
   document.getElementById('detailSel').value=code;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   document.getElementById('page-detail').classList.add('on');
   // Find the detail nav item
-  document.querySelectorAll('.ni').forEach(n=>{if(n.textContent.trim().includes('품목 상세'))n.classList.add('on');});
+  document.querySelectorAll('.ni').forEach(n=>{if(n.textContent.trim().includes('í’ˆëª© ìƒì„¸'))n.classList.add('on');});
   renderDetail();
 }
 
 function renderDetail() {
   const code=document.getElementById('detailSel').value;
   if (!code||!D.loaded){
-    document.getElementById('detailContent').innerHTML='<div class="empty"><div class="ico">🔍</div><div>품목을 선택하세요</div></div>';
+    document.getElementById('detailContent').innerHTML='<div class="empty"><div class="ico">ðŸ”</div><div>í’ˆëª©ì„ ì„ íƒí•˜ì„¸ìš”</div></div>';
     return;
   }
   const s=itemSummary(code,D.dates);
@@ -1409,31 +1409,31 @@ function renderDetail() {
   const fcV=recent.map(d=>(D.fc[code]||{})[d]||0);
   const acV=recent.map(d=>(D.ac[code]||{})[d]||0);
   const errV=recent.map((_,i)=>fcV[i]>0?+((acV[i]/fcV[i]-1)*100).toFixed(1):null);
-  const badge=s.st==='danger'?'<span class="badge bd">🔴 위험</span>':s.st==='warn'?'<span class="badge bw">🟡 주의</span>':'<span class="badge bo">🟢 정상</span>';
+  const badge=s.st==='danger'?'<span class="badge bd">ðŸ”´ ìœ„í—˜</span>':s.st==='warn'?'<span class="badge bw">ðŸŸ¡ ì£¼ì˜</span>':'<span class="badge bo">ðŸŸ¢ ì •ìƒ</span>';
 
   let h=`<div class="stats-row mb12">
-    <div class="stat-card"><div class="sl">품목</div><div class="sv" style="font-size:18px">${TAG[code]}</div><div class="ss">${NAME[code]}</div></div>
-    <div class="stat-card"><div class="sl">평균 예측(fc)</div><div class="sv fc-c">${s.aFc.toFixed(1)}</div><div class="ss">${s.n}일 기준</div></div>
-    <div class="stat-card"><div class="sl">평균 실적(ac)</div><div class="sv ac-c">${s.aAc.toFixed(1)}</div><div class="ss">일평균</div></div>
-    <div class="stat-card"><div class="sl">평균 오차율</div>
+    <div class="stat-card"><div class="sl">í’ˆëª©</div><div class="sv" style="font-size:18px">${TAG[code]}</div><div class="ss">${NAME[code]}</div></div>
+    <div class="stat-card"><div class="sl">í‰ê·  ì˜ˆì¸¡(fc)</div><div class="sv fc-c">${s.aFc.toFixed(1)}</div><div class="ss">${s.n}ì¼ ê¸°ì¤€</div></div>
+    <div class="stat-card"><div class="sl">í‰ê·  ì‹¤ì (ac)</div><div class="sv ac-c">${s.aAc.toFixed(1)}</div><div class="ss">ì¼í‰ê· </div></div>
+    <div class="stat-card"><div class="sl">í‰ê·  ì˜¤ì°¨ìœ¨</div>
       <div class="sv" style="color:${s.st==='danger'?'var(--red)':s.st==='warn'?'var(--orange)':'var(--green)'}">${(s.aPct>=0?'+':'')+s.aPct.toFixed(1)}%</div>
       <div class="ss">${badge}</div></div>
   </div>
-  <div class="card mb12"><div class="card-title">일별 fc vs ac (최근 60일)</div>
+  <div class="card mb12"><div class="card-title">ì¼ë³„ fc vs ac (ìµœê·¼ 60ì¼)</div>
     <div style="position:relative;height:220px"><canvas id="cDetLine"></canvas></div></div>
-  <div class="card mb12"><div class="card-title">일별 오차율%</div>
+  <div class="card mb12"><div class="card-title">ì¼ë³„ ì˜¤ì°¨ìœ¨%</div>
     <div style="position:relative;height:150px"><canvas id="cDetErr"></canvas></div></div>
-  <div class="card"><div class="card-title">일별 상세 (최근 30일)</div><div class="tbl-wrap">
-    <table><thead><tr><th>날짜</th><th>요일</th><th class="r">fc</th><th class="r">ac</th><th class="r">오차</th><th class="r">오차율</th><th>상태</th></tr></thead><tbody>`;
+  <div class="card"><div class="card-title">ì¼ë³„ ìƒì„¸ (ìµœê·¼ 30ì¼)</div><div class="tbl-wrap">
+    <table><thead><tr><th>ë‚ ì§œ</th><th>ìš”ì¼</th><th class="r">fc</th><th class="r">ac</th><th class="r">ì˜¤ì°¨</th><th class="r">ì˜¤ì°¨ìœ¨</th><th>ìƒíƒœ</th></tr></thead><tbody>`;
 
   D.dates.slice(-30).reverse().forEach(dt=>{
     const fc=(D.fc[code]||{})[dt]||0, ac=(D.ac[code]||{})[dt]||0;
     if(fc===0&&ac===0) return;
     const diff=ac-fc, pct=fc>0?(diff/fc)*100:0;
     const st=errSt(diff,pct);
-    const sb=st==='danger'?'<span class="badge bd">🔴</span>':st==='warn'?'<span class="badge bw">🟡</span>':'<span class="badge bo">🟢</span>';
+    const sb=st==='danger'?'<span class="badge bd">ðŸ”´</span>':st==='warn'?'<span class="badge bw">ðŸŸ¡</span>':'<span class="badge bo">ðŸŸ¢</span>';
     const ec=st==='danger'?'ed':st==='warn'?'ew':'eo';
-    h+=`<tr><td>${dt}</td><td>${getDow(dt)||'—'}</td><td class="r fc-c">${fc}</td><td class="r ac-c">${ac}</td>
+    h+=`<tr><td>${dt}</td><td>${getDow(dt)||'â€”'}</td><td class="r fc-c">${fc}</td><td class="r ac-c">${ac}</td>
       <td class="r ${ec}">${diff>=0?'+':''}${diff}</td><td class="r ${ec}">${diff>=0?'+':''}${pct.toFixed(1)}%</td><td>${sb}</td></tr>`;
   });
   h+='</tbody></table></div></div>';
@@ -1445,8 +1445,8 @@ function renderDetail() {
     charts.detL=new Chart(document.getElementById('cDetLine').getContext('2d'),{
       type:'line',
       data:{labels:recent.map(d=>d.slice(5)),datasets:[
-        {label:'예측 fc',data:fcV,borderColor:'rgba(58,58,240,1)',backgroundColor:'rgba(58,58,240,0.07)',fill:true,tension:0.3,borderWidth:2,pointRadius:2},
-        {label:'실제 ac',data:acV,borderColor:'rgba(26,138,74,1)',fill:false,tension:0.3,borderWidth:2,pointRadius:2}
+        {label:'ì˜ˆì¸¡ fc',data:fcV,borderColor:'rgba(58,58,240,1)',backgroundColor:'rgba(58,58,240,0.07)',fill:true,tension:0.3,borderWidth:2,pointRadius:2},
+        {label:'ì‹¤ì œ ac',data:acV,borderColor:'rgba(26,138,74,1)',fill:false,tension:0.3,borderWidth:2,pointRadius:2}
       ]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
@@ -1459,7 +1459,7 @@ function renderDetail() {
     charts.detE=new Chart(document.getElementById('cDetErr').getContext('2d'),{
       type:'bar',
       data:{labels:recent.map(d=>d.slice(5)),datasets:[{
-        label:'오차율%',data:errV,
+        label:'ì˜¤ì°¨ìœ¨%',data:errV,
         backgroundColor:errV.map(v=>v===null?'transparent':v>=0?'rgba(26,138,74,0.6)':'rgba(212,32,32,0.6)'),
         borderRadius:2
       }]},
@@ -1473,9 +1473,9 @@ function renderDetail() {
   },50);
 }
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // COEFF
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 function doUpdateX() {
   const v=parseInt(document.getElementById('xInp').value)||100;
   CFG.X=v;
@@ -1490,8 +1490,8 @@ function renderCoeff() {
   let h='';
   DOWS.forEach(d=>{
     h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--glass-border-subtle)">
-      <span style="font-weight:600;color:var(--tx)">${d}요일</span>
-      <span style="color:var(--accent);font-weight:600">${CFG.dow[d].toFixed(3)}×</span>
+      <span style="font-weight:600;color:var(--tx)">${d}ìš”ì¼</span>
+      <span style="color:var(--accent);font-weight:600">${CFG.dow[d].toFixed(3)}Ã—</span>
     </div>`;
   });
   document.getElementById('dowCoeffDisp').innerHTML=h;
@@ -1503,11 +1503,11 @@ function renderCoeff() {
 function renderCrossTable() {
   const X=CFG.X;
   const grps=[
-    {label:'요거트',codes:CODES.filter(c=>GRP[c]==='yogurt')},
-    {label:'토핑',codes:CODES.filter(c=>GRP[c]==='topping')},
-    {label:'마시는',codes:CODES.filter(c=>GRP[c]==='drink')}
+    {label:'ìš”ê±°íŠ¸',codes:CODES.filter(c=>GRP[c]==='yogurt')},
+    {label:'í† í•‘',codes:CODES.filter(c=>GRP[c]==='topping')},
+    {label:'ë§ˆì‹œëŠ”',codes:CODES.filter(c=>GRP[c]==='drink')}
   ];
-  let h=`<table><thead><tr><th>태그</th><th>품목</th><th class="r">품목계수</th>${DOWS.map(d=>`<th class="r">${d}</th>`).join('')}<th class="r">주합</th></tr></thead><tbody>`;
+  let h=`<table><thead><tr><th>íƒœê·¸</th><th>í’ˆëª©</th><th class="r">í’ˆëª©ê³„ìˆ˜</th>${DOWS.map(d=>`<th class="r">${d}</th>`).join('')}<th class="r">ì£¼í•©</th></tr></thead><tbody>`;
   grps.forEach(g=>{
     h+=`<tr><td colspan="${3+DOWS.length+1}" style="background:var(--glass-bg-dark);color:var(--t3);font-size:10px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;padding:5px 10px">${g.label}</td></tr>`;
     g.codes.forEach(c=>{
@@ -1515,9 +1515,9 @@ function renderCrossTable() {
       const vals=DOWS.map(d=>Math.round(X*ic*CFG.dow[d]));
       const wk=vals.reduce((a,b)=>a+b,0);
       h+=`<tr><td><b>${TAG[c]}</b></td><td style="color:var(--t2)">${NAME[c]}</td>
-        <td class="r" style="color:var(--accent)">${ic.toFixed(3)}×</td>
-        ${vals.map(v=>`<td class="r">${v||'—'}</td>`).join('')}
-        <td class="r" style="font-weight:600">${wk||'—'}</td></tr>`;
+        <td class="r" style="color:var(--accent)">${ic.toFixed(3)}Ã—</td>
+        ${vals.map(v=>`<td class="r">${v||'â€”'}</td>`).join('')}
+        <td class="r" style="font-weight:600">${wk||'â€”'}</td></tr>`;
     });
   });
   h+='</tbody></table>';
@@ -1525,12 +1525,12 @@ function renderCrossTable() {
 }
 
 function renderPromoCoeff() {
-  const clrs={'없음':'var(--t2)','슈퍼적립':'var(--green)','+세일':'var(--pink)','자체행사':'var(--teal)','신상품런칭':'var(--accent)','한입발견회':'var(--purple)','푸드페스타':'var(--blue)','오늘끝딜':'var(--red)'};
+  const clrs={'ì—†ìŒ':'var(--t2)','ìŠˆí¼ì ë¦½':'var(--green)','+ì„¸ì¼':'var(--pink)','ìžì²´í–‰ì‚¬':'var(--teal)','ì‹ ìƒí’ˆëŸ°ì¹­':'var(--accent)','í•œìž…ë°œê²¬íšŒ':'var(--purple)','í‘¸ë“œíŽ˜ìŠ¤íƒ€':'var(--blue)','ì˜¤ëŠ˜ëë”œ':'var(--red)'};
   let h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
   Object.entries(CFG.promo).forEach(([nm,v])=>{
     h+=`<div style="padding:10px 12px;background:var(--glass-bg-dark);border-radius:var(--r);border:1px solid var(--glass-border-subtle)">
       <div style="font-size:11px;color:var(--t3);margin-bottom:4px">${nm}</div>
-      <div style="font-size:20px;font-weight:700;color:${clrs[nm]||'var(--tx)'}">${v.toFixed(3)}×</div>
+      <div style="font-size:20px;font-weight:700;color:${clrs[nm]||'var(--tx)'}">${v.toFixed(3)}Ã—</div>
     </div>`;
   });
   h+='</div>';
@@ -1543,59 +1543,59 @@ function renderHolCoeff() {
     const col=v>1?'var(--orange)':v<1?'var(--red)':'var(--t2)';
     h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--glass-border-subtle)">
       <span style="color:var(--t2)">${nm}</span>
-      <span style="font-weight:700;color:${col}">${v.toFixed(3)}×</span>
+      <span style="font-weight:700;color:${col}">${v.toFixed(3)}Ã—</span>
     </div>`;
   });
   document.getElementById('holCoeffDiv').innerHTML=h;
 }
 
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // WEEKLY FORECAST v4
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
-// ── Bundle definitions ────────────────────
+// â”€â”€ Bundle definitions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const BUNDLES = [
-  { id:'11186574097', name:'요6+토핑1', isMain:true,  comp:{'Y-P-00':6,'Y-S-00':6,'T-3-BR':1,'T-3-CR':1,'T-3-CC':1}, compDesc:'플or소×6 + 블토or크토or초토×1' },
-  { id:'10273725144', name:'체험 8종',  isMain:true,  comp:{'Y-P-00':1,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1,'Y-P-AP':1,'Y-P-OG':1,'Y-S-CR':1}, compDesc:'플·소·알·말·블·애·오·크 각×1' },
-  { id:'12863905642', name:'플4+요4',   isMain:true,  comp:{'Y-P-00':4,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1}, compDesc:'플×4 + 소·알·말·블 각×1' },
-  { id:'11809718890', name:'플4+4+블1', isMain:true,  comp:{'Y-P-00':8,'Y-P-BR':1}, compDesc:'플×8 + 블×1' },
-  { id:'10301450854', name:'소10+꿀10', isMain:true,  comp:{'Y-S-00':10,'T-1-HS':10}, compDesc:'소×10 + 꿀×10' },
-  { id:'11470622749', name:'알4+플4',   isMain:false, comp:{'Y-V-A0':4,'Y-P-00':4}, compDesc:'알×4 + 플×4' },
-  { id:'12409281824', name:'알5+플1',   isMain:false, comp:{'Y-V-A0':5,'Y-P-00':1}, compDesc:'알×5 + 플×1' },
-  { id:'11438362925', name:'오3+플3',   isMain:false, comp:{'Y-P-OG':3,'Y-P-00':3}, compDesc:'오×3 + 플×3' },
-  { id:'12580366413', name:'라5+플1',   isMain:false, comp:{'Y-V-L0':5,'Y-P-00':1}, compDesc:'라×5 + 플×1' },
-  { id:'7587925609',  name:'블5+소1',   isMain:false, comp:{'Y-P-BR':5,'Y-S-00':1}, compDesc:'블×5 + 소×1' },
-  { id:'12580546874', name:'말5+초토3', isMain:false, comp:{'Y-V-M0':5,'T-3-CC':1}, compDesc:'말×5 + 초토×1' },
-  { id:'12835060307', name:'플3+소3',   isMain:false, comp:{'Y-P-00':3,'Y-S-00':3}, compDesc:'플×3 + 소×3' },
-  { id:'12794215123', name:'푸3+플3',   isMain:false, comp:{'Y-P-PR':3,'Y-P-00':3}, compDesc:'푸×3 + 플×3' },
-  { id:'11838572943', name:'카4+플4',   isMain:false, comp:{'Y-P-KK':4,'Y-P-00':4}, compDesc:'카×4 + 플×4' },
-  { id:'12739207913', name:'푸5',        isMain:false, comp:{'Y-P-PR':5}, compDesc:'푸×5' },
-  { id:'10994518732', name:'토핑6+6',   isMain:false, comp:{'T-3-BR':2,'T-3-CR':2,'T-3-CC':2,'T-3-ST':1,'T-3-KK':1}, compDesc:'블토·크토·초토×2 + 딸토·카토×1' },
-  { id:'13049647929', name:'마S2+메이커',isMain:false, comp:{'D-P-S0':2}, compDesc:'마S×2 + 메이커×1' },
-  { id:'13049680413', name:'마S2+토핑6', isMain:false, comp:{'D-P-S0':2,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2}, compDesc:'마S×2 + 블토·크토·초토×2' },
-  { id:'12448492587', name:'[선물]6+6',  isMain:false, comp:{'Y-P-00':3,'Y-S-00':3,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2}, compDesc:'플·소×3 + 블토·크토·초토×2' },
-  { id:'12541261594', name:'말3+플3+초토',isMain:false,comp:{'Y-V-M0':3,'Y-P-00':3,'T-3-CC':1}, compDesc:'말×3 + 플×3 + 초토×1' },
+  { id:'11186574097', name:'ìš”6+í† í•‘1', isMain:true,  comp:{'Y-P-00':6,'Y-S-00':6,'T-3-BR':1,'T-3-CR':1,'T-3-CC':1}, compDesc:'í”Œorì†ŒÃ—6 + ë¸”í† orí¬í† orì´ˆí† Ã—1' },
+  { id:'10273725144', name:'ì²´í—˜ 8ì¢…',  isMain:true,  comp:{'Y-P-00':1,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1,'Y-P-AP':1,'Y-P-OG':1,'Y-S-CR':1}, compDesc:'í”ŒÂ·ì†ŒÂ·ì•ŒÂ·ë§Â·ë¸”Â·ì• Â·ì˜¤Â·í¬ ê°Ã—1' },
+  { id:'12863905642', name:'í”Œ4+ìš”4',   isMain:true,  comp:{'Y-P-00':4,'Y-S-00':1,'Y-V-A0':1,'Y-V-M0':1,'Y-P-BR':1}, compDesc:'í”ŒÃ—4 + ì†ŒÂ·ì•ŒÂ·ë§Â·ë¸” ê°Ã—1' },
+  { id:'11809718890', name:'í”Œ4+4+ë¸”1', isMain:true,  comp:{'Y-P-00':8,'Y-P-BR':1}, compDesc:'í”ŒÃ—8 + ë¸”Ã—1' },
+  { id:'10301450854', name:'ì†Œ10+ê¿€10', isMain:true,  comp:{'Y-S-00':10,'T-1-HS':10}, compDesc:'ì†ŒÃ—10 + ê¿€Ã—10' },
+  { id:'11470622749', name:'ì•Œ4+í”Œ4',   isMain:false, comp:{'Y-V-A0':4,'Y-P-00':4}, compDesc:'ì•ŒÃ—4 + í”ŒÃ—4' },
+  { id:'12409281824', name:'ì•Œ5+í”Œ1',   isMain:false, comp:{'Y-V-A0':5,'Y-P-00':1}, compDesc:'ì•ŒÃ—5 + í”ŒÃ—1' },
+  { id:'11438362925', name:'ì˜¤3+í”Œ3',   isMain:false, comp:{'Y-P-OG':3,'Y-P-00':3}, compDesc:'ì˜¤Ã—3 + í”ŒÃ—3' },
+  { id:'12580366413', name:'ë¼5+í”Œ1',   isMain:false, comp:{'Y-V-L0':5,'Y-P-00':1}, compDesc:'ë¼Ã—5 + í”ŒÃ—1' },
+  { id:'7587925609',  name:'ë¸”5+ì†Œ1',   isMain:false, comp:{'Y-P-BR':5,'Y-S-00':1}, compDesc:'ë¸”Ã—5 + ì†ŒÃ—1' },
+  { id:'12580546874', name:'ë§5+ì´ˆí† 3', isMain:false, comp:{'Y-V-M0':5,'T-3-CC':1}, compDesc:'ë§Ã—5 + ì´ˆí† Ã—1' },
+  { id:'12835060307', name:'í”Œ3+ì†Œ3',   isMain:false, comp:{'Y-P-00':3,'Y-S-00':3}, compDesc:'í”ŒÃ—3 + ì†ŒÃ—3' },
+  { id:'12794215123', name:'í‘¸3+í”Œ3',   isMain:false, comp:{'Y-P-PR':3,'Y-P-00':3}, compDesc:'í‘¸Ã—3 + í”ŒÃ—3' },
+  { id:'11838572943', name:'ì¹´4+í”Œ4',   isMain:false, comp:{'Y-P-KK':4,'Y-P-00':4}, compDesc:'ì¹´Ã—4 + í”ŒÃ—4' },
+  { id:'12739207913', name:'í‘¸5',        isMain:false, comp:{'Y-P-PR':5}, compDesc:'í‘¸Ã—5' },
+  { id:'10994518732', name:'í† í•‘6+6',   isMain:false, comp:{'T-3-BR':2,'T-3-CR':2,'T-3-CC':2,'T-3-ST':1,'T-3-KK':1}, compDesc:'ë¸”í† Â·í¬í† Â·ì´ˆí† Ã—2 + ë”¸í† Â·ì¹´í† Ã—1' },
+  { id:'13049647929', name:'ë§ˆS2+ë©”ì´ì»¤',isMain:false, comp:{'D-P-S0':2}, compDesc:'ë§ˆSÃ—2 + ë©”ì´ì»¤Ã—1' },
+  { id:'13049680413', name:'ë§ˆS2+í† í•‘6', isMain:false, comp:{'D-P-S0':2,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2}, compDesc:'ë§ˆSÃ—2 + ë¸”í† Â·í¬í† Â·ì´ˆí† Ã—2' },
+  { id:'12448492587', name:'[ì„ ë¬¼]6+6',  isMain:false, comp:{'Y-P-00':3,'Y-S-00':3,'T-3-BR':2,'T-3-CR':2,'T-3-CC':2}, compDesc:'í”ŒÂ·ì†ŒÃ—3 + ë¸”í† Â·í¬í† Â·ì´ˆí† Ã—2' },
+  { id:'12541261594', name:'ë§3+í”Œ3+ì´ˆí† ',isMain:false,comp:{'Y-V-M0':3,'Y-P-00':3,'T-3-CC':1}, compDesc:'ë§Ã—3 + í”ŒÃ—3 + ì´ˆí† Ã—1' },
 ];
 
 const FC_PROMO = {
-  '슈퍼적립':{v:1.166,c:'#1a8a4a',bg:'rgba(26,138,74,0.10)'},
-  '+세일':{v:1.250,c:'#c42878',bg:'rgba(196,40,120,0.10)'},
-  '자체행사':{v:1.360,c:'#0d7a6b',bg:'rgba(13,122,107,0.10)'},
-  '신상품런칭':{v:1.800,c:'#3a3af0',bg:'rgba(58,58,240,0.10)'},
-  '한입발견회':{v:1.623,c:'#6c35cc',bg:'rgba(108,53,204,0.10)'},
-  '푸드페스타':{v:1.875,c:'#1a56c8',bg:'rgba(26,86,200,0.10)'},
-  '오늘끝딜':{v:3.249,c:'#d42020',bg:'rgba(212,32,32,0.10)'},
+  'ìŠˆí¼ì ë¦½':{v:1.166,c:'#1a8a4a',bg:'rgba(26,138,74,0.10)'},
+  '+ì„¸ì¼':{v:1.250,c:'#c42878',bg:'rgba(196,40,120,0.10)'},
+  'ìžì²´í–‰ì‚¬':{v:1.360,c:'#0d7a6b',bg:'rgba(13,122,107,0.10)'},
+  'ì‹ ìƒí’ˆëŸ°ì¹­':{v:1.800,c:'#3a3af0',bg:'rgba(58,58,240,0.10)'},
+  'í•œìž…ë°œê²¬íšŒ':{v:1.623,c:'#6c35cc',bg:'rgba(108,53,204,0.10)'},
+  'í‘¸ë“œíŽ˜ìŠ¤íƒ€':{v:1.875,c:'#1a56c8',bg:'rgba(26,86,200,0.10)'},
+  'ì˜¤ëŠ˜ëë”œ':{v:3.249,c:'#d42020',bg:'rgba(212,32,32,0.10)'},
 };
 const FC_HOL = {
-  '공휴일 전날':{v:1.150,c:'#c45a10',bg:'rgba(196,90,16,0.10)'},
-  '공휴일 당일':{v:0.787,c:'#d42020',bg:'rgba(212,32,32,0.10)'},
-  '공휴일 다음날':{v:0.800,c:'#d42020',bg:'rgba(212,32,32,0.08)'},
-  '연휴 기간':{v:0.787,c:'#d42020',bg:'rgba(212,32,32,0.10)'},
+  'ê³µíœ´ì¼ ì „ë‚ ':{v:1.150,c:'#c45a10',bg:'rgba(196,90,16,0.10)'},
+  'ê³µíœ´ì¼ ë‹¹ì¼':{v:0.787,c:'#d42020',bg:'rgba(212,32,32,0.10)'},
+  'ê³µíœ´ì¼ ë‹¤ìŒë‚ ':{v:0.800,c:'#d42020',bg:'rgba(212,32,32,0.08)'},
+  'ì—°íœ´ ê¸°ê°„':{v:0.787,c:'#d42020',bg:'rgba(212,32,32,0.10)'},
 };
-const DOW_COLORS={'월':'#d42020','화':'#c45a10','수':'#3a3af0','목':'#1a56c8','금':'#1a8a4a'};
+const DOW_COLORS={'ì›”':'#d42020','í™”':'#c45a10','ìˆ˜':'#3a3af0','ëª©':'#1a56c8','ê¸ˆ':'#1a8a4a'};
 const DOW_CLS=['mon','tue','wed','thu','fri'];
-const DOW_KO=['월','화','수','목','금'];
+const DOW_KO=['ì›”','í™”','ìˆ˜','ëª©','ê¸ˆ'];
 
 let FC={
   monDate:null, days:[], bundles:{}, overrides:{}, grp:'all',
@@ -1607,7 +1607,7 @@ function dateStr(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(
 function getX(){return parseFloat(document.getElementById('fcX').value)||CFG.X;}
 function getGrow(){return parseFloat(document.getElementById('fcGrow').value)||1;}
 
-// ── Calc ──────────────────────────────────
+// â”€â”€ Calc â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fcCalcBundle(bid,dayIdx){
   const st=FC.bundles[bid]; if(!st||st.qty<=0) return 0;
   const day=FC.days[dayIdx];
@@ -1632,7 +1632,7 @@ function fcCalcItem(code,dayIdx){
 }
 function fcDayItemTotal(i){return CODES.reduce((s,c)=>s+fcCalcItem(c,i),0);}
 
-// fcRenderPalette: palette panel removed; chips are now in 참고 popup only
+// fcRenderPalette: palette panel removed; chips are now in ì°¸ê³  popup only
 function fcRenderPalette(){} // no-op
 function mkChip(key,info,type){
   const d=JSON.stringify({type,key});
@@ -1645,7 +1645,7 @@ function fcRenderPalette(){
     return`<span class="coeff-chip ref-chip" style="background:${c}15;color:${c};border-color:${c}30;cursor:default">${d}<span class="chip-m">\xd7${v.toFixed(3)}</span></span>`;
   }).join('');
   let ih='';['yogurt','topping','drink'].forEach(g=>{
-    ih+=`<span style="display:block;font-size:9px;color:var(--t4);font-weight:700;margin:5px 0 2px;text-transform:uppercase">{{${g}}}</span>`.replace('{{yogurt}}','요거트').replace('{{topping}}','토핑').replace('{{drink}}','마시는');
+    ih+=`<span style="display:block;font-size:9px;color:var(--t4);font-weight:700;margin:5px 0 2px;text-transform:uppercase">{{${g}}}</span>`.replace('{{yogurt}}','ìš”ê±°íŠ¸').replace('{{topping}}','í† í•‘').replace('{{drink}}','ë§ˆì‹œëŠ”');
     CODES.filter(c=>GRP[c]===g).forEach(c=>{
       ih+=`<span class="coeff-chip ref-chip" style="background:var(--glass-bg-dark);color:var(--t2);border-color:var(--glass-border-subtle);font-size:10px;cursor:default">${TAG[c]}<span class="chip-m">\xd7${(CFG.item[c]||0).toFixed(3)}</span></span>`;
     });
@@ -1653,7 +1653,7 @@ function fcRenderPalette(){
   document.getElementById('itemRefChips').innerHTML=ih;
 }
 
-// ── Drag + click chip ──────────────────────
+// â”€â”€ Drag + click chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let _dragData=null;
 function chipDragStart(e,el){
   _dragData=JSON.parse(el.dataset.chip);
@@ -1669,7 +1669,7 @@ function chipDragEnd(e,el){
   el.classList.remove('drag-src');_dragData=null;
   document.querySelectorAll('.dg-over,.chip-target').forEach(x=>{x.classList.remove('dg-over');x.classList.remove('chip-target');});
 }
-// Click chip → select (highlight valid targets). Click again → deselect.
+// Click chip â†’ select (highlight valid targets). Click again â†’ deselect.
 function chipClick(e,el){
   e.stopPropagation();
   const d=JSON.parse(el.dataset.chip);
@@ -1690,66 +1690,66 @@ function clearSelChip(){
   FC.selChip=null;
 }
 
-// ── Day Cards — 휴무 button ────────────────
-// 전날/다음날: 주말 건너뜀 (금요일 다음날 → 해당 주에 없음, 월요일 전날 → 해당 주에 없음)
-// 시각적으로 "이전 영업일" / "다음 영업일" 표시
+// â”€â”€ Day Cards â€” íœ´ë¬´ button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ì „ë‚ /ë‹¤ìŒë‚ : ì£¼ë§ ê±´ë„ˆëœ€ (ê¸ˆìš”ì¼ ë‹¤ìŒë‚  â†’ í•´ë‹¹ ì£¼ì— ì—†ìŒ, ì›”ìš”ì¼ ì „ë‚  â†’ í•´ë‹¹ ì£¼ì— ì—†ìŒ)
+// ì‹œê°ì ìœ¼ë¡œ "ì´ì „ ì˜ì—…ì¼" / "ë‹¤ìŒ ì˜ì—…ì¼" í‘œì‹œ
 function fcToggleHoliday(i){
   const day=FC.days[i];
-  if(day.holiday==='공휴일 당일'){
-    // 제거
+  if(day.holiday==='ê³µíœ´ì¼ ë‹¹ì¼'){
+    // ì œê±°
     day.holiday=null;
-    FC.days.forEach(d=>{if(d.holiday==='공휴일 전날'||d.holiday==='공휴일 다음날')d.holiday=null;});
+    FC.days.forEach(d=>{if(d.holiday==='ê³µíœ´ì¼ ì „ë‚ '||d.holiday==='ê³µíœ´ì¼ ë‹¤ìŒë‚ ')d.holiday=null;});
   } else {
-    // 기존 전날/다음날 제거 후 새로 설정
-    FC.days.forEach(d=>{if(d.holiday==='공휴일 전날'||d.holiday==='공휴일 다음날')d.holiday=null;});
-    day.holiday='공휴일 당일';
-    // 전날: i-1이 있으면 해당 영업일, 없으면 "이전 영업일(주외)" 표시용 플래그만
-    if(i>0) FC.days[i-1].holiday='공휴일 전날';
-    // 다음날: i+1이 있으면 해당 영업일
-    if(i<FC.days.length-1) FC.days[i+1].holiday='공휴일 다음날';
+    // ê¸°ì¡´ ì „ë‚ /ë‹¤ìŒë‚  ì œê±° í›„ ìƒˆë¡œ ì„¤ì •
+    FC.days.forEach(d=>{if(d.holiday==='ê³µíœ´ì¼ ì „ë‚ '||d.holiday==='ê³µíœ´ì¼ ë‹¤ìŒë‚ ')d.holiday=null;});
+    day.holiday='ê³µíœ´ì¼ ë‹¹ì¼';
+    // ì „ë‚ : i-1ì´ ìžˆìœ¼ë©´ í•´ë‹¹ ì˜ì—…ì¼, ì—†ìœ¼ë©´ "ì´ì „ ì˜ì—…ì¼(ì£¼ì™¸)" í‘œì‹œìš© í”Œëž˜ê·¸ë§Œ
+    if(i>0) FC.days[i-1].holiday='ê³µíœ´ì¼ ì „ë‚ ';
+    // ë‹¤ìŒë‚ : i+1ì´ ìžˆìœ¼ë©´ í•´ë‹¹ ì˜ì—…ì¼
+    if(i<FC.days.length-1) FC.days[i+1].holiday='ê³µíœ´ì¼ ë‹¤ìŒë‚ ';
   }
   fcRecalc();
 }
 
 function fcRenderDayCards(){
-  // 월요일 = i=0이면 전날은 이전 주 금요일 (주외) → 별도 표시
-  const monIsHol=FC.days.length>0&&FC.days[0].holiday==='공휴일 당일';
-  const friIsHol=FC.days.length>0&&FC.days[4].holiday==='공휴일 당일';
+  // ì›”ìš”ì¼ = i=0ì´ë©´ ì „ë‚ ì€ ì´ì „ ì£¼ ê¸ˆìš”ì¼ (ì£¼ì™¸) â†’ ë³„ë„ í‘œì‹œ
+  const monIsHol=FC.days.length>0&&FC.days[0].holiday==='ê³µíœ´ì¼ ë‹¹ì¼';
+  const friIsHol=FC.days.length>0&&FC.days[4].holiday==='ê³µíœ´ì¼ ë‹¹ì¼';
   let h='';
   FC.days.forEach((day,i)=>{
     const dc=CFG.dow[day.dow]||1;
     const hol=FC_HOL[day.holiday]||null;
     const hc=hol?hol.v:1;
     const dsum=fcDayItemTotal(i);
-    const isHolDay=day.holiday==='공휴일 당일';
+    const isHolDay=day.holiday==='ê³µíœ´ì¼ ë‹¹ì¼';
     const hasHol=!!day.holiday;
     const isOpen=day.open||false;
     // Holiday tag inline
     let holTag='';
     if(day.holiday){
       const hi=FC_HOL[day.holiday];
-      holTag=`<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:${hi.bg};color:${hi.c};font-weight:700;white-space:nowrap;flex-shrink:0">${day.holiday} �${hi.v.toFixed(3)}</span>`;
+      holTag=`<span style="font-size:8px;padding:1px 5px;border-radius:8px;background:${hi.bg};color:${hi.c};font-weight:700;white-space:nowrap;flex-shrink:0">${day.holiday} ×${hi.v.toFixed(3)}</span>`;
     }
     // Body detail
-    let body=`<div style="font-size:9.5px;color:var(--t4);margin:6px 0 3px">요일계수 ×${dc.toFixed(3)}</div>`;
+    let body=`<div style="font-size:9.5px;color:var(--t4);margin:6px 0 3px">ìš”ì¼ê³„ìˆ˜ Ã—${dc.toFixed(3)}</div>`;
     if(day.holiday){
       const hi=FC_HOL[day.holiday];
-      body+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${hi.bg};color:${hi.c};margin-bottom:3px">${day.holiday} ×${hi.v.toFixed(3)}</div>`;
+      body+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:3px 7px;border-radius:20px;font-size:10px;font-weight:700;background:${hi.bg};color:${hi.c};margin-bottom:3px">${day.holiday} Ã—${hi.v.toFixed(3)}</div>`;
     }
-    body+=`<div style="font-size:9.5px;color:var(--t2)">유효배율 <b style="color:${hc!==1?'var(--orange)':'var(--t2)'}">×${(dc*hc).toFixed(2)}</b></div>`;
+    body+=`<div style="font-size:9.5px;color:var(--t2)">ìœ íš¨ë°°ìœ¨ <b style="color:${hc!==1?'var(--orange)':'var(--t2)'}">Ã—${(dc*hc).toFixed(2)}</b></div>`;
     // Extra hints for edge days
-    if(i===0&&!FC.days[0].holiday&&(FC.days.length>1&&FC.days[1].holiday==='공휴일 당일')){
+    if(i===0&&!FC.days[0].holiday&&(FC.days.length>1&&FC.days[1].holiday==='ê³µíœ´ì¼ ë‹¹ì¼')){
       // Mon is "next day after holiday"? handled by FC.days[0].holiday already
     }
     if(i===0&&FC.days[0].holiday===null){
-      // Check if tue is holiday day — show "오늘은 공휴일 전날" note
+      // Check if tue is holiday day â€” show "ì˜¤ëŠ˜ì€ ê³µíœ´ì¼ ì „ë‚ " note
     }
     // Show out-of-week hints
-    if(i===0&&FC.days[0].holiday==='공휴일 당일'){
-      body+=`<div style="font-size:9px;color:var(--orange);margin-top:4px">📅 전날(금)도 공휴일 전날 ×1.150 적용됨 (이전주)</div>`;
+    if(i===0&&FC.days[0].holiday==='ê³µíœ´ì¼ ë‹¹ì¼'){
+      body+=`<div style="font-size:9px;color:var(--orange);margin-top:4px">ðŸ“… ì „ë‚ (ê¸ˆ)ë„ ê³µíœ´ì¼ ì „ë‚  Ã—1.150 ì ìš©ë¨ (ì´ì „ì£¼)</div>`;
     }
-    if(i===4&&FC.days[4].holiday==='공휴일 당일'){
-      body+=`<div style="font-size:9px;color:var(--orange);margin-top:4px">📅 다음날(월)도 공휴일 다음날 ×0.800 적용됨 (다음주)</div>`;
+    if(i===4&&FC.days[4].holiday==='ê³µíœ´ì¼ ë‹¹ì¼'){
+      body+=`<div style="font-size:9px;color:var(--orange);margin-top:4px">ðŸ“… ë‹¤ìŒë‚ (ì›”)ë„ ê³µíœ´ì¼ ë‹¤ìŒë‚  Ã—0.800 ì ìš©ë¨ (ë‹¤ìŒì£¼)</div>`;
     }
     h+=`<div class="fc-day-card${hasHol?' has-hol':''}${isOpen?' open':''}" id="fdc${i}">
       <div class="fdc-hd">
@@ -1759,11 +1759,11 @@ function fcRenderDayCards(){
           ${holTag}
         </div>
         <div class="fdc-right">
-          <span class="fdc-eff" style="color:${hc!==1?'var(--orange)':'var(--t3)'}">×${(dc*hc).toFixed(2)}</span>
+          <span class="fdc-eff" style="color:${hc!==1?'var(--orange)':'var(--t3)'}">Ã—${(dc*hc).toFixed(2)}</span>
           <button class="btn no-print" onclick="event.stopPropagation();fcToggleHoliday(${i})"
             style="padding:2px 6px;font-size:9px;white-space:nowrap;${isHolDay?'background:rgba(212,32,32,0.12);color:var(--red);border-color:rgba(212,32,32,0.4)':''}"
-            title="공휴일 당일 지정 → 전날 ×1.150 / 다음날 ×0.800 자동 적용">🏖${isHolDay?' 해제':' 휴무'}</button>
-          <span class="fdc-arr" onclick="fcDayToggle(${i})" style="cursor:pointer">▼</span>
+            title="ê³µíœ´ì¼ ë‹¹ì¼ ì§€ì • â†’ ì „ë‚  Ã—1.150 / ë‹¤ìŒë‚  Ã—0.800 ìžë™ ì ìš©">ðŸ–${isHolDay?' í•´ì œ':' íœ´ë¬´'}</button>
+          <span class="fdc-arr" onclick="fcDayToggle(${i})" style="cursor:pointer">â–¼</span>
         </div>
       </div>
       <div class="fdc-body">${body}</div>
@@ -1773,7 +1773,7 @@ function fcRenderDayCards(){
 }
 function fcDayToggle(i){FC.days[i].open=!FC.days[i].open;fcRenderDayCards();}
 
-// ── Bundle Cards — 5-per-row, click/drag target ─
+// â”€â”€ Bundle Cards â€” 5-per-row, click/drag target â”€
 function fcInitBundles(){BUNDLES.forEach(b=>{if(!FC.bundles[b.id])FC.bundles[b.id]={promo:null,rank:b.isMain?'main':'sub1',qty:0,open:false};});}
 function fbcToggle(bid,e){if(e)e.stopPropagation();if(FC.bundles[bid])FC.bundles[bid].open=!FC.bundles[bid].open;fcRenderBundleCards();}
 function fbcSetQty(bid,v){if(FC.bundles[bid]){FC.bundles[bid].qty=parseInt(v)||0;fcRenderBundleCards();fcUpdateTable();}}
@@ -1799,7 +1799,7 @@ function fbcDrop(e,bid){
     fcRenderBundleCards();fcUpdateTable();
   }
 }
-// Click card while chip is selected → apply
+// Click card while chip is selected â†’ apply
 function fbcCardClick(bid,e){
   if(!FC.selChip) return;
   e.stopPropagation();
@@ -1813,8 +1813,8 @@ function fbcCardClick(bid,e){
 function fcRenderBundleCards(){
   const mainB=BUNDLES.filter(b=>b.isMain), subB=BUNDLES.filter(b=>!b.isMain);
   document.getElementById('fcBundleCards').innerHTML=
-    renderBGroup('🔴 메인 상품 (행사 ×1.5 기본)',mainB)+
-    renderBGroup('🔵 서브 상품',subB);
+    renderBGroup('ðŸ”´ ë©”ì¸ ìƒí’ˆ (í–‰ì‚¬ Ã—1.5 ê¸°ë³¸)',mainB)+
+    renderBGroup('ðŸ”µ ì„œë¸Œ ìƒí’ˆ',subB);
   // Re-apply chip-target class if chip is selected
   if(FC.selChip&&FC.selChip.type==='promo'){
     document.querySelectorAll('.fc-bcard').forEach(c=>c.classList.add('chip-target'));
@@ -1830,49 +1830,49 @@ function renderBGroup(label,blist){
     const rm=st.rank==='main'?1.5:st.rank==='sub2'?1.1:1.2;
     const wkTot=FC.days.reduce((s,_,i)=>s+fcCalcBundle(b.id,i),0);
 
-    // Effective multiplier = X × dow × (promo if set) × hol × grow × rank_mult
+    // Effective multiplier = X Ã— dow Ã— (promo if set) Ã— hol Ã— grow Ã— rank_mult
     // Show globally applied coefficients in compact header
     const promoTag=pi
-      ?`<span class="fbc-ptag" style="background:${pi.bg};color:${pi.c}">${st.promo} ×${pi.v.toFixed(3)}</span>`
+      ?`<span class="fbc-ptag" style="background:${pi.bg};color:${pi.c}">${st.promo} Ã—${pi.v.toFixed(3)}</span>`
       :'';
     const rmColor=rm===1.5?'var(--red)':rm===1.1?'var(--blue)':'var(--orange)';
 
-    // ── Body (expanded) ──────────────────────
+    // â”€â”€ Body (expanded) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // 1. Item breakdown
-    let itemGrid=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:4px">품목별 구성 및 계수</div><div class="fbc-item-grid">`;
+    let itemGrid=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin-bottom:4px">í’ˆëª©ë³„ êµ¬ì„± ë° ê³„ìˆ˜</div><div class="fbc-item-grid">`;
     Object.entries(b.comp).forEach(([code,qty])=>{
       const ic=CFG.item[code]||0;
-      // For each day, effective per-unit = ic × dow × promo × hol × grow × rankMult
+      // For each day, effective per-unit = ic Ã— dow Ã— promo Ã— hol Ã— grow Ã— rankMult
       // Show a representative (Mon) value for quick reference
-      const repDow=CFG.dow['월']||1;
+      const repDow=CFG.dow['ì›”']||1;
       const pc=pi?pi.v:1;
       const repVal=Math.round(getX()*ic*repDow*pc*getGrow()*rm)*qty;
       itemGrid+=`<div class="fbc-item-cell">
         <span class="ic-tag" style="color:var(--accent)">${TAG[code]}</span>
-        <span class="ic-qty">×${qty}개</span>
-        <span class="ic-coeff">품목계수 ×${ic.toFixed(3)}</span>
-        <span class="ic-val" style="font-size:10px;color:var(--t3)">월 ~${repVal}</span>
+        <span class="ic-qty">Ã—${qty}ê°œ</span>
+        <span class="ic-coeff">í’ˆëª©ê³„ìˆ˜ Ã—${ic.toFixed(3)}</span>
+        <span class="ic-val" style="font-size:10px;color:var(--t3)">ì›” ~${repVal}</span>
       </div>`;
     });
     itemGrid+=`</div>`;
 
     // 2. Day breakdown
-    let dayBreak=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin:6px 0 3px">요일별 상품 판매수 (일 기준)</div><div class="fbc-days">`;
+    let dayBreak=`<div style="font-size:10px;color:var(--t3);font-weight:600;margin:6px 0 3px">ìš”ì¼ë³„ ìƒí’ˆ íŒë§¤ìˆ˜ (ì¼ ê¸°ì¤€)</div><div class="fbc-days">`;
     FC.days.forEach((day,i)=>{
       const bq=fcCalcBundle(b.id,i);
-      dayBreak+=`<div class="fbc-dc"><div class="dd" style="color:${DOW_COLORS[day.dow]};font-weight:700">${day.dow}</div><div class="dv">${bq||'—'}</div></div>`;
+      dayBreak+=`<div class="fbc-dc"><div class="dd" style="color:${DOW_COLORS[day.dow]};font-weight:700">${day.dow}</div><div class="dv">${bq||'â€”'}</div></div>`;
     });
     dayBreak+=`</div>`;
 
     // 3. Controls
     const ctrl=`<div class="fbc-inp-row">
-      <label>일 판매수</label>
+      <label>ì¼ íŒë§¤ìˆ˜</label>
       <input type="number" class="fn-inp" value="${st.qty}" min="0" max="9999" style="width:60px;color:var(--accent)" oninput="fbcSetQty('${b.id}',this.value)">
-      <label>등급</label>
+      <label>ë“±ê¸‰</label>
       <select class="ev-sel" onchange="fbcSetRank('${b.id}',this.value)" style="font-size:10.5px;padding:2px 5px">
-        <option value="main" ${st.rank==='main'?'selected':''}>메인 ×1.5</option>
-        <option value="sub1" ${st.rank==='sub1'?'selected':''}>서브대 ×1.2</option>
-        <option value="sub2" ${st.rank==='sub2'?'selected':''}>서브소 ×1.1</option>
+        <option value="main" ${st.rank==='main'?'selected':''}>ë©”ì¸ Ã—1.5</option>
+        <option value="sub1" ${st.rank==='sub1'?'selected':''}>ì„œë¸ŒëŒ€ Ã—1.2</option>
+        <option value="sub2" ${st.rank==='sub2'?'selected':''}>ì„œë¸Œì†Œ Ã—1.1</option>
       </select>
     </div>`;
 
@@ -1880,8 +1880,8 @@ function renderBGroup(label,blist){
     const dropZone=`<div class="fbc-drop" id="fbcDrop_${b.id}"
       ondragover="fbcDragOver(event,'${b.id}')" ondragleave="fbcDragLeave(event,'${b.id}')" ondrop="fbcDrop(event,'${b.id}')"
     >${pi
-      ?`🎉 ${st.promo} ×${pi.v.toFixed(3)} <span onclick="fbcRemovePromo('${b.id}',event)" style="cursor:pointer;opacity:.6;margin-left:5px">✕</span>`
-      :'🎉 행사계수 드롭 / 칩 선택 후 카드 클릭'}</div>`;
+      ?`ðŸŽ‰ ${st.promo} Ã—${pi.v.toFixed(3)} <span onclick="fbcRemovePromo('${b.id}',event)" style="cursor:pointer;opacity:.6;margin-left:5px">âœ•</span>`
+      :'ðŸŽ‰ í–‰ì‚¬ê³„ìˆ˜ ë“œë¡­ / ì¹© ì„ íƒ í›„ ì¹´ë“œ í´ë¦­'}</div>`;
 
     const body=itemGrid+dayBreak+ctrl+dropZone;
 
@@ -1894,14 +1894,14 @@ function renderBGroup(label,blist){
       <div class="fbc-hd" onclick="fbcToggle('${b.id}',event)">
         <div class="fbc-hd-top">
           <span class="fbc-name">${b.name}</span>
-          <span class="fbc-arr">▼</span>
+          <span class="fbc-arr">â–¼</span>
         </div>
         <div class="fbc-hd-row2">
           ${promoTag}
-          <span class="fbc-mult" style="color:${rmColor}">등급 ×${rm}</span>
-          ${st.qty>0?`<span style="font-size:9px;color:var(--t3)">일${st.qty}개</span>`:''}
+          <span class="fbc-mult" style="color:${rmColor}">ë“±ê¸‰ Ã—${rm}</span>
+          ${st.qty>0?`<span style="font-size:9px;color:var(--t3)">ì¼${st.qty}ê°œ</span>`:''}
         </div>
-        <span class="fbc-wk">${st.qty>0?wkTot.toLocaleString()+'개/주':'—'}</span>
+        <span class="fbc-wk">${st.qty>0?wkTot.toLocaleString()+'ê°œ/ì£¼':'â€”'}</span>
       </div>
       <div class="fbc-body" onclick="event.stopPropagation()">${body}</div>
     </div>`;
@@ -1916,31 +1916,31 @@ function fcUpdateTable(){
   fcUpdateTitle();
 }
 
-// ── Event sheet loading ────────────────────
+// â”€â”€ Event sheet loading â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let EV_RAW=[];
 async function evLoadSheet(){
   const btn=document.getElementById('evLoadBtn');
-  btn.disabled=true;btn.textContent='로딩중...';
-  document.getElementById('evSheetStatus').textContent='구글 시트에서 불러오는 중...';
+  btn.disabled=true;btn.textContent='ë¡œë”©ì¤‘...';
+  document.getElementById('evSheetStatus').textContent='êµ¬ê¸€ ì‹œíŠ¸ì—ì„œ ë¶ˆëŸ¬ì˜¤ëŠ” ì¤‘...';
   try{
     const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=`;
     const [evInfoTxt,evSidTxt]=await Promise.all([
-      fetch(base+GIDS.evInfo).then(r=>{if(!r.ok)throw new Error('행사정보 HTTP '+r.status);return r.text();}),
-      fetch(base+GIDS.evSid).then(r=>{if(!r.ok)throw new Error('행사SID HTTP '+r.status);return r.text();}),
+      fetch(base+GIDS.evInfo).then(r=>{if(!r.ok)throw new Error('í–‰ì‚¬ì •ë³´ HTTP '+r.status);return r.text();}),
+      fetch(base+GIDS.evSid).then(r=>{if(!r.ok)throw new Error('í–‰ì‚¬SID HTTP '+r.status);return r.text();}),
     ]);
-    // Parse SID table: each row = [행사명, SID1, SID2, ...]
+    // Parse SID table: each row = [í–‰ì‚¬ëª…, SID1, SID2, ...]
     const sidRows=parseCSV(evSidTxt).filter(r=>r[0]&&r[0].trim());
     const sidMap={};
     sidRows.forEach(r=>{const k=r[0].trim();sidMap[k]=(r.slice(1).map(s=>s.trim()).filter(Boolean));});
     // Parse event info
     const evRows=parseCSV(evInfoTxt);
-    if(evRows.length<2) throw new Error('행사정보 시트 데이터 없음');
+    if(evRows.length<2) throw new Error('í–‰ì‚¬ì •ë³´ ì‹œíŠ¸ ë°ì´í„° ì—†ìŒ');
     const hdr=evRows[0].map(c=>c.trim().toLowerCase());
     const ci=kws=>{const idx=hdr.findIndex(h=>kws.some(k=>h.includes(k)));return idx>=0?idx:null;};
-    const iName=ci(['행사명','이름','name']);
-    const iType=ci(['유형','type','행사유형','종류']);
-    const iStart=ci(['시작','start','from','시작일']);
-    const iEnd=ci(['종료','end','to','종료일','마감']);
+    const iName=ci(['í–‰ì‚¬ëª…','ì´ë¦„','name']);
+    const iType=ci(['ìœ í˜•','type','í–‰ì‚¬ìœ í˜•','ì¢…ë¥˜']);
+    const iStart=ci(['ì‹œìž‘','start','from','ì‹œìž‘ì¼']);
+    const iEnd=ci(['ì¢…ë£Œ','end','to','ì¢…ë£Œì¼','ë§ˆê°']);
     EV_RAW=evRows.slice(1).filter(r=>r.some(c=>c.trim())).map(r=>{
       const nm=(iName!==null?r[iName]:'').trim();
       const tp=(iType!==null?r[iType]:'').trim();
@@ -1949,7 +1949,7 @@ async function evLoadSheet(){
       return{name:nm,type:tp,start:st,end:en,sids:sidMap[nm]||[]};
     }).filter(e=>e.name);
     const sel=document.getElementById('evSheetSel');
-    sel.innerHTML='<option value="">— 행사를 선택하세요 —</option>';
+    sel.innerHTML='<option value="">â€” í–‰ì‚¬ë¥¼ ì„ íƒí•˜ì„¸ìš” â€”</option>';
     EV_RAW.forEach((ev,i)=>{
       const o=document.createElement('option');
       o.value=i;
@@ -1957,11 +1957,11 @@ async function evLoadSheet(){
       sel.appendChild(o);
     });
     document.getElementById('evSelectRow').style.display='flex';
-    document.getElementById('evSheetStatus').textContent=`\u2705 ${EV_RAW.length}개 행사 로드 완료`;
+    document.getElementById('evSheetStatus').textContent=`\u2705 ${EV_RAW.length}ê°œ í–‰ì‚¬ ë¡œë“œ ì™„ë£Œ`;
   }catch(err){
-    document.getElementById('evSheetStatus').innerHTML=`<span style="color:var(--red)">\u274c 로드 실패: ${err.message} (GitHub Pages 필요)</span>`;
+    document.getElementById('evSheetStatus').innerHTML=`<span style="color:var(--red)">\u274c ë¡œë“œ ì‹¤íŒ¨: ${err.message} (GitHub Pages í•„ìš”)</span>`;
   }
-  btn.disabled=false;btn.textContent='🔄 시트 불러오기';
+  btn.disabled=false;btn.textContent='ðŸ”„ ì‹œíŠ¸ ë¶ˆëŸ¬ì˜¤ê¸°';
 }
 function evOnSheetSelect(){
   const idx=parseInt(document.getElementById('evSheetSel').value);
@@ -1969,8 +1969,8 @@ function evOnSheetSelect(){
   const ev=EV_RAW[idx];if(!ev)return;
   const pi=FC_PROMO[ev.type]||null;
   const piC=pi?pi.c:'var(--t2)',piBg=pi?pi.bg:'var(--glass-bg-dark)';
-  document.getElementById('evDtType').innerHTML=`<span style="background:${piBg};color:${piC};padding:2px 8px;border-radius:20px;font-size:13px;font-weight:700">${ev.type||'—'}</span>`;
-  document.getElementById('evDtPeriod').textContent=ev.start?(ev.start+(ev.end&&ev.end!==ev.start?' ~ '+ev.end:'')):'기간 정보 없음';
+  document.getElementById('evDtType').innerHTML=`<span style="background:${piBg};color:${piC};padding:2px 8px;border-radius:20px;font-size:13px;font-weight:700">${ev.type||'â€”'}</span>`;
+  document.getElementById('evDtPeriod').textContent=ev.start?(ev.start+(ev.end&&ev.end!==ev.start?' ~ '+ev.end:'')):'ê¸°ê°„ ì •ë³´ ì—†ìŒ';
   // week day badges
   let dayBadges='';
   if(ev.start){
@@ -1978,7 +1978,7 @@ function evOnSheetSelect(){
     const eD=new Date((ev.end||ev.start).replace(/\./g,'-')+'T00:00:00');
     const active=FC.days.filter(d=>{const dt=new Date(d.date+'T00:00:00');return dt>=sD&&dt<=eD;});
     dayBadges=active.map(d=>`<span style="background:${DOW_COLORS[d.dow]}20;color:${DOW_COLORS[d.dow]};padding:1px 7px;border-radius:20px;font-weight:700;font-size:10.5px;margin:1px">${d.dow} ${d.date.slice(5)}</span>`).join('');
-    if(!dayBadges) dayBadges='<span style="color:var(--t4);font-size:11px">이번 주 해당 없음</span>';
+    if(!dayBadges) dayBadges='<span style="color:var(--t4);font-size:11px">ì´ë²ˆ ì£¼ í•´ë‹¹ ì—†ìŒ</span>';
   }
   document.getElementById('evDtDays').innerHTML=dayBadges;
   const matchedIds=new Set(ev.sids);
@@ -1988,9 +1988,9 @@ function evOnSheetSelect(){
     const st=FC.bundles[b.id]||{rank:b.isMain?'main':'sub1'};
     bGrid+=`<div class="ev-bi"><input type="checkbox" id="evb_${b.id}" ${matched?'checked':''}><span style="font-size:11px;font-weight:600">${b.name}</span>
       <select class="bi-rank" id="evr_${b.id}" style="font-size:10px">
-        <option value="main" ${st.rank==='main'?'selected':''}>메인</option>
-        <option value="sub1" ${st.rank==='sub1'?'selected':''}>서브대</option>
-        <option value="sub2" ${st.rank==='sub2'?'selected':''}>서브소</option>
+        <option value="main" ${st.rank==='main'?'selected':''}>ë©”ì¸</option>
+        <option value="sub1" ${st.rank==='sub1'?'selected':''}>ì„œë¸ŒëŒ€</option>
+        <option value="sub2" ${st.rank==='sub2'?'selected':''}>ì„œë¸Œì†Œ</option>
       </select></div>`;
   });
   document.getElementById('evBGrid').innerHTML=bGrid;
@@ -1998,8 +1998,8 @@ function evOnSheetSelect(){
 }
 function evApply(){
   const idx=parseInt(document.getElementById('evSheetSel').value);
-  if(isNaN(idx)){alert('행사를 선택하세요');return;}
-  const ev=EV_RAW[idx];if(!ev||!ev.type){alert('행사 유형 정보 없음');return;}
+  if(isNaN(idx)){alert('í–‰ì‚¬ë¥¼ ì„ íƒí•˜ì„¸ìš”');return;}
+  const ev=EV_RAW[idx];if(!ev||!ev.type){alert('í–‰ì‚¬ ìœ í˜• ì •ë³´ ì—†ìŒ');return;}
   BUNDLES.forEach(b=>{
     const cb=document.getElementById('evb_'+b.id);
     const rb=document.getElementById('evr_'+b.id);
@@ -2032,7 +2032,7 @@ function evClear(){
   fcRecalc();
 }
 
-// ── Week navigation ────────────────────────
+// â”€â”€ Week navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function fcSetWeek(mon){
   FC.monDate=mon;document.getElementById('fcMonDate').value=dateStr(mon);
   FC.days=DOW_KO.map((dow,i)=>{const d=new Date(mon);d.setDate(mon.getDate()+i);return{date:dateStr(d),dow,holiday:null,open:false};});
@@ -2047,7 +2047,7 @@ function fcResetAll(){
   FC.overrides={};clearSelChip();document.getElementById('evApplied').innerHTML='';fcRecalc();
 }
 
-// ── Table ──────────────────────────────────
+// â”€â”€ Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let fcCurGrp='all';
 function fcSetGrp(g,el){fcCurGrp=g;el.closest('.tab-row').querySelectorAll('.tb').forEach(b=>b.classList.remove('on'));el.classList.add('on');fcRenderTable();}
 function fcRenderTable(){
@@ -2059,9 +2059,9 @@ function fcRenderTable(){
     const holTag=d.holiday?`<br><span style="font-size:8px;background:${FC_HOL[d.holiday].bg};color:${FC_HOL[d.holiday].c};padding:1px 4px;border-radius:8px;font-weight:700">${d.holiday}</span>`:'';
     return`<th class="r" style="min-width:56px"><div style="color:${DOW_COLORS[d.dow]};font-weight:800;font-size:12px">${d.dow}</div><div style="font-size:9px;color:var(--t3)">${d.date.slice(5)}</div><div style="font-size:9px;color:var(--t4)">\xd7${(dc*hc).toFixed(2)}</div>${holTag}</th>`;
   }).join('');
-  let h=`<table class="fc-tbl"><thead><tr><th style="text-align:left;min-width:140px">품목</th>${hdCols}<th class="r">주합</th></tr></thead><tbody>`;
+  let h=`<table class="fc-tbl"><thead><tr><th style="text-align:left;min-width:140px">í’ˆëª©</th>${hdCols}<th class="r">ì£¼í•©</th></tr></thead><tbody>`;
   const dayTots=FC.days.map(()=>0);
-  const grps=[{label:'요거트',codes:codes.filter(c=>GRP[c]==='yogurt')},{label:'토핑',codes:codes.filter(c=>GRP[c]==='topping')},{label:'마시는',codes:codes.filter(c=>GRP[c]==='drink')}].filter(g=>g.codes.length);
+  const grps=[{label:'ìš”ê±°íŠ¸',codes:codes.filter(c=>GRP[c]==='yogurt')},{label:'í† í•‘',codes:codes.filter(c=>GRP[c]==='topping')},{label:'ë§ˆì‹œëŠ”',codes:codes.filter(c=>GRP[c]==='drink')}].filter(g=>g.codes.length);
   grps.forEach(g=>{
     h+=`<tr class="grp-row"><td colspan="${FC.days.length+2}">${g.label}</td></tr>`;
     const gT=FC.days.map(()=>0);let gW=0;
@@ -2071,38 +2071,38 @@ function fcRenderTable(){
         const v=fcCalcItem(code,i);wk+=v;gT[i]+=v;dayTots[i]+=v;
         const ok=code+'-'+FC.days[i].date,isOv=FC.overrides[ok]!==undefined;
         if(edit)return`<td class="r"><input class="edit-inp${isOv?' ov':''}" type="number" value="${v}" data-key="${ok}" oninput="fcOverride(this)" min="0"></td>`;
-        return`<td class="r" style="font-weight:${v?600:400};color:${isOv?'var(--orange)':v?'var(--tx)':'var(--t4)'};font-variant-numeric:tabular-nums">${v||'—'}</td>`;
+        return`<td class="r" style="font-weight:${v?600:400};color:${isOv?'var(--orange)':v?'var(--tx)':'var(--t4)'};font-variant-numeric:tabular-nums">${v||'â€”'}</td>`;
       });
       gW+=wk;const ic=CFG.item[code]||0;
-      h+=`<tr><td><b>${TAG[code]}</b><span style="color:var(--t4);font-size:9.5px;margin-left:3px">\xd7${ic.toFixed(3)}</span><span style="color:var(--t3);font-size:10.5px;margin-left:5px">${NAME[code]}</span></td>${cells.join('')}<td class="r" style="font-weight:700;color:var(--accent)">${wk||'—'}</td></tr>`;
+      h+=`<tr><td><b>${TAG[code]}</b><span style="color:var(--t4);font-size:9.5px;margin-left:3px">\xd7${ic.toFixed(3)}</span><span style="color:var(--t3);font-size:10.5px;margin-left:5px">${NAME[code]}</span></td>${cells.join('')}<td class="r" style="font-weight:700;color:var(--accent)">${wk||'â€”'}</td></tr>`;
     });
-    if(grps.length>1)h+=`<tr class="subtotal-row"><td>${g.label} 합계</td>${gT.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${gW.toLocaleString()}</td></tr>`;
+    if(grps.length>1)h+=`<tr class="subtotal-row"><td>${g.label} í•©ê³„</td>${gT.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${gW.toLocaleString()}</td></tr>`;
   });
   const grand=dayTots.reduce((a,b)=>a+b,0);
-  h+=`<tr class="total-row"><td>전체 합계</td>${dayTots.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${grand.toLocaleString()}</td></tr></tbody></table>`;
+  h+=`<tr class="total-row"><td>ì „ì²´ í•©ê³„</td>${dayTots.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${grand.toLocaleString()}</td></tr></tbody></table>`;
   document.getElementById('fcTableWrap').innerHTML=h;
 }
 function fcOverride(inp){const v=parseInt(inp.value);if(!isNaN(v)&&v>=0){FC.overrides[inp.dataset.key]=v;inp.classList.add('ov');fcUpdateSummary();}}
 function fcUpdateSummary(){
-  // Summary row was removed — keep IDs in DOM but only update if elements exist
+  // Summary row was removed â€” keep IDs in DOM but only update if elements exist
   let tot=0,yog=0,top=0,drk=0;
   CODES.forEach(c=>FC.days.forEach((_,i)=>{const v=fcCalcItem(c,i);tot+=v;if(GRP[c]==='yogurt')yog+=v;if(GRP[c]==='topping')top+=v;if(GRP[c]==='drink')drk+=v;}));
   ['fsTot','fsAvg','fsYog','fsTop','fsDrk'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='';});
 }
-function fcUpdateTitle(){if(!FC.days.length)return;const el=document.getElementById('fcTableTitle');if(el)el.textContent=`품목별 출고 예측 — ${FC.days[0].date} ~ ${FC.days[4].date}`;}
+function fcUpdateTitle(){if(!FC.days.length)return;const el=document.getElementById('fcTableTitle');if(el)el.textContent=`í’ˆëª©ë³„ ì¶œê³  ì˜ˆì¸¡ â€” ${FC.days[0].date} ~ ${FC.days[4].date}`;}
 function fcRecalc(){
   if(!FC.days.length)return;
   fcRenderDayCards();fcRenderBundleCards();fcRenderTable();fcUpdateTitle();
 }
 
-// ── 참고 팝업 ──────────────────────────────
-// 계수 최신 업데이트 날짜 (인수인계 기준: 2026-03-26)
+// â”€â”€ ì°¸ê³  íŒì—… â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ê³„ìˆ˜ ìµœì‹  ì—…ë°ì´íŠ¸ ë‚ ì§œ (ì¸ìˆ˜ì¸ê³„ ê¸°ì¤€: 2026-03-26)
 const COEFF_UPDATED = '2026-03-26';
 
 function fcShowRef(){
   // Last updated
   const lud=document.getElementById('refLastUpdated');
-  if(lud) lud.innerHTML=`<span style="color:var(--t4)">계수 최종 업데이트: </span><b style="color:var(--t2)">${COEFF_UPDATED}</b> <span style="color:var(--t4);font-size:9.5px">(인수인계 v3 기준 — X=100, 2월 기준물량)</span>`;
+  if(lud) lud.innerHTML=`<span style="color:var(--t4)">ê³„ìˆ˜ ìµœì¢… ì—…ë°ì´íŠ¸: </span><b style="color:var(--t2)">${COEFF_UPDATED}</b> <span style="color:var(--t4);font-size:9.5px">(ì¸ìˆ˜ì¸ê³„ v3 ê¸°ì¤€ â€” X=100, 2ì›” ê¸°ì¤€ë¬¼ëŸ‰)</span>`;
 
   const refDow=document.getElementById('refDowChips');
   const refPromo=document.getElementById('refPromoChips');
@@ -2110,21 +2110,21 @@ function fcShowRef(){
   const refItem=document.getElementById('refItemTable');
   if(refDow) refDow.innerHTML=DOW_KO.map(d=>{
     const v=CFG.dow[d],c=DOW_COLORS[d];
-    return`<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${c}15;color:${c};border:1.5px solid ${c}30">${d}<span style="font-size:9.5px;opacity:.7">×${v.toFixed(3)}</span></span>`;
+    return`<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${c}15;color:${c};border:1.5px solid ${c}30">${d}<span style="font-size:9.5px;opacity:.7">Ã—${v.toFixed(3)}</span></span>`;
   }).join('');
   if(refPromo) refPromo.innerHTML=Object.entries(FC_PROMO).map(([k,v])=>
-    `<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${v.bg};color:${v.c};border:1.5px solid ${v.c}33">${k}<span style="font-size:9.5px;opacity:.7">×${v.v.toFixed(3)}</span></span>`
+    `<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${v.bg};color:${v.c};border:1.5px solid ${v.c}33">${k}<span style="font-size:9.5px;opacity:.7">Ã—${v.v.toFixed(3)}</span></span>`
   ).join('');
   if(refHol) refHol.innerHTML=Object.entries(FC_HOL).map(([k,v])=>
-    `<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${v.bg};color:${v.c};border:1.5px solid ${v.c}33">${k}<span style="font-size:9.5px;opacity:.7">×${v.v.toFixed(3)}</span></span>`
+    `<span style="display:inline-flex;align-items:center;gap:3px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:${v.bg};color:${v.c};border:1.5px solid ${v.c}33">${k}<span style="font-size:9.5px;opacity:.7">Ã—${v.v.toFixed(3)}</span></span>`
   ).join('');
   if(refItem){
-    const grps=[{l:'요거트',cs:CODES.filter(c=>GRP[c]==='yogurt')},{l:'토핑',cs:CODES.filter(c=>GRP[c]==='topping')},{l:'마시는',cs:CODES.filter(c=>GRP[c]==='drink')}];
+    const grps=[{l:'ìš”ê±°íŠ¸',cs:CODES.filter(c=>GRP[c]==='yogurt')},{l:'í† í•‘',cs:CODES.filter(c=>GRP[c]==='topping')},{l:'ë§ˆì‹œëŠ”',cs:CODES.filter(c=>GRP[c]==='drink')}];
     let th=`<table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr>
-      <th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:var(--t3);font-weight:600">품목</th>
-      <th style="text-align:right;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:var(--t3)">품목계수</th>
+      <th style="text-align:left;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:var(--t3);font-weight:600">í’ˆëª©</th>
+      <th style="text-align:right;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:var(--t3)">í’ˆëª©ê³„ìˆ˜</th>
       ${DOW_KO.map(d=>`<th style="text-align:right;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:${DOW_COLORS[d]};font-weight:700">${d}</th>`).join('')}
-      <th style="text-align:right;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:var(--t3)">주합</th>
+      <th style="text-align:right;padding:4px 8px;border-bottom:1px solid var(--glass-border-subtle);color:var(--t3)">ì£¼í•©</th>
     </tr></thead><tbody>`;
     grps.forEach(g=>{
       th+=`<tr><td colspan="${3+DOW_KO.length}" style="background:var(--glass-bg-dark);color:var(--t3);font-size:9.5px;font-weight:700;text-transform:uppercase;padding:3px 8px;letter-spacing:.5px">${g.l}</td></tr>`;
@@ -2134,9 +2134,9 @@ function fcShowRef(){
         const wk=vals.reduce((a,b)=>a+b,0);
         th+=`<tr style="border-bottom:1px solid var(--glass-border-subtle)">
           <td style="padding:4px 8px"><b style="color:var(--accent)">${TAG[c]}</b> <span style="color:var(--t3)">${NAME[c]}</span></td>
-          <td style="text-align:right;padding:4px 8px;color:var(--t4)">×${ic.toFixed(3)}</td>
-          ${vals.map(v=>`<td style="text-align:right;padding:4px 8px;font-variant-numeric:tabular-nums;font-weight:600">${v||'—'}</td>`).join('')}
-          <td style="text-align:right;padding:4px 8px;font-weight:700;color:var(--accent)">${wk||'—'}</td>
+          <td style="text-align:right;padding:4px 8px;color:var(--t4)">Ã—${ic.toFixed(3)}</td>
+          ${vals.map(v=>`<td style="text-align:right;padding:4px 8px;font-variant-numeric:tabular-nums;font-weight:600">${v||'â€”'}</td>`).join('')}
+          <td style="text-align:right;padding:4px 8px;font-weight:700;color:var(--accent)">${wk||'â€”'}</td>
         </tr>`;
       });
     });
@@ -2147,28 +2147,28 @@ function fcShowRef(){
 }
 function fcHideRef(){document.getElementById('fcRefModal').style.display='none';}
 
-// ── 편집 모드 토글 — 기본값: 고정(🔒) ───────
+// â”€â”€ íŽ¸ì§‘ ëª¨ë“œ í† ê¸€ â€” ê¸°ë³¸ê°’: ê³ ì •(ðŸ”’) â”€â”€â”€â”€â”€â”€â”€
 function fcToggleEdit(){
   const cb=document.getElementById('fcEditMode');
   const btn=document.getElementById('fcEditBtn');
   const lbl=document.getElementById('fcEditLbl');
   cb.checked=!cb.checked;
   if(cb.checked){
-    // 편집 ON
-    btn.innerHTML='✏️<span id="fcEditLbl" style="font-size:9.5px;margin-left:3px;color:var(--accent)">편집</span>';
+    // íŽ¸ì§‘ ON
+    btn.innerHTML='âœï¸<span id="fcEditLbl" style="font-size:9.5px;margin-left:3px;color:var(--accent)">íŽ¸ì§‘</span>';
     btn.style.background='rgba(58,58,240,0.10)';
     btn.style.borderColor='rgba(58,58,240,0.45)';
-    btn.setAttribute('title','편집 모드 ON — 클릭하여 고정');
+    btn.setAttribute('title','íŽ¸ì§‘ ëª¨ë“œ ON â€” í´ë¦­í•˜ì—¬ ê³ ì •');
   } else {
-    // 고정 ON
-    btn.innerHTML='🔒<span id="fcEditLbl" style="font-size:9.5px;margin-left:3px;color:var(--t3)">고정</span>';
+    // ê³ ì • ON
+    btn.innerHTML='ðŸ”’<span id="fcEditLbl" style="font-size:9.5px;margin-left:3px;color:var(--t3)">ê³ ì •</span>';
     btn.style.background='';btn.style.borderColor='';
-    btn.setAttribute('title','셀 직접 편집 모드');
+    btn.setAttribute('title','ì…€ ì§ì ‘ íŽ¸ì§‘ ëª¨ë“œ');
   }
   fcRecalc();
 }
 
-// ── Init ──────────────────────────────────
+// â”€â”€ Init â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 (function initForecast(){
   fcRenderPalette();fcInitBundles();
   const mon=fcMonday(new Date());FC.monDate=mon;
@@ -2177,7 +2177,7 @@ function fcToggleEdit(){
   fcRecalc();
 })();
 
-// ════════════════════════════════════════
+// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 // Init
 renderCoeff();
 </script>
