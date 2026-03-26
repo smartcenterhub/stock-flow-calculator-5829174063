@@ -794,9 +794,37 @@ function nav(id, el) {
 }
 
 // ════════════════════════════════════════
-// CSV FETCH & PARSE
+// CSV FETCH — Apps Script proxy (CORS-free)
 // ════════════════════════════════════════
+// Apps Script가 같은 스프레드시트에서 CSV를 반환해줌 → CORS 문제 없음
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbworflKoEjhTLwbHY0XEZRYmjMHYwsy_HMsA1wofFaYbj0IL5Fmq7VXt6B-52G5Oc3Eqw/exec';
+
+async function fetchCsvByGid(gid) {
+  // 방법 1: Apps Script proxy (항상 사용 — CORS 문제 없음)
+  const proxyUrl = `${APPS_SCRIPT_URL}?action=getCsv&gid=${gid}&id=${SHEET_ID}`;
+  try {
+    const r = await fetch(proxyUrl);
+    if (r.ok) {
+      const txt = await r.text();
+      if (txt && !txt.trimStart().startsWith('<') && txt.includes(',')) return txt;
+    }
+  } catch(_) {}
+  // 방법 2: 직접 CSV export (GitHub Pages / HTTPS 환경)
+  const directUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
+  const r2 = await fetch(directUrl);
+  if (!r2.ok) throw new Error(`HTTP ${r2.status} (gid=${gid})`);
+  const txt2 = await r2.text();
+  if (!txt2 || txt2.trimStart().startsWith('<')) {
+    throw new Error(
+      `gid=${gid} — CSV가 아닌 HTML 응답을 받았습니다.\n` +
+      `구글 시트 공유 설정: 파일 → 공유 → 링크 있는 사람 → 뷰어\n` +
+      `또는 file:// 로컬 실행 시 python -m http.server 사용`
+    );
+  }
+  return txt2;
+}
 function parseCSVRow(line) {
+  if (!line) return [];
   const cols = []; let f='', inQ=false;
   for (let i=0;i<line.length;i++) {
     const c = line[i];
@@ -813,7 +841,8 @@ function parseCSVRow(line) {
 }
 
 function parseCSV(txt) {
-  return txt.split(/\r?\n/).map(parseCSVRow);
+  if (!txt) return [];
+  return txt.split(/\r?\n/).filter(l=>l.trim()).map(parseCSVRow);
 }
 
 function parseSheetData(txt) {
@@ -890,14 +919,10 @@ async function loadAll() {
   btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> 로딩중...';
 
   try {
-    const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=`;
     const [fcTxt,acTxt] = await Promise.all([
-      fetch(base+GIDS.fc).then(r=>{ if(!r.ok) throw new Error('fc: HTTP '+r.status); return r.text(); }),
-      fetch(base+GIDS.ac).then(r=>{ if(!r.ok) throw new Error('ac: HTTP '+r.status); return r.text(); })
+      fetchCsvByGid(GIDS.fc),
+      fetchCsvByGid(GIDS.ac),
     ]);
-
-    checkNotHtml(fcTxt, 'fc_예측');
-    checkNotHtml(acTxt, 'ac_실제출고');
 
     const fcP = parseSheetData(fcTxt);
     const acP = parseSheetData(acTxt);
@@ -1923,14 +1948,10 @@ async function evLoadSheet(){
   btn.disabled=true;btn.textContent='로딩중...';
   document.getElementById('evSheetStatus').textContent='구글 시트에서 불러오는 중...';
   try{
-    const base=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=`;
     const [evInfoTxt,evSidTxt]=await Promise.all([
-      fetch(base+GIDS.evInfo).then(r=>{if(!r.ok)throw new Error('행사정보 HTTP '+r.status);return r.text();}),
-      fetch(base+GIDS.evSid).then(r=>{if(!r.ok)throw new Error('행사SID HTTP '+r.status);return r.text();}),
+      fetchCsvByGid(GIDS.evInfo),
+      fetchCsvByGid(GIDS.evSid),
     ]);
-
-    checkNotHtml(evInfoTxt, '◆행사정보');
-    checkNotHtml(evSidTxt, '◆행사SID목록');
 
     // Parse SID table: each row = [행사명, SID1, SID2, ...]
     const sidRows=parseCSV(evSidTxt).filter(r=>r&&r[0]&&r[0].trim());
