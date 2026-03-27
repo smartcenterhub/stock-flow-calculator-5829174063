@@ -2634,13 +2634,7 @@ function renderDowSuggest() {
   if(btn){ btn.style.display = anyBig ? 'inline-block' : 'none'; }
 }
 
-function applyDowSuggest() {
-  DOWS.forEach(d=>{ if(_dowSug[d]) CFG.dow[d]=_dowSug[d]; });
-  fcRecalc();
-  renderCoeff();
-  sbGuideFill();
-  showToast('✅ 요일계수 제안값 반영 완료');
-}
+
 
 // ── 품목계수 제안 & 반영 ───────────────────────
 let _itemSug = {};
@@ -3274,9 +3268,9 @@ function copyCrossTable(){
 
   const rows=[];
   // 헤더
-  rows.push(['품목코드','품목명','계수',...DOWS,'주합'].join('	'));
+  rows.push(['품목코드','품목명','계수',...DOWS,'주합'].join('\t'));
   grps.forEach(g=>{
-    rows.push([g.label,'','','',...DOWS.map(()=>''),''].join('	')); // 그룹행
+    rows.push([g.label,'','','',...DOWS.map(()=>''),''].join('\t')); // 그룹행
     g.codes.forEach(c=>{
       if(ITEM_OFF[c]) return; // OFF 품목 제외
       const ic=CFG.item[c]||0;
@@ -3288,12 +3282,11 @@ function copyCrossTable(){
         return v;
       });
       const wk=out.reduce((a,b)=>a+b,0);
-      rows.push([c, NAME[c]||c, ic.toFixed(3), ...out, wk].join('	'));
+      rows.push([c, NAME[c]||c, ic.toFixed(3), ...out, wk].join('\t'));
     });
   });
 
-  const tsv=rows.join('
-');
+  const tsv=rows.join('\n');
   navigator.clipboard.writeText(tsv).then(()=>{
     showToast(`✅ 엑셀 복사 완료 — ${modeNames[modeKey]}`);
   }).catch(()=>{
