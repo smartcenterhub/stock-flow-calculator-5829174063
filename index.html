@@ -1424,61 +1424,98 @@ function parseCSV(txt) {
 
 function parseSheetData(txt) {
   const rows = parseCSV(txt);
-  if (rows.length < 6) return {items:{}, dates:[], dinfo:{}};
+  if (rows.length < 2) return {items:{}, dates:[], dinfo:{}};
 
-  const monthRow = rows[1]||[];
-  const dowRow   = rows[3]||[];
-  const dateRow  = rows[4]||[];
+  // ── 시트 구조 자동 감지 ──────────────────────────────
+  // fc_예측 / ac_실제출고 구조:
+  //   row[0] = 헤더(빈 행 or 제목)
+  //   row[1] = 월 레이블 (e.g. "2026년 1월")
+  //   row[2] = (빈 행)
+  //   row[3] = 요일 (월, 화, 수 ...)
+  //   row[4] = 날짜 숫자 (1, 2, 3 ...)
+  //   row[5] = (빈 행 or 합계)
+  //   row[6]+ = 품목 데이터 (col0=코드, col1=태그, col2=이름, col3+=수량)
 
-  // Find data start col
-  let dsc = 3;
-  for (let c=3;c<dateRow.length;c++) {
-    if (/^\d+$/.test((dateRow[c]||'').trim())) { dsc=c; break; }
+  // 먼저 어느 행이 요일행인지, 어느 행이 날짜행인지 자동 탐지
+  const DOW_SET = new Set(['월','화','수','목','금','토','일']);
+  let dowRowIdx = -1, dateRowIdx = -1, monthRowIdx = -1;
+
+  for (let r = 0; r < Math.min(rows.length, 10); r++) {
+    const row = rows[r];
+    if (!row) continue;
+    const nonEmpty = row.filter(c => c && c.trim());
+    // 요일행: 비어있지 않은 셀 중 과반수가 요일 글자
+    const dowCount = nonEmpty.filter(c => DOW_SET.has(c.trim())).length;
+    if (dowCount >= 3 && dowRowIdx < 0) { dowRowIdx = r; continue; }
+    // 날짜행: 비어있지 않은 셀 중 과반수가 숫자
+    const numCount = nonEmpty.filter(c => /^\d+$/.test(c.trim())).length;
+    if (numCount >= 5 && dateRowIdx < 0 && dowRowIdx >= 0) { dateRowIdx = r; continue; }
+    // 월행: "YYYY년 M월" 패턴
+    const hasMonth = row.some(c => /\d{4}년/.test(c||''));
+    if (hasMonth && monthRowIdx < 0) { monthRowIdx = r; }
   }
 
-  // Forward-fill months
-  let cm='';
+  // fallback: 원래 고정 인덱스
+  if (monthRowIdx < 0) monthRowIdx = 1;
+  if (dowRowIdx   < 0) dowRowIdx   = 3;
+  if (dateRowIdx  < 0) dateRowIdx  = 4;
+
+  const monthRow = rows[monthRowIdx] || [];
+  const dowRow   = rows[dowRowIdx]   || [];
+  const dateRow  = rows[dateRowIdx]  || [];
+
+  // 데이터 시작 컬럼 찾기 (날짜 숫자가 처음 나오는 컬럼)
+  let dsc = 1;
+  for (let c = 1; c < dateRow.length; c++) {
+    if (/^\d+$/.test((dateRow[c]||'').trim())) { dsc = c; break; }
+  }
+
+  // 월 forward-fill
+  let cm = '';
   const mByC = {};
-  for (let c=dsc;c<monthRow.length;c++) {
-    const v=(monthRow[c]||'').trim();
-    if (v) cm=v;
-    mByC[c]=cm;
+  for (let c = 0; c < monthRow.length; c++) {
+    const v = (monthRow[c]||'').trim();
+    if (v) cm = v;
+    mByC[c] = cm;
   }
 
-  // Build date keys
-  const dateKeys=[], dinfo={};
-  for (let c=dsc;c<dateRow.length;c++) {
-    const dn=(dateRow[c]||'').trim();
-    const dow=(dowRow[c]||'').trim();
-    const m=mByC[c]||'';
+  // 날짜 키 생성
+  const dateKeys = [], dinfo = {};
+  for (let c = dsc; c < dateRow.length; c++) {
+    const dn  = (dateRow[c]||'').trim();
+    const dow = (dowRow[c] ||'').trim();
+    const m   = mByC[c] || '';
     if (m && /^\d+$/.test(dn)) {
-      const pm=m.match(/(\d{4})년\s*(\d{1,2})월/);
+      const pm = m.match(/(\d{4})년\s*(\d{1,2})월/);
       if (pm) {
-        const k=`${pm[1]}-${pm[2].padStart(2,'0')}-${dn.padStart(2,'0')}`;
+        const k = `${pm[1]}-${pm[2].padStart(2,'0')}-${dn.padStart(2,'0')}`;
         dateKeys.push(k);
-        dinfo[k]={dow, col:c};
+        dinfo[k] = {dow, col:c};
       } else dateKeys.push(null);
     } else dateKeys.push(null);
   }
 
-  // Item rows from row 6+
-  const items={};
-  for (let r=6;r<rows.length;r++) {
-    const row=rows[r];
-    if (!row||!row[0]) continue;
-    const code=row[0].trim();
-    if (!TAG[code]) continue;
-    const data={};
-    for (let ci=0;ci<dateKeys.length;ci++) {
+  // 품목 데이터 행 (dateRow 이후부터)
+  const itemStartRow = dateRowIdx + 1;
+  const items = {};
+  for (let r = itemStartRow; r < rows.length; r++) {
+    const row = rows[r];
+    if (!row || !row[0]) continue;
+    const code = row[0].trim();
+    if (!code) continue;
+    // TAG에 없어도 일단 읽기 시도 (TAG가 시트에서 덮어쓰기 전일 수 있음)
+    const data = {};
+    for (let ci = 0; ci < dateKeys.length; ci++) {
       if (!dateKeys[ci]) continue;
-      const raw=(row[dsc+ci]||'').trim().replace(/,/g,'');
-      const v=parseFloat(raw);
-      if (!isNaN(v)) data[dateKeys[ci]]=v;
+      const raw = (row[dsc+ci]||'').toString().trim().replace(/,/g,'');
+      const v = parseFloat(raw);
+      if (!isNaN(v) && v >= 0) data[dateKeys[ci]] = v;
     }
-    items[code]=data;
+    if (Object.keys(data).length > 0) items[code] = data;
   }
 
-  return {items, dates:dateKeys.filter(Boolean), dinfo};
+  return {items, dates:dateKeys.filter(Boolean), dinfo,
+    _debug:{monthRowIdx, dowRowIdx, dateRowIdx, dsc, dateCount:dateKeys.filter(Boolean).length, itemCount:Object.keys(items).length}};
 }
 
 // ════════════════════════════════════════
@@ -1613,6 +1650,22 @@ async function loadAll() {
     const fcP = parseSheetData(fcTxt);
     const acP = parseSheetData(acTxt);
 
+    // ── 진단 정보 콘솔 출력 ──────────────────────
+    console.group('📊 데이터 파싱 진단');
+    console.log('fc 파싱:', fcP._debug, '| 날짜수:', fcP.dates.length, '| 품목수:', Object.keys(fcP.items).length);
+    console.log('ac 파싱:', acP._debug, '| 날짜수:', acP.dates.length, '| 품목수:', Object.keys(acP.items).length);
+    console.log('fc 품목코드 샘플:', Object.keys(fcP.items).slice(0,5));
+    console.log('CODES (TAG 기준):', CODES.slice(0,5));
+    console.log('fc 날짜 샘플:', fcP.dates.slice(0,3));
+    console.groupEnd();
+
+    // ── TAG에 없는 코드도 D.fc에 포함 (시트에 새 품목 추가된 경우 대비) ──
+    // fc/ac 시트에서 발견된 모든 코드를 처리
+    const allCodes = new Set([...CODES, ...Object.keys(fcP.items), ...Object.keys(acP.items)]);
+    allCodes.forEach(c => {
+      if(!TAG[c]) return; // TAG에 없으면 스킵 (쓰레기 행)
+    });
+
     loadBarSet(50, '📡 pv · mx · 미출 연결 중...', '');
 
     // ② pv / mx / mis 선택
@@ -1650,6 +1703,24 @@ async function loadAll() {
     if (D.dates.length) {
       document.getElementById('dateRangeTxt').textContent = `${D.dates[0]} ~ ${D.dates[D.dates.length-1]}`;
       document.getElementById('lastUpdTxt').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
+    } else {
+      // 날짜가 없으면 진단 정보 표시
+      const fcDbg = fcP._debug||{};
+      document.getElementById('ovTable').innerHTML =
+        `<div class="alert al-w" style="white-space:pre-wrap;font-size:12px;line-height:1.8">
+⚠️ <b>시트 로드는 됐지만 데이터 파싱 실패</b>
+
+fc_예측 파싱 결과:
+ · 총 행수: ${parseCSV(fcTxt).length}행
+ · 감지된 월행: row${fcDbg.monthRowIdx} / 요일행: row${fcDbg.dowRowIdx} / 날짜행: row${fcDbg.dateRowIdx}
+ · 데이터 시작 컬럼: col${fcDbg.dsc}
+ · 날짜 인식 수: ${fcDbg.dateCount}개
+ · 품목 인식 수: ${fcDbg.itemCount}개
+
+첫 3행 미리보기:
+${parseCSV(fcTxt).slice(0,4).map((r,i)=>`  row${i}: ${JSON.stringify(r.slice(0,6))}`).join('\n')}
+
+→ 개발자도구 콘솔(F12)에서 상세 진단 확인 가능</div>`;
     }
 
     const sel = document.getElementById('detailSel');
