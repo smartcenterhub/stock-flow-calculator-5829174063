@@ -976,7 +976,10 @@ canvas{display:block}
         <span style="padding:2px 8px;border-radius:12px;background:rgba(26,86,200,.1);color:var(--blue);font-weight:700;font-size:10.5px">10단위 내림</span>
         <span style="color:var(--t4)">/</span>
         <span style="padding:2px 8px;border-radius:12px;background:rgba(26,138,74,.1);color:var(--green);font-weight:700;font-size:10.5px">10단위 올림</span>
-        <button onclick="copyCrossTable()" style="padding:3px 10px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--t2);font-size:11px;cursor:pointer;margin-left:4px" title="엑셀 붙여넣기용으로 복사">📋 엑셀 복사</button>
+        <button onclick="copyCross(0)" style="padding:2px 9px;border-radius:12px;border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--t2);font-size:10.5px;cursor:pointer;font-weight:600" title="기본값 복사">기본값</button>
+        <button onclick="copyCross(1)" style="padding:2px 9px;border-radius:12px;background:rgba(196,90,16,.12);border:1px solid rgba(196,90,16,.3);color:var(--orange);font-size:10.5px;cursor:pointer;font-weight:700" title="50단위 절사 복사">50단위</button>
+        <button onclick="copyCross(2)" style="padding:2px 9px;border-radius:12px;background:rgba(26,86,200,.1);border:1px solid rgba(26,86,200,.3);color:var(--blue);font-size:10.5px;cursor:pointer;font-weight:700" title="10단위 내림 복사">10↓</button>
+        <button onclick="copyCross(3)" style="padding:2px 9px;border-radius:12px;background:rgba(26,138,74,.1);border:1px solid rgba(26,138,74,.3);color:var(--green);font-size:10.5px;cursor:pointer;font-weight:700" title="10단위 올림 복사">10↑</button>
       </div>
     </div>
     <div class="tbl-wrap" id="crossDiv"></div>
@@ -3252,50 +3255,47 @@ function renderCoeff() {
   renderHolCoeff();
 }
 
-function copyCrossTable(){
-  // 탭 구분 텍스트 생성 (엑셀 붙여넣기 호환)
+function copyCross(mode){
+  // mode: 0=기본값, 1=50단위절사, 2=10단위내림, 3=10단위올림
   const X=CFG.X;
+  const modeLabel=['기본값','50단위 절사','10단위 내림','10단위 올림'][mode];
+  const rows=[];
+
   const grps=[
     {label:'요거트',codes:CODES.filter(c=>GRP[c]==='yogurt')},
     {label:'토핑',codes:CODES.filter(c=>GRP[c]==='topping')},
     {label:'마시는',codes:CODES.filter(c=>GRP[c]==='drink')}
   ];
 
-  // 값 종류 선택
-  const modeNames = ['실제값','50단위 절사','10단위 내림','10단위 올림'];
-  const modeIdx = parseInt(prompt('복사할 값:\n1. 실제값\n2. 50단위 절사\n3. 10단위 내림\n4. 10단위 올림\n\n번호 입력 (1~4):'))||1;
-  const modeKey = Math.min(4, Math.max(1, modeIdx)) - 1;
-
-  const rows=[];
-  // 헤더
-  rows.push(['품목코드','품목명','계수',...DOWS,'주합'].join('\t'));
   grps.forEach(g=>{
-    rows.push([g.label,'','','',...DOWS.map(()=>''),''].join('\t')); // 그룹행
     g.codes.forEach(c=>{
-      if(ITEM_OFF[c]) return; // OFF 품목 제외
+      if(ITEM_OFF[c]) return;
       const ic=CFG.item[c]||0;
-      const vals=DOWS.map(d=>Math.round(X*ic*(CFG.dow[d]||1)));
-      const out=vals.map(v=>{
-        if(modeKey===1) return Math.floor(v/50)*50;
-        if(modeKey===2) return Math.floor(v/10)*10;
-        if(modeKey===3) return Math.ceil(v/10)*10;
+      const vals=DOWS.map(d=>{
+        const v=Math.round(X*ic*(CFG.dow[d]||1));
+        if(mode===1) return Math.floor(v/50)*50;
+        if(mode===2) return Math.floor(v/10)*10;
+        if(mode===3) return Math.ceil(v/10)*10;
         return v;
       });
-      const wk=out.reduce((a,b)=>a+b,0);
-      rows.push([c, NAME[c]||c, ic.toFixed(3), ...out, wk].join('\t'));
+      // 형식: 태그 [탭] 월값 [탭] 화값 [탭] ... 금값
+      rows.push([TAG[c]||c, ...vals].join('\t'));
     });
   });
 
-  const tsv=rows.join('\n');
-  navigator.clipboard.writeText(tsv).then(()=>{
-    showToast(`✅ 엑셀 복사 완료 — ${modeNames[modeKey]}`);
-  }).catch(()=>{
-    // fallback
-    const el=document.createElement('textarea');
-    el.value=tsv; document.body.appendChild(el); el.select();
-    document.execCommand('copy'); document.body.removeChild(el);
-    showToast('✅ 복사 완료');
-  });
+  const tsv = rows.join('\n');
+  const copy = (txt) => {
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>showToast(`✅ ${modeLabel} 복사 완료 (${rows.length}행)`));
+    } else {
+      const el=document.createElement('textarea');
+      el.value=txt; el.style.position='fixed'; el.style.opacity='0';
+      document.body.appendChild(el); el.select();
+      document.execCommand('copy'); document.body.removeChild(el);
+      showToast(`✅ ${modeLabel} 복사 완료 (${rows.length}행)`);
+    }
+  };
+  copy(tsv);
 }
 
 function renderCrossTable() {
