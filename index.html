@@ -1424,98 +1424,144 @@ function parseCSV(txt) {
 
 function parseSheetData(txt) {
   const rows = parseCSV(txt);
-  if (rows.length < 2) return {items:{}, dates:[], dinfo:{}};
+  if (rows.length < 2) return {items:{}, dates:[], dinfo:{}, _debug:{err:'rows<2'}};
 
-  // ── 시트 구조 자동 감지 ──────────────────────────────
-  // fc_예측 / ac_실제출고 구조:
-  //   row[0] = 헤더(빈 행 or 제목)
-  //   row[1] = 월 레이블 (e.g. "2026년 1월")
-  //   row[2] = (빈 행)
-  //   row[3] = 요일 (월, 화, 수 ...)
-  //   row[4] = 날짜 숫자 (1, 2, 3 ...)
-  //   row[5] = (빈 행 or 합계)
-  //   row[6]+ = 품목 데이터 (col0=코드, col1=태그, col2=이름, col3+=수량)
-
-  // 먼저 어느 행이 요일행인지, 어느 행이 날짜행인지 자동 탐지
   const DOW_SET = new Set(['월','화','수','목','금','토','일']);
-  let dowRowIdx = -1, dateRowIdx = -1, monthRowIdx = -1;
+  const WDAY_SET = new Set(['월','화','수','목','금']);
 
-  for (let r = 0; r < Math.min(rows.length, 10); r++) {
-    const row = rows[r];
-    if (!row) continue;
-    const nonEmpty = row.filter(c => c && c.trim());
-    // 요일행: 비어있지 않은 셀 중 과반수가 요일 글자
-    const dowCount = nonEmpty.filter(c => DOW_SET.has(c.trim())).length;
-    if (dowCount >= 3 && dowRowIdx < 0) { dowRowIdx = r; continue; }
-    // 날짜행: 비어있지 않은 셀 중 과반수가 숫자
-    const numCount = nonEmpty.filter(c => /^\d+$/.test(c.trim())).length;
-    if (numCount >= 5 && dateRowIdx < 0 && dowRowIdx >= 0) { dateRowIdx = r; continue; }
-    // 월행: "YYYY년 M월" 패턴
-    const hasMonth = row.some(c => /\d{4}년/.test(c||''));
-    if (hasMonth && monthRowIdx < 0) { monthRowIdx = r; }
+  // ── 1. 각 행의 "역할" 자동 감지 ─────────────────────
+  let monthRowIdx=-1, dowRowIdx=-1, dateRowIdx=-1;
+
+  // Apps Script Date → 연도 추출
+  function parseYear(s){ const m=String(s).match(/(\d{4})/); return m?parseInt(m[1]):null; }
+  // 월 텍스트/숫자 → 월 번호 (1-12)
+  function parseMonthNum(s){
+    s=String(s).trim();
+    // "2026년 3월" or "3월"
+    const km=s.match(/(\d{1,2})월/); if(km) return parseInt(km[1]);
+    // 순수 숫자
+    const n=parseFloat(s); if(!isNaN(n)&&n>=1&&n<=12) return n;
+    // Date string "Mar 2026" etc.
+    const mo={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const low=s.toLowerCase(); for(const[k,v] of Object.entries(mo)){if(low.includes(k))return v;}
+    return null;
+  }
+  // 날짜 숫자 (1~31) 판定
+  function isDateNum(s){ const n=parseFloat(String(s).trim()); return !isNaN(n)&&n>=1&&n<=31&&Number.isInteger(n); }
+  // Apps Script Date string → {y,m,d}
+  function parseDateStr(s){
+    s=String(s);
+    // "Mon Jan 06 2026 ..." or "2026-01-06" or "2026.01.06"
+    const iso=s.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
+    if(iso) return {y:parseInt(iso[1]),m:parseInt(iso[2]),d:parseInt(iso[3])};
+    const eng=s.match(/(\w{3})\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
+    if(eng){const mo={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};return{y:parseInt(eng[4]),m:mo[eng[2]]||0,d:parseInt(eng[3])};}
+    return null;
   }
 
-  // fallback: 원래 고정 인덱스
-  if (monthRowIdx < 0) monthRowIdx = 1;
-  if (dowRowIdx   < 0) dowRowIdx   = 3;
-  if (dateRowIdx  < 0) dateRowIdx  = 4;
+  for(let r=0; r<Math.min(rows.length,12); r++){
+    const row=rows[r]||[];
+    const nonEmpty=row.filter(c=>c!==''&&c!==null&&c!==undefined);
+    if(!nonEmpty.length) continue;
 
-  const monthRow = rows[monthRowIdx] || [];
-  const dowRow   = rows[dowRowIdx]   || [];
-  const dateRow  = rows[dateRowIdx]  || [];
+    // 요일행
+    const dowN=nonEmpty.filter(c=>DOW_SET.has(String(c).trim())).length;
+    if(dowN>=3&&dowRowIdx<0){dowRowIdx=r;continue;}
 
-  // 데이터 시작 컬럼 찾기 (날짜 숫자가 처음 나오는 컬럼)
-  let dsc = 1;
-  for (let c = 1; c < dateRow.length; c++) {
-    if (/^\d+$/.test((dateRow[c]||'').trim())) { dsc = c; break; }
+    // 날짜행: 과반수가 1~31 정수
+    const dateN=nonEmpty.filter(c=>isDateNum(c)).length;
+    if(dateN>=5&&dateRowIdx<0&&dowRowIdx>=0){dateRowIdx=r;continue;}
+
+    // 월행: "YYYY년" or "M월" or 연도 포함 Date string
+    const hasMonth=row.some(c=>{
+      const s=String(c||'');
+      return /\d{4}년/.test(s)||/\d{1,2}월/.test(s)||(parseDateStr(s)&&parseDateStr(s).y>2000);
+    });
+    if(hasMonth&&monthRowIdx<0){monthRowIdx=r;}
   }
 
+  // ── 2. 날짜 대안 탐지: 헤더 행이 날짜 Date string인 경우 ──
+  // (Apps Script가 날짜 셀을 Date 객체로 돌려줄 때)
+  let useDateHeader = false;
+  if(dateRowIdx<0&&monthRowIdx>=0){
+    const hrow=rows[monthRowIdx]||[];
+    const dateCount=hrow.filter(c=>parseDateStr(String(c||''))!==null&&parseDateStr(String(c||'')).y>2020).length;
+    if(dateCount>=3){ useDateHeader=true; dateRowIdx=monthRowIdx; }
+  }
+
+  // fallback
+  if(monthRowIdx<0) monthRowIdx=1;
+  if(dowRowIdx<0)   dowRowIdx=3;
+  if(dateRowIdx<0)  dateRowIdx=4;
+
+  const monthRow=rows[monthRowIdx]||[];
+  const dowRow  =rows[dowRowIdx]  ||[];
+  const dateRow =rows[dateRowIdx] ||[];
+
+  // ── 3. 데이터 시작 컬럼 ──────────────────────────────
+  let dsc=1;
+  for(let c=1;c<dateRow.length;c++){
+    if(isDateNum(dateRow[c])||parseDateStr(String(dateRow[c]||''))){dsc=c;break;}
+  }
+
+  // ── 4. 날짜 키 빌드 ──────────────────────────────────
   // 월 forward-fill
-  let cm = '';
-  const mByC = {};
-  for (let c = 0; c < monthRow.length; c++) {
-    const v = (monthRow[c]||'').trim();
-    if (v) cm = v;
-    mByC[c] = cm;
-  }
-
-  // 날짜 키 생성
-  const dateKeys = [], dinfo = {};
-  for (let c = dsc; c < dateRow.length; c++) {
-    const dn  = (dateRow[c]||'').trim();
-    const dow = (dowRow[c] ||'').trim();
-    const m   = mByC[c] || '';
-    if (m && /^\d+$/.test(dn)) {
-      const pm = m.match(/(\d{4})년\s*(\d{1,2})월/);
-      if (pm) {
-        const k = `${pm[1]}-${pm[2].padStart(2,'0')}-${dn.padStart(2,'0')}`;
-        dateKeys.push(k);
-        dinfo[k] = {dow, col:c};
-      } else dateKeys.push(null);
-    } else dateKeys.push(null);
-  }
-
-  // 품목 데이터 행 (dateRow 이후부터)
-  const itemStartRow = dateRowIdx + 1;
-  const items = {};
-  for (let r = itemStartRow; r < rows.length; r++) {
-    const row = rows[r];
-    if (!row || !row[0]) continue;
-    const code = row[0].trim();
-    if (!code) continue;
-    // TAG에 없어도 일단 읽기 시도 (TAG가 시트에서 덮어쓰기 전일 수 있음)
-    const data = {};
-    for (let ci = 0; ci < dateKeys.length; ci++) {
-      if (!dateKeys[ci]) continue;
-      const raw = (row[dsc+ci]||'').toString().trim().replace(/,/g,'');
-      const v = parseFloat(raw);
-      if (!isNaN(v) && v >= 0) data[dateKeys[ci]] = v;
+  let curY=new Date().getFullYear(), curM=1;
+  const mByC={};
+  for(let c=0;c<monthRow.length;c++){
+    const s=String(monthRow[c]||'').trim();
+    if(s){
+      const y=parseYear(s); const m=parseMonthNum(s);
+      if(y&&y>2020) curY=y;
+      if(m) curM=m;
     }
-    if (Object.keys(data).length > 0) items[code] = data;
+    mByC[c]={y:curY,m:curM};
   }
 
-  return {items, dates:dateKeys.filter(Boolean), dinfo,
-    _debug:{monthRowIdx, dowRowIdx, dateRowIdx, dsc, dateCount:dateKeys.filter(Boolean).length, itemCount:Object.keys(items).length}};
+  const dateKeys=[], dinfo={};
+  for(let c=dsc;c<dateRow.length;c++){
+    const cell=dateRow[c];
+    const dow=(dowRow[c]||'').toString().trim();
+    let key=null;
+
+    // Case A: Apps Script Date string in date row
+    const pd=parseDateStr(String(cell||''));
+    if(pd&&pd.y>2020){
+      key=`${pd.y}-${String(pd.m).padStart(2,'0')}-${String(pd.d).padStart(2,'0')}`;
+    }
+    // Case B: plain day number + month from monthRow
+    else if(isDateNum(cell)){
+      const {y,m}=mByC[c]||{y:curY,m:curM};
+      const d=parseInt(String(cell).trim());
+      key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    }
+
+    if(key){dateKeys.push(key); dinfo[key]={dow,col:c};}
+    else dateKeys.push(null);
+  }
+
+  // ── 5. 품목 데이터 ──────────────────────────────────
+  const itemStartRow=Math.max(dateRowIdx,dowRowIdx)+1;
+  const items={};
+  for(let r=itemStartRow;r<rows.length;r++){
+    const row=rows[r];
+    if(!row||!row[0]) continue;
+    const code=String(row[0]).trim();
+    if(!code||code==='합계'||code==='total'||code==='소계') continue;
+    const data={};
+    for(let ci=0;ci<dateKeys.length;ci++){
+      if(!dateKeys[ci]) continue;
+      const raw=String(row[dsc+ci]||'').trim().replace(/,/g,'');
+      const v=parseFloat(raw);
+      if(!isNaN(v)&&v>=0) data[dateKeys[ci]]=v;
+    }
+    if(Object.keys(data).length>0) items[code]=data;
+  }
+
+  const validDates=dateKeys.filter(Boolean);
+  return {items, dates:validDates, dinfo,
+    _debug:{monthRowIdx,dowRowIdx,dateRowIdx,dsc,dateCount:validDates.length,itemCount:Object.keys(items).length,
+            firstDate:validDates[0]||'none', firstCode:Object.keys(items)[0]||'none'}};
 }
 
 // ════════════════════════════════════════
@@ -1672,33 +1718,74 @@ async function loadAll() {
 
     loadBarSet(50, '📡 pv · mx · 미출 연결 중...', '');
 
-    // ② pv / mx / mis 선택
+    // ② pv / mx 선택 (mis는 mx-ac 자동계산)
     const suppResults = await Promise.allSettled([
       fetchCsvByGid(GIDS.pv),
       fetchCsvByGid(GIDS.mx),
-      fetchCsvByGid(GIDS.mis),
     ]);
-    const [pvTxt, mxTxt, misTxt] = suppResults.map(r => r.status==='fulfilled' ? r.value : '');
-    steps[2].status = pvTxt  ? 'ok' : 'warn';
-    steps[3].status = mxTxt  ? 'ok' : 'warn';
-    steps[4].status = misTxt ? 'ok' : 'warn';
+    const [pvTxt, mxTxt] = suppResults.map(r => r.status==='fulfilled' ? r.value : '');
+    steps[2].status = pvTxt ? 'ok' : 'warn';
+    steps[3].status = mxTxt ? 'ok' : 'warn';
+    steps[4].status = 'ok'; // mis는 mx-ac 자동계산
     loadBarSet(70, '🔧 데이터 합산 중...', '');
     loadBarStep(steps);
 
-    const pvP  = pvTxt  ? parseSheetData(pvTxt)  : {items:{}, dates:[], dinfo:{}};
-    const mxP  = mxTxt  ? parseSheetData(mxTxt)  : {items:{}, dates:[], dinfo:{}};
-    const misP = misTxt ? parseSheetData(misTxt) : {items:{}, dates:[], dinfo:{}};
+    const pvP  = pvTxt ? parseSheetData(pvTxt) : {items:{}, dates:[], dinfo:{}};
+    const mxP  = mxTxt ? parseSheetData(mxTxt) : {items:{}, dates:[], dinfo:{}};
+    const misP = {items:{}, dates:[], dinfo:{}}; // mis는 아래서 자동계산
 
-    const allDates = new Set([...fcP.dates, ...acP.dates, ...pvP.dates, ...mxP.dates, ...misP.dates]);
-    D.dates = [...allDates].sort();
-    D.dateInfo = {...fcP.dinfo, ...acP.dinfo};
+    const allDates = new Set([...fcP.dates, ...acP.dates, ...pvP.dates, ...mxP.dates]);
+    D.dates = [...allDates].sort().filter(d => {
+      // 평일만 (요일 정보 있는 날짜)
+      const dow = (fcP.dinfo[d]||acP.dinfo[d]||{}).dow||'';
+      return true; // 모든 날짜 포함 (주말 포함)
+    });
+    D.dateInfo = {...fcP.dinfo, ...acP.dinfo, ...pvP.dinfo, ...mxP.dinfo};
 
-    CODES.forEach(c => {
+    // 시트에서 발견된 모든 코드를 CODES와 합쳐서 저장
+    const allSheetCodes = new Set([
+      ...Object.keys(fcP.items),
+      ...Object.keys(acP.items),
+      ...CODES
+    ]);
+
+    allSheetCodes.forEach(c => {
       D.fc[c]  = fcP.items[c]  || {};
       D.ac[c]  = acP.items[c]  || {};
       D.pv[c]  = pvP.items[c]  || {};
       D.mx[c]  = mxP.items[c]  || {};
-      D.mis[c] = misP.items[c] || {};
+      // mis = mx - ac 자동계산 (가이드 기준: 미출 = 출고최대 - 실제출고)
+      D.mis[c] = {};
+      D.dates.forEach(dt => {
+        const mx = (D.mx[c][dt]||0);
+        const ac = (D.ac[c][dt]||0);
+        if(mx > 0 || ac > 0) D.mis[c][dt] = Math.max(0, mx - ac);
+      });
+    });
+
+    // TAG에 없는 새 품목 코드도 런타임에 등록
+    allSheetCodes.forEach(c => {
+      if(!TAG[c]){
+        TAG[c]  = c.split('-').pop()||c; // 코드 마지막 파트를 태그로
+        NAME[c] = c;
+        GRP[c]  = codeToGrp(c);
+      }
+    });
+    // CODES 재생성 (렌더러들이 참조)
+    CODES.length = 0;
+    Object.keys(TAG).forEach(c=>CODES.push(c));
+
+    // CODES도 시트 코드로 보완 (TAG 있는 것만)
+    allSheetCodes.forEach(c => {
+      if(TAG[c] && !CODES.includes(c)) CODES.push(c);
+    });
+
+    // 진단 로그
+    console.log('✅ 데이터 저장 완료:', {
+      dates: D.dates.length,
+      codes: allSheetCodes.size,
+      fcSample: Object.keys(fcP.items).slice(0,5),
+      dateSample: D.dates.slice(0,3)
     });
 
     D.loaded = true;
@@ -1794,7 +1881,16 @@ function itemSummary(code, dates) {
   return {code, aFc, aAc, aDiff, aPct, n, st:errSt(aDiff,aPct), byDate};
 }
 
-function getDow(d) { return (D.dateInfo[d]||{}).dow||''; }
+function getDow(d) {
+  // dateInfo에 있으면 그걸 사용, 없으면 날짜로 직접 계산
+  const fromInfo = (D.dateInfo[d]||{}).dow||'';
+  if(fromInfo) return fromInfo;
+  // fallback: JS Date로 요일 계산
+  try {
+    const dt = new Date(d+'T00:00:00');
+    return ['일','월','화','수','목','금','토'][dt.getDay()]||'';
+  } catch(_){ return ''; }
+}
 
 function filtDates() {
   const p=document.getElementById('ovPeriod')?.value||'all';
