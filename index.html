@@ -1122,11 +1122,15 @@ canvas{display:block}
   <div class="card mb12">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
       <select id="dbgGid" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
-        <option value="250741762">fc_예측</option>
-        <option value="1725354971">ac_실제출고</option>
-        <option value="1996598780">pv_전일결제</option>
-        <option value="605077739">mx_출고최대</option>
-        <option value="910874187">unship_미출</option>
+        <option value="841166294">fc_예측</option>
+        <option value="30994408">ac_실제출고</option>
+        <option value="1242586257">pv_전일결제</option>
+        <option value="1642458068">mx_출고최대</option>
+        <option value="113580769">unship_미출</option>
+        <option value="1280336969">◆품목기준표</option>
+        <option value="1480827801">◆sku_기준표</option>
+        <option value="611987186">◆행사정보</option>
+        <option value="598629104">◆행사SID목록</option>
       </select>
       <button class="btn btn-p" onclick="dbgFetch()" style="padding:5px 14px">🔍 원본 데이터 조회</button>
       <span id="dbgStatus" style="font-size:11px;color:var(--t3)"></span>
@@ -1143,13 +1147,15 @@ canvas{display:block}
 // ════════════════════════════════════════
 const SHEET_ID = '1Y5xDhV_6UcdNOtivYdkOO6bduYgdkNmB6_w4zfPXXQM';
 const GIDS = {
-  fc:250741762, ac:1725354971,
-  pv:1996598780,               // pv_전일결제
-  mx:605077739,                // mx_출고최대
-  mis:910874187,               // unship_미출
+  fc:841166294,                // fc_예측
+  ac:30994408,                 // ac_실제출고
+  pv:1242586257,               // pv_전일결제
+  mx:1642458068,               // mx_출고최대
+  mis:113580769,               // unship_미출
   evInfo:611987186, evSid:598629104,
-  itemMaster:1280336969,
-  skuMaster:1480827801,
+  itemMaster:1280336969,       // ◆품목기준표
+  skuMaster:1480827801,        // ◆sku_기준표
+  log:688904014,               // 연동로그
 };
 
 // ── 분류코드 → 그룹 매핑 헬퍼 ─────────────────
@@ -1761,14 +1767,21 @@ function parseSheetData(txt) {
   if (rows.length < 2) return {items:{}, dates:[], dinfo:{}, _debug:{err:'rows<2'}};
 
   const DOW_SET = new Set(['월','화','수','목','금','토','일']);
+  const DOW_KR = ['일','월','화','수','목','금','토']; // JS getDay() 순서
+  const FULL_DATE_RE = /^\d{4}[-./]\d{1,2}[-./]\d{1,2}$/;
 
-  // ── 콘텐츠 기반 행 감지 (인덱스 가정 없음) ────────────────
+  // ── 콘텐츠 기반 행 감지 ─────────────────────────────────
   let monthRowIdx=-1, dowRowIdx=-1, dateRowIdx=-1;
+  let fullDateRowIdx=-1; // NEW: "2026-01-02" 형식 전체날짜 행
 
   for (let r=0; r<Math.min(rows.length,15); r++) {
     const row = (rows[r]||[]).map(c=>String(c||'').trim());
     const ne  = row.filter(Boolean);
     if (!ne.length) continue;
+
+    // 전체날짜 행: 5개 이상이 YYYY-MM-DD 형식
+    const fullDateN = ne.filter(c=>FULL_DATE_RE.test(c)).length;
+    if (fullDateN>=5 && fullDateRowIdx<0) { fullDateRowIdx=r; continue; }
 
     // 요일행: 3개 이상이 요일 글자
     const dowN = ne.filter(c=>DOW_SET.has(c)).length;
@@ -1782,7 +1795,80 @@ function parseSheetData(txt) {
     if (row.some(c=>/\d{4}년/.test(c)) && monthRowIdx<0) { monthRowIdx=r; }
   }
 
-  // fallback (Apps Script 구조: row1=월, row3=요일, row4=날짜)
+  // ── 전체날짜 형식 처리 (row6 = "2026-01-02" 방식) ─────────
+  if (fullDateRowIdx >= 0) {
+    const fullDateRow = (rows[fullDateRowIdx]||[]).map(c=>String(c||'').trim());
+    const itemStartIdx = fullDateRowIdx + 2;
+
+    // dsc: 첫 날짜 컬럼
+    let dsc=0;
+    for(let c=0;c<fullDateRow.length;c++){
+      if(FULL_DATE_RE.test(fullDateRow[c])){dsc=c;break;}
+    }
+
+    // 코드 컬럼 감지
+    let codeCol=0;
+    for(let r=itemStartIdx;r<Math.min(rows.length,itemStartIdx+5);r++){
+      const row=rows[r]||[];
+      for(let c=0;c<=2;c++){
+        const v=String(row[c]||'').trim();
+        if(/^[A-Z]-[A-Z0-9]/.test(v)){codeCol=c;break;}
+      }
+      if(codeCol>0)break;
+    }
+
+    const dateKeys=[], dinfo={};
+    for(let c=dsc;c<fullDateRow.length;c++){
+      const cell=fullDateRow[c];
+      if(FULL_DATE_RE.test(cell)){
+        const norm=cell.replace(/[./]/g,'-');
+        const parts=norm.split('-');
+        const key=`${parts[0]}-${parts[1].padStart(2,'0')}-${parts[2].padStart(2,'0')}`;
+        const dt=new Date(key+'T00:00:00');
+        const dow=DOW_KR[dt.getDay()]||'';
+        dateKeys.push(key);
+        dinfo[key]={dow,col:c};
+      } else {
+        dateKeys.push(null);
+      }
+    }
+
+    const validDates=dateKeys.filter(Boolean);
+    const items={};
+    for(let r=itemStartIdx;r<rows.length;r++){
+      const row=rows[r];
+      if(!row)continue;
+      const code=String(row[codeCol]||'').trim();
+      if(!code||/합계|total|소계/i.test(code))continue;
+      const data={};
+      for(let ci=0;ci<dateKeys.length;ci++){
+        if(!dateKeys[ci])continue;
+        const colIdx=dsc+ci;
+        const raw=String(row[colIdx]||'').replace(/,/g,'').trim();
+        const v=parseInt(raw);
+        if(!isNaN(v)&&v>0) data[dateKeys[ci]]=v;
+      }
+      items[code]=data;
+    }
+
+    return {items, dates:validDates, dinfo,
+      _debug:{
+        monthRowIdx:-1, dowRowIdx:-1, dateRowIdx:-1,
+        fullDateRowIdx, dsc, codeCol,
+        itemStartIdx, dateCount:validDates.length,
+        itemCount:Object.keys(items).length,
+        firstDate:validDates[0]||'—', lastDate:validDates[validDates.length-1]||'—',
+        firstCode:Object.keys(items)[0]||'none',
+        monthSample:fullDateRow[dsc]||'—',
+        dowSample:dinfo[validDates[0]]?.dow||'—',
+        dateSample:validDates[0]?.slice(8)||'—',
+        mode:'fulldate'
+      }
+    };
+  }
+
+  // ── 기존 방식 (월행 + 요일행 + 숫자날짜) ─────────────────
+  // fallback
   if (monthRowIdx<0) monthRowIdx=1;
   if (dowRowIdx<0)   dowRowIdx=3;
   if (dateRowIdx<0)  dateRowIdx=4;
