@@ -338,15 +338,70 @@ canvas{display:block}
 .fc-tbl .subtotal-row td{background:rgba(0,0,0,.02);font-weight:600;color:var(--t2);font-size:11px;border-top:1px solid var(--glass-border-subtle)}
 .edit-inp{width:52px;padding:2px 3px;border-radius:4px;text-align:right;border:1px solid var(--accent);background:rgba(58,58,240,.06);font-size:12px;font-weight:600;color:var(--accent);font-family:inherit;font-variant-numeric:tabular-nums}
 .edit-inp.ov{border-color:var(--orange);color:var(--orange);background:rgba(196,90,16,.06)}
-/* DOW color helpers */
-.c-mon{color:#d42020}.c-tue{color:#c45a10}.c-wed{color:var(--accent)}.c-thu{color:var(--blue)}.c-fri{color:var(--green)}
-@media print{
-  .sidebar,.histbar,.fc-palette,.fc-week-bar,.ev-panel,.no-print{display:none!important}
-  .fc-layout{display:block}.main{margin-left:0;padding:10px}
-  .page{display:block!important}.page:not(.on){display:none!important}
-  .fc-tbl th,.fc-tbl td{padding:4px 8px;font-size:11px}
+/* ── Sidebar guide panel ── */
+.sb-guide{
+  border-top:1px solid var(--glass-border-subtle);
+  padding:10px 12px;
+  flex-shrink:0;
 }
-
+.sb-guide-hd{
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;user-select:none;margin-bottom:0;
+}
+.sb-guide-hd:hover{opacity:.8}
+.sb-guide-title{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.6px}
+.sb-guide-arr{font-size:9px;color:var(--t4);transition:transform .2s}
+.sb-guide.open .sb-guide-arr{transform:rotate(180deg)}
+.sb-guide-body{display:none;margin-top:8px}
+.sb-guide.open .sb-guide-body{display:block}
+.guide-item{
+  padding:6px 8px;border-radius:var(--r-sm);margin-bottom:3px;
+  background:var(--glass-bg-dark);
+}
+.guide-item .gi-label{font-size:9.5px;font-weight:700;color:var(--t3);margin-bottom:2px}
+.guide-item .gi-val{font-size:11px;font-weight:700;color:var(--tx)}
+.guide-item .gi-note{font-size:9px;color:var(--t4);margin-top:1px}
+.gi-badge{
+  display:inline-block;padding:1px 6px;border-radius:10px;
+  font-size:9.5px;font-weight:700;margin:1px;
+}
+/* ── Daily page ─────────────────────────── */
+.daily-summary-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.daily-sum-card{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r-lg);box-shadow:var(--glass-shadow);padding:11px 14px}
+.daily-sum-card .sl{font-size:10px;color:var(--t3);font-weight:600;margin-bottom:3px}
+.daily-sum-card .sv{font-size:19px;font-weight:700;letter-spacing:-.4px}
+.daily-col-hd{display:flex;align-items:center;padding:5px 13px;font-size:9px;color:var(--t4);font-weight:600;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--glass-border-subtle);margin-bottom:4px}
+.daily-row{background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--r-lg);box-shadow:var(--glass-shadow);margin-bottom:4px;overflow:hidden;transition:border-color .15s}
+.daily-row.is-today{border-color:rgba(58,58,240,.4);box-shadow:0 0 0 2px rgba(58,58,240,.08),var(--glass-shadow)}
+.daily-row.has-miss{border-color:rgba(212,32,32,.35)}
+.daily-hd{display:flex;align-items:center;cursor:pointer;user-select:none;padding:8px 13px;gap:0}
+.daily-hd:hover{background:var(--glass-bg-dark)}
+.d-dow{font-size:13px;font-weight:800;width:24px;flex-shrink:0}
+.d-date{font-size:11px;color:var(--t3);width:72px;flex-shrink:0}
+.d-cells{display:flex;flex:1;gap:0}
+.d-cell{flex:1;text-align:right;padding:0 8px;min-width:0}
+.d-cell .dc-l{font-size:8px;color:var(--t4);font-weight:600;text-transform:uppercase;letter-spacing:.3px;display:block;white-space:nowrap}
+.d-cell .dc-v{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;display:block;line-height:1.3}
+.d-cell .dc-v.zero{color:var(--t4);font-weight:400}
+.d-right{display:flex;align-items:center;gap:7px;flex-shrink:0;padding-left:8px}
+.d-err{font-size:11.5px;font-weight:700;white-space:nowrap}
+.d-arr{font-size:9px;color:var(--t4);transition:transform .2s;width:12px;text-align:center}
+.daily-row.open .d-arr{transform:rotate(180deg)}
+.daily-body{display:none;padding:0 13px 10px;border-top:1px solid var(--glass-border-subtle)}
+.daily-row.open .daily-body{display:block}
+.dib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:3px;margin-top:8px}
+.dib-row{display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:var(--r-sm);background:var(--glass-bg-dark);font-size:11px}
+.dib-tag{font-weight:800;color:var(--accent);width:22px;flex-shrink:0}
+.dib-name{color:var(--t3);flex:1;font-size:9.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dib-fc{color:var(--accent);font-variant-numeric:tabular-nums;width:34px;text-align:right}
+.dib-ac{color:var(--green);font-weight:700;font-variant-numeric:tabular-nums;width:34px;text-align:right}
+.dib-mx{color:var(--orange);font-variant-numeric:tabular-nums;width:34px;text-align:right}
+.dib-mis{color:var(--red);font-weight:700;font-variant-numeric:tabular-nums;width:30px;text-align:right}
+@media print{
+  .sidebar,.histbar,.no-print{display:none!important}
+  .main{margin-left:0;padding:10px}
+  .page{display:block!important}.page:not(.on){display:none!important}
+}
 </style>
 </head>
 <body>
@@ -354,26 +409,77 @@ canvas{display:block}
 <!-- ─── SIDEBAR ───────────────────────────────── -->
 <aside class="sidebar">
   <div class="sb-brand">
-    <h1>🥛 요즘 오차 분석</h1>
-    <small>물량 예측 · 오차 · 계수 제안</small>
+    <h1>🥛 요즘 대시보드</h1>
+    <small>물량 예측 · 오차 분석 · 계수 관리</small>
   </div>
-  <nav class="sb-nav">
+  <nav class="sb-nav" style="flex:1;overflow-y:auto">
+
     <div class="nav-grp">예측</div>
     <div class="ni" onclick="nav('forecast',this)"><span class="ico">🗓️</span> 주간 예측표</div>
+
+    <div class="nav-grp">출고 데이터</div>
+    <div class="ni" onclick="nav('daily',this)"><span class="ico">📋</span> 일별 현황</div>
+    <div class="ni" onclick="nav('trend',this)"><span class="ico">📈</span> 추이 분석</div>
+    <div class="ni" onclick="nav('detail',this)"><span class="ico">🔎</span> 품목 상세</div>
+
     <div class="nav-grp">오차 분석</div>
     <div class="ni on" onclick="nav('overview',this)"><span class="ico">📊</span> 오차 현황</div>
     <div class="ni" onclick="nav('factors',this)"><span class="ico">🔍</span> 요인 분석</div>
+
+    <div class="nav-grp">계수 관리</div>
     <div class="ni" onclick="nav('suggest',this)"><span class="ico">💡</span> 계수 제안</div>
-    <div class="nav-grp">데이터</div>
-    <div class="ni" onclick="nav('trend',this)"><span class="ico">📈</span> 트렌드</div>
-    <div class="ni" onclick="nav('detail',this)"><span class="ico">🔎</span> 품목 상세</div>
-    <div class="nav-grp">설정</div>
     <div class="ni" onclick="nav('coeff',this)"><span class="ico">⚙️</span> 계수 설정</div>
+
   </nav>
+
+  <!-- 오차 & 계수 가이드 (고정 패널) -->
+  <div class="sb-guide" id="sbGuide">
+    <div class="sb-guide-hd" onclick="sbGuideToggle()">
+      <span class="sb-guide-title">📐 오차 &amp; 계수 가이드</span>
+      <span class="sb-guide-arr">▼</span>
+    </div>
+    <div class="sb-guide-body" id="sbGuideBody">
+      <div class="guide-item">
+        <div class="gi-label">오차 임계값</div>
+        <div style="margin-top:3px">
+          <span class="gi-badge" style="background:rgba(212,32,32,.12);color:var(--red)">🔴 위험</span>
+          <span style="font-size:9px;color:var(--t3)">율≥25% AND ≥10개</span>
+        </div>
+        <div style="margin-top:2px">
+          <span class="gi-badge" style="background:rgba(196,90,16,.1);color:var(--orange)">🟡 주의</span>
+          <span style="font-size:9px;color:var(--t3)">율≥15% AND ≥5개</span>
+        </div>
+      </div>
+      <div class="guide-item">
+        <div class="gi-label">계수 공식</div>
+        <div class="gi-val" style="font-size:10px;line-height:1.6">X × 요일 × 품목<br>× 행사 × 공휴일 × 성장</div>
+      </div>
+      <div class="guide-item">
+        <div class="gi-label">요일 계수</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px" id="guideDoW"></div>
+      </div>
+      <div class="guide-item">
+        <div class="gi-label">행사 계수</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px" id="guidePromo"></div>
+      </div>
+      <div class="guide-item" style="padding-bottom:5px">
+        <div class="gi-label">공휴일 계수</div>
+        <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px" id="guideHol"></div>
+      </div>
+      <div style="font-size:9px;color:var(--t4);margin-top:5px;line-height:1.5">
+        X=100 기준 (2월 기준물량)<br>
+        월요일 플레인 = X×2.5×1.6 = 400
+      </div>
+    </div>
+  </div>
+
   <div class="sb-foot">
-    <div>X = <span class="x-pill" id="xBadge">100</span></div>
-    <div style="margin-top:4px;font-size:10.5px" id="lastUpdTxt">데이터 미로드</div>
-    <div style="margin-top:5px;font-size:9.5px;line-height:1.4" id="masterLoadStatus" style="color:var(--t4)">📦 마스터 로드 중...</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:11px;color:var(--t3)">X =</span>
+      <span class="x-pill" id="xBadge">100</span>
+    </div>
+    <div style="margin-top:4px;font-size:10px;color:var(--t4)" id="lastUpdTxt">데이터 미로드</div>
+    <div style="margin-top:3px;font-size:9.5px;line-height:1.4;color:var(--t4)" id="masterLoadStatus">📦 마스터 로드 중...</div>
   </div>
 </aside>
 
@@ -389,6 +495,38 @@ canvas{display:block}
 
 <!-- ─── MAIN ──────────────────────────────────── -->
 <main class="main">
+
+<!-- ══ PAGE: 일별 현황 ═══════════════════════════ -->
+<div class="page" id="page-daily">
+  <div class="sh mb12">
+    <div>
+      <h2>📋 일별 현황</h2>
+      <div class="sub">예측(fc) · 전일결제(pv) · 출고최대(mx) · 실출고(ac) · 미출(mis) 날짜별 통합</div>
+    </div>
+    <div class="frow">
+      <select id="dailyPeriod" onchange="renderDaily()">
+        <option value="14">최근 14일</option>
+        <option value="30" selected>최근 30일</option>
+        <option value="60">최근 60일</option>
+        <option value="all">전체</option>
+      </select>
+      <select id="dailyGrp" onchange="renderDaily()">
+        <option value="all">전체 품목</option>
+        <option value="yogurt">요거트</option>
+        <option value="topping">토핑</option>
+        <option value="drink">마시는</option>
+      </select>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer">
+        <input type="checkbox" id="dailyMissOnly" onchange="renderDaily()" style="accent-color:var(--red)">
+        미출 있는 날만
+      </label>
+    </div>
+  </div>
+  <div id="dailySummary"></div>
+  <div id="dailyContent">
+    <div class="empty"><div class="ico">📋</div><div>데이터를 로드하면 자동으로 표시됩니다</div></div>
+  </div>
+</div>
 
 <!-- ══ PAGE: 오차 현황 ══════════════════════════ -->
 <div class="page on" id="page-overview">
@@ -488,29 +626,42 @@ canvas{display:block}
 <!-- ══ PAGE: 계수 제안 ══════════════════════════ -->
 <div class="page" id="page-suggest">
   <div class="sh mb12">
-    <div><h2>💡 계수 제안</h2><div class="sub">실데이터 기반 — 현행 대비 ±5% 이상 차이 품목 표시</div></div>
+    <div><h2>💡 계수 제안</h2><div class="sub">실출고 데이터 기반 계수 제안 — 클릭 한 번으로 현행 계수에 반영</div></div>
+    <button class="btn btn-p" onclick="renderSuggest()" style="padding:5px 12px">↻ 재계산</button>
   </div>
 
   <div id="suggestAlerts" class="mb12"></div>
 
+  <!-- X 제안 -->
   <div class="g2 mb12">
     <div class="card">
       <div class="card-title">X 기준값 제안</div>
       <div id="xSuggestDiv"><div class="empty"><div class="ico">🔢</div><div>데이터 로드 필요</div></div></div>
     </div>
     <div class="card">
-      <div class="card-title">요일계수 제안</div>
+      <div class="card-title">요일계수 제안
+        <button class="btn" id="applyDowBtn" onclick="applyDowSuggest()" style="display:none;padding:3px 10px;font-size:11px;margin-left:8px;color:var(--green)">✓ 제안값 반영</button>
+      </div>
       <div id="dowSuggestDiv"><div class="empty"><div class="ico">📅</div><div>데이터 로드 필요</div></div></div>
     </div>
   </div>
 
+  <!-- 품목계수 제안 -->
   <div class="card mb12">
-    <div class="card-title">품목계수 제안 (현행 대비 — 데이터 기반 정규화)</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="card-title" style="margin:0">품목계수 제안
+        <span style="font-size:10px;color:var(--t4);font-weight:400;margin-left:6px">현행 대비 ±5% 이상 강조</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn" id="applyAllItemBtn" onclick="applyItemSuggest('all')" style="display:none;padding:4px 12px;font-size:11px;color:var(--green)">✓ 전체 반영</button>
+        <button class="btn" id="applyBigItemBtn" onclick="applyItemSuggest('big')" style="display:none;padding:4px 12px;font-size:11px;color:var(--orange)">⚡ ±10% 이상만 반영</button>
+      </div>
+    </div>
     <div class="tbl-wrap" id="itemSuggestDiv"><div class="empty"><div class="ico">📊</div><div>데이터 로드 필요</div></div></div>
   </div>
 
   <div class="card">
-    <div class="card-title">⚠️ 미반영 보류 항목 (향후 검토)</div>
+    <div class="card-title">⚠️ 미반영 보류 항목</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
       <div class="alert al-i" style="margin:0">행사전날예열 ×1.150 — 데이터 부족, 보류</div>
       <div class="alert al-i" style="margin:0">행사종료+1일 ×1.260 — 반짝 수요 패턴 확인 후</div>
@@ -520,32 +671,52 @@ canvas{display:block}
   </div>
 </div>
 
-<!-- ══ PAGE: 트렌드 ══════════════════════════════ -->
+<!-- ══ PAGE: 추이 분석 ═══════════════════════════ -->
 <div class="page" id="page-trend">
   <div class="sh mb12">
-    <div><h2>📈 트렌드</h2><div class="sub">월별 출고량 추이 및 MoM 성장률</div></div>
+    <div><h2>📈 추이 분석</h2><div class="sub">월별 출고량 추이 · MoM 성장률 · 요일별 패턴 · 품목 점유율</div></div>
+    <select id="trendGrp" onchange="renderTrend()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
+      <option value="all">전체 품목</option>
+      <option value="yogurt">요거트</option>
+      <option value="topping">토핑</option>
+      <option value="drink">마시는</option>
+    </select>
   </div>
 
-  <div class="stats-row mb12">
-    <div class="stat-card"><div class="sl">1월 일평균 ac</div><div class="sv ac-c" id="tr1">—</div><div class="ss">기준월</div></div>
-    <div class="stat-card"><div class="sl">2월 일평균 ac</div><div class="sv ac-c" id="tr2">—</div><div class="ss">×1.01 성장</div></div>
-    <div class="stat-card"><div class="sl">3월 일평균 ac</div><div class="sv ac-c" id="tr3">—</div><div class="ss">×1.27 성장</div></div>
-    <div class="stat-card"><div class="sl">최근 MoM 성장률</div><div class="sv" id="trMom">—</div><div class="ss">직전월 대비</div></div>
-  </div>
+  <!-- 월별 요약 카드 (동적) -->
+  <div id="trendMonthCards" class="mb12"></div>
 
+  <!-- 월별 fc vs ac -->
   <div class="card mb12">
-    <div class="card-title">월별 fc vs ac 일평균 합계</div>
-    <div style="position:relative;height:260px"><canvas id="cMonth"></canvas></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <div class="card-title" style="margin:0">월별 일평균 출고량 (fc vs ac)</div>
+    </div>
+    <div style="position:relative;height:240px"><canvas id="cMonth"></canvas></div>
+  </div>
+
+  <div class="g2 mb12">
+    <!-- 요일별 패턴 -->
+    <div class="card">
+      <div class="card-title">요일별 일평균 ac (전체 기간)</div>
+      <div style="position:relative;height:210px"><canvas id="cTrendDow"></canvas></div>
+    </div>
+    <!-- 월별 오차율 -->
+    <div class="card">
+      <div class="card-title">월별 오차율% 추이</div>
+      <div style="position:relative;height:210px"><canvas id="cMonthErr"></canvas></div>
+    </div>
   </div>
 
   <div class="g2">
+    <!-- 품목 점유율 stacked -->
     <div class="card">
-      <div class="card-title">상위 5 품목 — 월별 일평균 ac</div>
+      <div class="card-title">품목 점유율 변화 (월별 stacked)</div>
       <div style="position:relative;height:240px"><canvas id="cShare"></canvas></div>
     </div>
+    <!-- 요일별 fc vs ac -->
     <div class="card">
-      <div class="card-title">fc vs ac 오차율 월별 추이</div>
-      <div style="position:relative;height:240px"><canvas id="cMonthErr"></canvas></div>
+      <div class="card-title">요일별 fc vs ac 평균</div>
+      <div style="position:relative;height:240px"><canvas id="cDow"></canvas></div>
     </div>
   </div>
 </div>
@@ -732,9 +903,12 @@ canvas{display:block}
 const SHEET_ID = '1Y5xDhV_6UcdNOtivYdkOO6bduYgdkNmB6_w4zfPXXQM';
 const GIDS = {
   fc:250741762, ac:1725354971,
+  pv:1996598780,               // pv_전일결제
+  mx:605077739,                // mx_출고최대
+  mis:910874187,               // unship_미출
   evInfo:611987186, evSid:598629104,
-  itemMaster:1280336969,   // ◆품목기준표
-  skuMaster:1480827801,    // ◆sku_기준표
+  itemMaster:1280336969,
+  skuMaster:1480827801,
 };
 
 // ── 분류코드 → 그룹 매핑 헬퍼 ─────────────────
@@ -950,7 +1124,7 @@ async function loadMasterData() {
   return { itemOk, bundleOk };
 }
 
-let D = { fc:{}, ac:{}, dates:[], dateInfo:{}, loaded:false };
+let D = { fc:{}, ac:{}, pv:{}, mx:{}, mis:{}, dates:[], dateInfo:{}, loaded:false };
 let curGrp = 'all';
 let charts = {};
 
@@ -963,13 +1137,185 @@ function nav(id, el) {
   document.getElementById('page-'+id).classList.add('on');
   el.classList.add('on');
   if (D.loaded) {
+    if (id==='daily')    renderDaily();
     if (id==='overview') renderOverview();
-    if (id==='factors') renderFactors();
-    if (id==='suggest') renderSuggest();
-    if (id==='trend') renderTrend();
-    if (id==='coeff') renderCoeff();
+    if (id==='factors')  renderFactors();
+    if (id==='suggest')  renderSuggest();
+    if (id==='trend')    renderTrend();
+    if (id==='coeff')    renderCoeff();
   }
 }
+
+// ── Sidebar guide panel ────────────────────
+function sbGuideToggle(){
+  document.getElementById('sbGuide').classList.toggle('open');
+}
+function sbGuideFill(){
+  // 요일 계수 뱃지
+  const dowEl=document.getElementById('guideDoW');
+  if(dowEl) dowEl.innerHTML=Object.entries(CFG.dow).map(([d,v])=>
+    `<span class="gi-badge" style="background:${DOW_COLORS?.[d]||'var(--accent)'}18;color:${DOW_COLORS?.[d]||'var(--accent)'}">${d} ×${v.toFixed(2)}</span>`
+  ).join('');
+  // 행사 계수 뱃지
+  const promoEl=document.getElementById('guidePromo');
+  if(promoEl) promoEl.innerHTML=Object.entries(CFG.promo).filter(([k])=>k!=='없음').map(([k,v])=>{
+    const info=FC_PROMO?.[k];
+    const c=info?info.c:'var(--t2)',bg=info?info.bg:'var(--glass-bg-dark)';
+    return`<span class="gi-badge" style="background:${bg};color:${c}">${k} ×${v.toFixed(3)}</span>`;
+  }).join('');
+  // 공휴일 계수 뱃지
+  const holEl=document.getElementById('guideHol');
+  if(holEl) holEl.innerHTML=Object.entries(CFG.holiday).filter(([k])=>k!=='없음').map(([k,v])=>{
+    const c=v>1?'var(--orange)':'var(--red)';
+    return`<span class="gi-badge" style="background:${c}15;color:${c}">${k} ×${v.toFixed(3)}</span>`;
+  }).join('');
+}
+
+// ── 일별 현황 ──────────────────────────────────
+const DAILY_OPEN = new Set(); // 펼쳐진 날짜 키 기억
+
+function renderDaily(){
+  if(!D.loaded){
+    document.getElementById('dailyContent').innerHTML='<div class="empty"><div class="ico">📋</div><div>데이터를 로드하면 자동으로 표시됩니다</div></div>';
+    return;
+  }
+  const pVal = document.getElementById('dailyPeriod')?.value||'30';
+  const grp  = document.getElementById('dailyGrp')?.value||'all';
+  const missOnly = document.getElementById('dailyMissOnly')?.checked||false;
+
+  let dates = pVal==='all' ? D.dates : D.dates.slice(-(parseInt(pVal)||30));
+  // 평일만 (주말 제외)
+  dates = dates.filter(d=>!['토','일'].includes(getDow(d)));
+
+  const codes = CODES.filter(c=>grp==='all'||GRP[c]===grp);
+
+  // 날짜별 합계 계산
+  const rows = dates.map(dt=>{
+    let fc=0,ac=0,pv=0,mx=0,mis=0;
+    codes.forEach(c=>{
+      fc  += (D.fc[c] ||{})[dt]||0;
+      ac  += (D.ac[c] ||{})[dt]||0;
+      pv  += (D.pv[c] ||{})[dt]||0;
+      mx  += (D.mx[c] ||{})[dt]||0;
+      mis += (D.mis[c]||{})[dt]||0;
+    });
+    return {dt, fc, ac, pv, mx, mis};
+  }).filter(r=>r.fc||r.ac||r.pv||r.mx||r.mis);
+
+  const filtered = missOnly ? rows.filter(r=>r.mis>0) : rows;
+
+  if(!filtered.length){
+    document.getElementById('dailySummary').innerHTML='';
+    document.getElementById('dailyContent').innerHTML='<div class="empty"><div class="ico">📭</div><div>해당 조건의 데이터 없음</div></div>';
+    return;
+  }
+
+  // ── 요약 카드 ──────────────────────────────────
+  const sumFC=filtered.reduce((s,r)=>s+r.fc,0);
+  const sumAC=filtered.reduce((s,r)=>s+r.ac,0);
+  const sumMX=filtered.reduce((s,r)=>s+r.mx,0);
+  const sumMIS=filtered.reduce((s,r)=>s+r.mis,0);
+  const avgErr=sumFC>0?((sumAC-sumFC)/sumFC*100):0;
+
+  document.getElementById('dailySummary').innerHTML=`
+    <div class="daily-summary-row">
+      <div class="daily-sum-card"><div class="sl">기간 합계 예측(fc)</div><div class="sv" style="color:var(--accent)">${sumFC.toLocaleString()}</div></div>
+      <div class="daily-sum-card"><div class="sl">기간 합계 실출고(ac)</div><div class="sv" style="color:var(--green)">${sumAC.toLocaleString()}</div></div>
+      <div class="daily-sum-card"><div class="sl">출고최대 합계(mx)</div><div class="sv" style="color:var(--orange)">${sumMX?sumMX.toLocaleString():'—'}</div></div>
+      <div class="daily-sum-card"><div class="sl">미출 합계(mis)</div><div class="sv" style="color:${sumMIS>0?'var(--red)':'var(--green)'}">${sumMIS?sumMIS.toLocaleString():'0'}</div></div>
+      <div class="daily-sum-card"><div class="sl">기간 평균 오차율</div><div class="sv" style="color:${Math.abs(avgErr)>15?'var(--red)':Math.abs(avgErr)>8?'var(--orange)':'var(--green)'}">${(avgErr>=0?'+':'')+avgErr.toFixed(1)}%</div></div>
+    </div>`;
+
+  // ── 컬럼 헤더 ──────────────────────────────────
+  const hasPv  = filtered.some(r=>r.pv>0);
+  const hasMx  = filtered.some(r=>r.mx>0);
+  const hasMis = filtered.some(r=>r.mis>0);
+
+  let colHd = `<div class="daily-col-hd">
+    <span style="width:24px;text-align:left;flex-shrink:0"></span>
+    <span style="width:72px;text-align:left;flex-shrink:0">날짜</span>
+    <span style="flex:1;text-align:right">예측 fc</span>
+    ${hasPv?'<span style="flex:1;text-align:right">전일 pv</span>':''}
+    ${hasMx?'<span style="flex:1;text-align:right">최대 mx</span>':''}
+    <span style="flex:1;text-align:right">실출고 ac</span>
+    ${hasMis?'<span style="flex:1;text-align:right;color:var(--red)">미출 mis</span>':''}
+    <span style="width:90px;text-align:right;flex-shrink:0">오차율</span>
+    <span style="width:12px"></span>
+  </div>`;
+
+  // ── 날짜 행 ──────────────────────────────────
+  let rowsHtml = [...filtered].reverse().map(r=>{
+    const dow = getDow(r.dt)||'—';
+    const diff = r.ac - r.fc;
+    const pct  = r.fc>0?(diff/r.fc*100):0;
+    const st   = errSt(diff, pct);
+    const errColor = st==='danger'?'var(--red)':st==='warn'?'var(--orange)':'var(--green)';
+    const badge    = st==='danger'?'🔴':st==='warn'?'🟡':'🟢';
+    const isToday  = r.dt===dateStr(new Date());
+    const isOpen   = DAILY_OPEN.has(r.dt);
+
+    // 품목별 상세 (펼친 상태)
+    let bodyHtml = '';
+    if(isOpen){
+      const itemRows = codes.map(c=>{
+        const cfc  = (D.fc[c] ||{})[r.dt]||0;
+        const cac  = (D.ac[c] ||{})[r.dt]||0;
+        const cmx  = (D.mx[c] ||{})[r.dt]||0;
+        const cmis = (D.mis[c]||{})[r.dt]||0;
+        if(!cfc&&!cac&&!cmx&&!cmis) return '';
+        const cdiff=cac-cfc, cpct=cfc>0?(cdiff/cfc*100):0;
+        const cst=errSt(cdiff,cpct);
+        const cc=cst==='danger'?'var(--red)':cst==='warn'?'var(--orange)':'var(--t2)';
+        return`<div class="dib-row" style="${cst!=='ok'?'border-left:2px solid '+cc:''}">
+          <span class="dib-tag">${TAG[c]}</span>
+          <span class="dib-name">${NAME[c]}</span>
+          <span class="dib-fc">${cfc||'—'}</span>
+          ${hasMx?`<span class="dib-mx">${cmx||'—'}</span>`:''}
+          <span class="dib-ac" style="color:${cc}">${cac||'—'}</span>
+          ${hasMis?`<span class="dib-mis">${cmis>0?cmis:'·'}</span>`:''}
+        </div>`;
+      }).join('');
+
+      bodyHtml = `<div style="margin-top:7px">
+        <div style="font-size:9px;color:var(--t4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;gap:20px">
+          <span>태그</span><span style="flex:1"></span>
+          <span>fc</span>${hasMx?'<span>mx</span>':''}<span>ac</span>${hasMis?'<span>mis</span>':''}
+        </div>
+        <div class="dib-grid">${itemRows||'<span style="color:var(--t4);font-size:11px">데이터 없음</span>'}</div>
+      </div>`;
+    }
+
+    return`<div class="daily-row${isToday?' is-today':''}${r.mis>0?' has-miss':''}${isOpen?' open':''}" id="drow_${r.dt}">
+      <div class="daily-hd" onclick="dailyToggle('${r.dt}')">
+        <span class="d-dow" style="color:${DOW_COLORS[dow]||'var(--t2)'}">${dow}</span>
+        <span class="d-date">${r.dt.slice(5)}${isToday?' <b style=\'color:var(--accent);font-size:9px\'>오늘</b>':''}</span>
+        <div class="d-cells">
+          <div class="d-cell"><span class="dc-l">fc</span><span class="dc-v${!r.fc?' zero':''}" style="color:var(--accent)">${r.fc?r.fc.toLocaleString():'—'}</span></div>
+          ${hasPv?`<div class="d-cell"><span class="dc-l">pv</span><span class="dc-v${!r.pv?' zero':''}" style="color:var(--blue)">${r.pv?r.pv.toLocaleString():'—'}</span></div>`:''}
+          ${hasMx?`<div class="d-cell"><span class="dc-l">mx</span><span class="dc-v${!r.mx?' zero':''}" style="color:var(--orange)">${r.mx?r.mx.toLocaleString():'—'}</span></div>`:''}
+          <div class="d-cell"><span class="dc-l">ac</span><span class="dc-v${!r.ac?' zero':''}" style="color:var(--green);font-weight:800">${r.ac?r.ac.toLocaleString():'—'}</span></div>
+          ${hasMis?`<div class="d-cell"><span class="dc-l">mis</span><span class="dc-v${!r.mis?' zero':''}" style="color:${r.mis>0?'var(--red)':'var(--t4)'}">${r.mis>0?r.mis.toLocaleString():'·'}</span></div>`:''}
+        </div>
+        <div class="d-right">
+          <span class="d-err" style="color:${errColor}">${badge} ${(pct>=0?'+':'')+pct.toFixed(1)}%</span>
+          <span class="d-arr">▼</span>
+        </div>
+      </div>
+      <div class="daily-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('dailyContent').innerHTML = colHd + rowsHtml;
+}
+
+function dailyToggle(dt){
+  if(DAILY_OPEN.has(dt)) DAILY_OPEN.delete(dt);
+  else DAILY_OPEN.add(dt);
+  renderDaily();
+}
+
+function filtDailyDates(){return{};}  // legacy stub
+function buildDailyTable(){return'';} // legacy stub
 
 // ════════════════════════════════════════
 // CSV FETCH
@@ -1200,25 +1546,39 @@ async function loadAll() {
   btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> 로딩중...';
 
   try {
-    const [fcTxt,acTxt] = await Promise.all([
+    // fc + ac 필수 / pv·mx·mis 선택 (실패해도 계속)
+    const [fcTxt, acTxt] = await Promise.all([
       fetchCsvByGid(GIDS.fc),
       fetchCsvByGid(GIDS.ac),
     ]);
 
-    // 휴일 자동 감지 (fc_예측 기준)
     detectHolidaysFromFc(fcTxt);
 
     const fcP = parseSheetData(fcTxt);
     const acP = parseSheetData(acTxt);
 
-    const allDates = new Set([...fcP.dates, ...acP.dates]);
+    // pv / mx / mis — 실패해도 빈 객체로 처리
+    const [pvTxt, mxTxt, misTxt] = await Promise.allSettled([
+      fetchCsvByGid(GIDS.pv),
+      fetchCsvByGid(GIDS.mx),
+      fetchCsvByGid(GIDS.mis),
+    ]).then(rs => rs.map(r => r.status==='fulfilled' ? r.value : ''));
+
+    const pvP  = pvTxt  ? parseSheetData(pvTxt)  : {items:{}, dates:[], dinfo:{}};
+    const mxP  = mxTxt  ? parseSheetData(mxTxt)  : {items:{}, dates:[], dinfo:{}};
+    const misP = misTxt ? parseSheetData(misTxt) : {items:{}, dates:[], dinfo:{}};
+
+    const allDates = new Set([...fcP.dates, ...acP.dates, ...pvP.dates, ...mxP.dates, ...misP.dates]);
     D.dates = [...allDates].sort();
     D.dateInfo = {...fcP.dinfo, ...acP.dinfo};
 
-    D.fc={};
-    CODES.forEach(c => { D.fc[c]= fcP.items[c]||{}; });
-    D.ac={};
-    CODES.forEach(c => { D.ac[c]= acP.items[c]||{}; });
+    CODES.forEach(c => {
+      D.fc[c]  = fcP.items[c]  || {};
+      D.ac[c]  = acP.items[c]  || {};
+      D.pv[c]  = pvP.items[c]  || {};
+      D.mx[c]  = mxP.items[c]  || {};
+      D.mis[c] = misP.items[c] || {};
+    });
 
     D.loaded = true;
 
@@ -1237,8 +1597,9 @@ async function loadAll() {
 
     renderOverview();
     renderCoeff();
-
-    // 주간 예측표가 열려 있으면 휴일 자동 적용
+    sbGuideFill();
+    // 일별 현황 페이지가 보이면 즉시 렌더
+    if(document.getElementById('page-daily').classList.contains('on')) renderDaily();
     applyHolidaysToWeek();
 
   } catch(e) {
@@ -1506,34 +1867,47 @@ function renderSuggest() {
 }
 
 function renderXSuggest() {
-  const avgDow=avg(Object.values(CFG.dow));
-  const totIC=CODES.reduce((s,c)=>s+(CFG.item[c]||0),0);
-  const expAt100=100*totIC*avgDow;
+  const avgDow = avg(Object.values(CFG.dow));
+  const totIC  = CODES.reduce((s,c)=>s+(CFG.item[c]||0), 0);
+  const expAt100 = 100 * totIC * avgDow;
 
-  let totAc=0,days=0;
-  D.dates.forEach(dt=>{
+  let totAc=0, days=0;
+  D.dates.forEach(dt => {
     const dow=getDow(dt);
     if (!DOWS.includes(dow)) return;
     let ac=0; CODES.forEach(c=>ac+=(D.ac[c]||{})[dt]||0);
-    if(ac>0){totAc+=ac;days++;}
+    if(ac>0){totAc+=ac; days++;}
   });
-  const avgAc=days?totAc/days:0;
-  const sugX=expAt100>0?Math.round(avgAc/expAt100*100):100;
-  const diff=sugX-CFG.X, dp=CFG.X?(Math.abs(diff)/CFG.X*100):0;
-  const need=dp>=5;
-  document.getElementById('xSuggestDiv').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 0">
-      <div><div style="font-size:11px;color:var(--t3)">현행 X</div><div style="font-size:30px;font-weight:700;color:var(--accent)">${CFG.X}</div></div>
-      <div><div style="font-size:11px;color:var(--t3)">데이터 기반 제안</div><div style="font-size:30px;font-weight:700;color:${need?'var(--orange)':'var(--green)'}">${sugX}</div></div>
+  const avgAc  = days ? totAc/days : 0;
+  const sugX   = expAt100>0 ? Math.round(avgAc/expAt100*100) : 100;
+  const diff   = sugX - CFG.X;
+  const dp     = CFG.X ? (Math.abs(diff)/CFG.X*100) : 0;
+  const need   = dp >= 5;
+
+  document.getElementById('xSuggestDiv').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:8px 0;align-items:end">
+      <div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px">현행 X</div>
+        <div style="font-size:34px;font-weight:700;color:var(--accent)">${CFG.X}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px">데이터 기반 제안</div>
+        <div style="font-size:34px;font-weight:700;color:${need?'var(--orange)':'var(--green)'}">${sugX}</div>
+      </div>
     </div>
-    <div style="font-size:11.5px;color:var(--t3);margin-top:6px">
+    <div style="font-size:11.5px;color:var(--t3);margin-bottom:10px">
       일평균 실적: <b style="color:var(--tx)">${avgAc.toFixed(0)}개</b> ·
-      ${need?`<span style="color:var(--orange)">⚠️ ${diff>0?'+':''}${diff} 조정 권장</span>`:'<span style="color:var(--green)">✅ 현행 유지</span>'}
-    </div>`;
+      ${need
+        ? `<span style="color:var(--orange)">⚠️ ${diff>0?'+':''}${diff} 조정 권장</span>`
+        : '<span style="color:var(--green)">✅ 현행 유지</span>'}
+    </div>
+    ${need ? `<button class="btn" onclick="applyXSuggest(${sugX})" style="padding:4px 14px;color:var(--green);font-size:12px">✓ X = ${sugX} 반영</button>` : ''}`;
 }
 
+// ── 요일계수 제안 & 반영 ───────────────────────
+let _dowSug = {};
 function renderDowSuggest() {
-  const acD={};
+  const acD = {};
   DOWS.forEach(d=>acD[d]=[]);
   D.dates.forEach(dt=>{
     const dow=getDow(dt);
@@ -1541,72 +1915,175 @@ function renderDowSuggest() {
     let ac=0; CODES.forEach(c=>ac+=(D.ac[c]||{})[dt]||0);
     if(ac>0) acD[dow].push(ac);
   });
-  const avgs={};DOWS.forEach(d=>avgs[d]=avg(acD[d])||0);
-  const tot=DOWS.reduce((s,d)=>s+avgs[d],0)/DOWS.length;
-  let h=`<table><thead><tr><th>요일</th><th class="r">현행</th><th class="r">제안</th><th class="r">차이</th></tr></thead><tbody>`;
-  DOWS.forEach(d=>{
-    const cur=CFG.dow[d], sug=tot>0?+(avgs[d]/tot).toFixed(3):cur;
-    const dp=cur?(sug-cur)/cur*100:0;
-    const cls=Math.abs(dp)>=5?(dp>0?'style="color:var(--green);font-weight:600"':'style="color:var(--red);font-weight:600"'):'';
-    h+=`<tr><td>${d}</td><td class="r">${cur.toFixed(3)}×</td><td class="r">${sug.toFixed(3)}×</td><td class="r" ${cls}>${dp>=0?'+':''}${dp.toFixed(1)}%</td></tr>`;
-  });
-  h+='</tbody></table>';
-  document.getElementById('dowSuggestDiv').innerHTML=h;
-}
+  const avgs={};
+  DOWS.forEach(d=>avgs[d]=avg(acD[d])||0);
+  const mean = DOWS.reduce((s,d)=>s+avgs[d],0)/DOWS.length;
+  _dowSug = {};
+  let anyBig = false;
 
-function renderItemSuggest() {
-  const norm={};
-  CODES.forEach(c=>norm[c]=[]);
-  D.dates.forEach(dt=>{
-    const dow=getDow(dt);
-    const dc=CFG.dow[dow]||1;
-    CODES.forEach(c=>{
-      const ac=(D.ac[c]||{})[dt]||0;
-      if (ac>0) norm[c].push(ac/(dc*CFG.X));
-    });
-  });
-
-  let h=`<table><thead><tr>
-    <th>품목</th><th class="r">현행 계수</th><th class="r">제안 계수</th>
-    <th class="r">차이%</th><th class="r">N일</th><th>판단</th>
+  let h=`<table style="width:100%"><thead><tr>
+    <th style="text-align:left">요일</th>
+    <th class="r">현행</th><th class="r">제안</th><th class="r">차이</th>
+    <th style="text-align:center">N일</th>
   </tr></thead><tbody>`;
-
-  const alerts=[];
-  CODES.forEach(c=>{
-    const cur=CFG.item[c]||0;
-    const sug=avg(norm[c]);
-    if (sug===null){
-      h+=`<tr><td><b>${TAG[c]}</b> <span style="color:var(--t3)">${NAME[c]}</span></td>
-        <td class="r">${cur.toFixed(3)}×</td><td class="r" style="color:var(--t4)">—</td>
-        <td class="r" style="color:var(--t4)">—</td><td class="r" style="color:var(--t4)">0</td>
-        <td style="color:var(--t4)">데이터 없음</td></tr>`;
-      return;
-    }
-    const dp=cur?(sug-cur)/cur*100:0;
-    const n=norm[c].length;
-    const big=Math.abs(dp)>=5;
-    const col=big?(dp>0?'var(--green)':'var(--red)'):'var(--t2)';
-    const verdict=big?(dp>0?'<span class="badge bo">↑ 상향 권장</span>':'<span class="badge bd">↓ 하향 권장</span>'):'<span class="badge bo">✅ 유지</span>';
-    if (Math.abs(dp)>=10) alerts.push({c,dp,cur,sug});
+  DOWS.forEach(d=>{
+    const cur = CFG.dow[d];
+    const sug = mean>0 ? +(avgs[d]/mean).toFixed(3) : cur;
+    const dp  = cur ? (sug-cur)/cur*100 : 0;
+    _dowSug[d] = sug;
+    if(Math.abs(dp)>=5) anyBig=true;
+    const col = Math.abs(dp)>=5 ? (dp>0?'var(--green)':'var(--red)') : 'var(--t2)';
     h+=`<tr>
-      <td><b>${TAG[c]}</b> <span style="color:var(--t3)">${NAME[c]}</span></td>
-      <td class="r" style="color:var(--accent)">${cur.toFixed(3)}×</td>
-      <td class="r" style="color:${col}">${sug.toFixed(3)}×</td>
-      <td class="r" style="color:${big?col:'var(--t2)'}${big?';font-weight:600':''}">${dp>=0?'+':''}${dp.toFixed(1)}%</td>
-      <td class="r" style="color:var(--t3)">${n}</td>
-      <td>${verdict}</td>
+      <td style="color:${DOW_COLORS[d]||'var(--t2)'};font-weight:700">${d}</td>
+      <td class="r">${cur.toFixed(3)}×</td>
+      <td class="r" style="color:${col};font-weight:${Math.abs(dp)>=5?600:400}">${sug.toFixed(3)}×</td>
+      <td class="r" style="color:${col};font-weight:${Math.abs(dp)>=5?700:400}">${dp>=0?'+':''}${dp.toFixed(1)}%</td>
+      <td style="text-align:center;color:var(--t4);font-size:11px">${acD[d].length}</td>
     </tr>`;
   });
   h+='</tbody></table>';
-  document.getElementById('itemSuggestDiv').innerHTML=h;
+  document.getElementById('dowSuggestDiv').innerHTML = h;
+  const btn = document.getElementById('applyDowBtn');
+  if(btn){ btn.style.display = anyBig ? 'inline-block' : 'none'; }
+}
 
+function applyXSuggest(x) {
+  CFG.X = x;
+  document.getElementById('fcX').value = x;
+  document.getElementById('xBadge').textContent = x;
+  document.getElementById('xInp') && (document.getElementById('xInp').value=x);
+  document.getElementById('xDisp') && (document.getElementById('xDisp').textContent=x);
+  fcRecalc();
+  renderXSuggest();
+  showToast(`✅ X = ${x} 반영 완료`);
+}
+
+function applyDowSuggest() {
+  DOWS.forEach(d=>{ if(_dowSug[d]) CFG.dow[d]=_dowSug[d]; });
+  fcRecalc();
+  renderCoeff();
+  sbGuideFill();
+  showToast('✅ 요일계수 제안값 반영 완료');
+}
+
+// ── 품목계수 제안 & 반영 ───────────────────────
+let _itemSug = {};
+function renderItemSuggest() {
+  const norm = {};
+  CODES.forEach(c=>norm[c]=[]);
+  D.dates.forEach(dt=>{
+    const dow=getDow(dt);
+    const dc =CFG.dow[dow]||1;
+    CODES.forEach(c=>{
+      const ac=(D.ac[c]||{})[dt]||0;
+      if(ac>0) norm[c].push(ac/(dc*CFG.X));
+    });
+  });
+
+  _itemSug = {};
+  const alerts = [];
+  let bigCount = 0;
+
+  let h=`<table style="width:100%"><thead><tr>
+    <th style="text-align:left">품목</th>
+    <th class="r">현행</th><th class="r">제안</th>
+    <th class="r">차이%</th><th class="r">N일</th>
+    <th style="text-align:center">판단</th>
+    <th style="text-align:center">반영</th>
+  </tr></thead><tbody>`;
+
+  CODES.forEach(c=>{
+    const cur = CFG.item[c]||0;
+    const sug = avg(norm[c]);
+    _itemSug[c] = sug !== null ? +(sug.toFixed(3)) : cur;
+
+    if(sug===null){
+      h+=`<tr><td><b>${TAG[c]}</b> <span style="color:var(--t3);font-size:11px">${NAME[c]}</span></td>
+        <td class="r">${cur.toFixed(3)}×</td><td class="r" style="color:var(--t4)">—</td>
+        <td class="r" style="color:var(--t4)">—</td>
+        <td class="r" style="color:var(--t4);font-size:11px">0</td>
+        <td style="text-align:center;color:var(--t4);font-size:11px">데이터 없음</td>
+        <td></td></tr>`;
+      return;
+    }
+    const dp  = cur ? (sug-cur)/cur*100 : 0;
+    const n   = norm[c].length;
+    const big = Math.abs(dp)>=5;
+    const col = big ? (dp>0?'var(--green)':'var(--red)') : 'var(--t2)';
+    const verdict = big
+      ? (dp>0 ? '<span class="badge bo">↑ 상향</span>' : '<span class="badge bd">↓ 하향</span>')
+      : '<span style="color:var(--t4);font-size:11px">유지</span>';
+    if(Math.abs(dp)>=10){ alerts.push({c,dp,cur,sug}); bigCount++; }
+
+    h+=`<tr style="${big?'background:var(--glass-bg-dark)':''}">
+      <td><b>${TAG[c]}</b> <span style="color:var(--t3);font-size:11px">${NAME[c]}</span></td>
+      <td class="r" style="color:var(--accent)">${cur.toFixed(3)}×</td>
+      <td class="r" style="color:${col};font-weight:${big?600:400}">${sug.toFixed(3)}×</td>
+      <td class="r" style="color:${big?col:'var(--t2)'};font-weight:${big?700:400}">${dp>=0?'+':''}${dp.toFixed(1)}%</td>
+      <td class="r" style="color:var(--t4);font-size:11px">${n}</td>
+      <td style="text-align:center">${verdict}</td>
+      <td style="text-align:center">
+        ${big ? `<button class="btn" onclick="applyOneItem('${c}',${sug.toFixed(3)})"
+          style="padding:2px 8px;font-size:10.5px;color:${col}">반영</button>` : ''}
+      </td>
+    </tr>`;
+  });
+  h+='</tbody></table>';
+  document.getElementById('itemSuggestDiv').innerHTML = h;
+
+  // 버튼 표시
+  const allBtn = document.getElementById('applyAllItemBtn');
+  const bigBtn = document.getElementById('applyBigItemBtn');
+  if(allBtn) allBtn.style.display='inline-block';
+  if(bigBtn) bigBtn.style.display = bigCount>0 ? 'inline-block' : 'none';
+
+  // 알림
   let al='';
-  if (alerts.length) {
+  if(alerts.length){
     al=`<div class="alert al-w">⚠️ <b>${alerts.length}개 품목</b> 현행 대비 ±10% 이상: ${alerts.map(a=>`${TAG[a.c]}(${(a.dp>=0?'+':'')+a.dp.toFixed(0)}%)`).join(', ')}</div>`;
   } else {
     al=`<div class="alert al-o">✅ 모든 품목 계수가 현행 대비 ±10% 이내입니다.</div>`;
   }
-  document.getElementById('suggestAlerts').innerHTML=al;
+  document.getElementById('suggestAlerts').innerHTML = al;
+}
+
+function applyOneItem(code, val){
+  CFG.item[code] = val;
+  renderItemSuggest();
+  fcRecalc();
+  renderCoeff();
+  showToast(`✅ ${TAG[code]} 계수 → ${val} 반영`);
+}
+
+function applyItemSuggest(mode){
+  let count=0;
+  CODES.forEach(c=>{
+    const cur=CFG.item[c]||0;
+    const sug=_itemSug[c];
+    if(sug===undefined||sug===null) return;
+    const dp=cur?(sug-cur)/cur*100:0;
+    if(mode==='all'||(mode==='big'&&Math.abs(dp)>=10)){
+      CFG.item[c]=sug; count++;
+    }
+  });
+  renderItemSuggest();
+  fcRecalc();
+  renderCoeff();
+  sbGuideFill();
+  showToast(`✅ 품목계수 ${count}개 반영 완료`);
+}
+
+// ── 토스트 알림 ──────────────────────────────
+function showToast(msg){
+  let t=document.getElementById('toastMsg');
+  if(!t){
+    t=document.createElement('div');t.id='toastMsg';
+    t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--glass-bg-strong);border:1px solid var(--glass-border);border-radius:var(--r-lg);padding:10px 20px;font-size:13px;font-weight:600;color:var(--tx);box-shadow:var(--glass-shadow-float);z-index:9999;transition:opacity .3s;backdrop-filter:blur(16px)';
+    document.body.appendChild(t);
+  }
+  t.textContent=msg; t.style.opacity='1';
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.style.opacity='0', 2500);
 }
 
 // ════════════════════════════════════════
@@ -1614,93 +2091,160 @@ function renderItemSuggest() {
 // ════════════════════════════════════════
 function renderTrend() {
   if (!D.loaded) return;
-  // Group by month
+  const grp = document.getElementById('trendGrp')?.value||'all';
+  const codes = CODES.filter(c=>grp==='all'||GRP[c]===grp);
+
+  // ── 월별 집계 ──────────────────────────────
   const bym={};
   D.dates.forEach(dt=>{
     const m=dt.slice(0,7);
-    if (!bym[m]) bym[m]={fc:0,ac:0,days:0};
+    if(!bym[m]) bym[m]={fc:0,ac:0,days:0};
     const dow=getDow(dt);
-    if (!DOWS.includes(dow)) return;
+    if(!DOWS.includes(dow)) return;
     let fc=0,ac=0;
-    CODES.forEach(c=>{fc+=(D.fc[c]||{})[dt]||0;ac+=(D.ac[c]||{})[dt]||0;});
-    if(fc>0||ac>0){bym[m].fc+=fc;bym[m].ac+=ac;bym[m].days++;}
+    codes.forEach(c=>{fc+=(D.fc[c]||{})[dt]||0; ac+=(D.ac[c]||{})[dt]||0;});
+    if(fc>0||ac>0){bym[m].fc+=fc; bym[m].ac+=ac; bym[m].days++;}
   });
   const months=Object.keys(bym).sort();
-
-  // Stat cards
-  const [m1,m2,m3]=months;
-  if(m1&&bym[m1].days) document.getElementById('tr1').textContent=(bym[m1].ac/bym[m1].days).toFixed(0);
-  if(m2&&bym[m2].days) document.getElementById('tr2').textContent=(bym[m2].ac/bym[m2].days).toFixed(0);
-  if(m3&&bym[m3].days) document.getElementById('tr3').textContent=(bym[m3].ac/bym[m3].days).toFixed(0);
-  if(m2&&m3&&bym[m2].days&&bym[m3].days){
-    const mom=((bym[m3].ac/bym[m3].days)/(bym[m2].ac/bym[m2].days)-1)*100;
-    document.getElementById('trMom').textContent=(mom>=0?'+':'')+mom.toFixed(1)+'%';
-    document.getElementById('trMom').style.color=mom>=0?'var(--green)':'var(--red)';
-  }
-
+  const lbl=months.map(m=>m.replace(/(\d{4})-(\d{2})/,(_,y,mo)=>`${y.slice(2)}년${parseInt(mo)}월`));
   const fcAvg=months.map(m=>bym[m].days?+(bym[m].fc/bym[m].days).toFixed(0):0);
   const acAvg=months.map(m=>bym[m].days?+(bym[m].ac/bym[m].days).toFixed(0):0);
-  const lbl=months.map(m=>m.replace('-','년 ')+'월');
 
+  // ── 월별 요약 카드 ──────────────────────────
+  let cards='<div class="stats-row">';
+  months.forEach((m,i)=>{
+    const ac=acAvg[i], fc=fcAvg[i];
+    const mom=i>0&&acAvg[i-1]>0?((ac/acAvg[i-1]-1)*100):null;
+    const momStr=mom!==null?`<div style="font-size:10px;color:${mom>=0?'var(--green)':'var(--red)'};margin-top:2px">MoM ${mom>=0?'+':''}${mom.toFixed(1)}%</div>`:'';
+    const errPct=fc>0?+((ac/fc-1)*100).toFixed(1):null;
+    cards+=`<div class="stat-card">
+      <div class="sl">${lbl[i]}</div>
+      <div class="sv ac-c">${ac.toLocaleString()}</div>
+      <div class="ss">일평균 ac${momStr}</div>
+      ${errPct!==null?`<div style="font-size:10px;color:${Math.abs(errPct)>=10?'var(--red)':Math.abs(errPct)>=5?'var(--orange)':'var(--green)'};margin-top:2px">오차 ${errPct>=0?'+':''}${errPct}%</div>`:''}
+    </div>`;
+  });
+  cards+='</div>';
+  document.getElementById('trendMonthCards').innerHTML=cards;
+
+  // ── 월별 fc vs ac 차트 ──────────────────────
   if(charts.month) charts.month.destroy();
   charts.month=new Chart(document.getElementById('cMonth').getContext('2d'),{
     type:'bar',
-    data:{labels:lbl,datasets:[
-      {label:'예측 fc 일평균',data:fcAvg,backgroundColor:'rgba(58,58,240,0.6)',borderRadius:5},
-      {label:'실제 ac 일평균',data:acAvg,backgroundColor:'rgba(26,138,74,0.6)',borderRadius:5,
-       type:'line',tension:0.3,borderColor:'rgba(26,138,74,1)',fill:false,borderWidth:2,pointRadius:4}
+    data:{labels:lbl, datasets:[
+      {label:'예측 fc 일평균', data:fcAvg, backgroundColor:'rgba(58,58,240,0.55)', borderRadius:4},
+      {label:'실출고 ac 일평균', data:acAvg, type:'line', tension:0.3,
+       borderColor:'rgba(26,138,74,1)', backgroundColor:'rgba(26,138,74,0.08)',
+       fill:true, borderWidth:2.5, pointRadius:5, pointBackgroundColor:'rgba(26,138,74,1)'}
     ]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
       scales:{
-        x:{grid:{display:false},ticks:{font:{family:'Inter',size:12}}},
+        x:{grid:{display:false},ticks:{font:{family:'Inter',size:11}}},
         y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Inter',size:11}}}
       }}
   });
 
-  // Top 5 item share
-  const top5=CODES.map(c=>{
-    let t=0;D.dates.forEach(d=>t+=(D.ac[c]||{})[d]||0);return{c,t};
-  }).sort((a,b)=>b.t-a.t).slice(0,5);
-  const c5=['rgba(58,58,240,0.75)','rgba(26,138,74,0.75)','rgba(196,90,16,0.75)','rgba(26,86,200,0.75)','rgba(108,53,204,0.75)'];
-
-  if(charts.share) charts.share.destroy();
-  charts.share=new Chart(document.getElementById('cShare').getContext('2d'),{
-    type:'bar',
-    data:{labels:lbl,datasets:top5.map(({c},i)=>({
-      label:TAG[c],
-      data:months.map(m=>{let t=0;D.dates.filter(d=>d.startsWith(m)).forEach(d=>t+=(D.ac[c]||{})[d]||0);return bym[m]?.days?+(t/bym[m].days).toFixed(0):0;}),
-      backgroundColor:c5[i],borderRadius:2,stack:'s'
-    }))},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
-      scales:{
-        x:{grid:{display:false},stacked:true,ticks:{font:{family:'Inter',size:12}}},
-        y:{grid:{color:'rgba(0,0,0,0.04)'},stacked:true,ticks:{font:{family:'Inter',size:11}}}
-      }}
+  // ── 요일별 패턴 (전체 기간 ac 평균) ──────────
+  const acByDow={};
+  DOWS.forEach(d=>acByDow[d]=[]);
+  D.dates.forEach(dt=>{
+    const dow=getDow(dt);
+    if(!DOWS.includes(dow)) return;
+    let ac=0; codes.forEach(c=>ac+=(D.ac[c]||{})[dt]||0);
+    if(ac>0) acByDow[dow].push(ac);
   });
+  const dowAvg=DOWS.map(d=>avg(acByDow[d])||0);
+  const dowColors=DOWS.map(d=>DOW_COLORS[d]||'var(--accent)');
 
-  // Monthly error %
-  const errPcts=months.map(m=>{
-    const fc=fcAvg[months.indexOf(m)],ac=acAvg[months.indexOf(m)];
-    return fc>0?+((ac/fc-1)*100).toFixed(1):0;
-  });
-  if(charts.mErr) charts.mErr.destroy();
-  charts.mErr=new Chart(document.getElementById('cMonthErr').getContext('2d'),{
+  if(charts.trendDow) charts.trendDow.destroy();
+  charts.trendDow=new Chart(document.getElementById('cTrendDow').getContext('2d'),{
     type:'bar',
-    data:{labels:lbl,datasets:[{
-      label:'오차율%',data:errPcts,
-      backgroundColor:errPcts.map(v=>v>=0?'rgba(26,138,74,0.65)':'rgba(212,32,32,0.65)'),borderRadius:5
+    data:{labels:DOWS, datasets:[{
+      label:'일평균 ac',
+      data:dowAvg.map(v=>+v.toFixed(0)),
+      backgroundColor:dowColors.map(c=>c+'cc'),
+      borderColor:dowColors,
+      borderWidth:2, borderRadius:6,
     }]},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false}},
       scales:{
-        x:{grid:{display:false},ticks:{font:{family:'Inter',size:12}}},
-        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Inter',size:11},callback:v=>v+'%'}}
+        x:{grid:{display:false},ticks:{font:{family:'Inter',size:13,weight:700},color:dowColors}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Inter',size:11}}}
+      }}
+  });
+
+  // ── 월별 오차율% ──────────────────────────
+  const errPcts=months.map((_,i)=>fcAvg[i]>0?+((acAvg[i]/fcAvg[i]-1)*100).toFixed(1):0);
+  if(charts.mErr) charts.mErr.destroy();
+  charts.mErr=new Chart(document.getElementById('cMonthErr').getContext('2d'),{
+    type:'bar',
+    data:{labels:lbl, datasets:[{
+      label:'오차율%', data:errPcts,
+      backgroundColor:errPcts.map(v=>Math.abs(v)>=15?'rgba(212,32,32,0.65)':Math.abs(v)>=8?'rgba(196,90,16,0.65)':'rgba(26,138,74,0.65)'),
+      borderRadius:5
+    }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Inter',size:11}}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Inter',size:11},callback:v=>v+'%'},
+          afterDataLimits(axis){axis.min=Math.min(axis.min,-5);axis.max=Math.max(axis.max,5);}}
+      }}
+  });
+
+  // ── 품목 점유율 stacked ──────────────────────
+  const top=codes.map(c=>{
+    let t=0; D.dates.forEach(d=>t+=(D.ac[c]||{})[d]||0); return{c,t};
+  }).sort((a,b)=>b.t-a.t).slice(0,8);
+  const palette=['rgba(58,58,240,.75)','rgba(26,138,74,.75)','rgba(196,90,16,.75)',
+    'rgba(26,86,200,.75)','rgba(108,53,204,.75)','rgba(212,32,32,.75)',
+    'rgba(13,122,107,.75)','rgba(196,40,120,.75)'];
+
+  if(charts.share) charts.share.destroy();
+  charts.share=new Chart(document.getElementById('cShare').getContext('2d'),{
+    type:'bar',
+    data:{labels:lbl, datasets:top.map(({c},i)=>({
+      label:TAG[c],
+      data:months.map(m=>{
+        let t=0;
+        D.dates.filter(d=>d.startsWith(m)).forEach(d=>t+=(D.ac[c]||{})[d]||0);
+        return bym[m]?.days?+(t/bym[m].days).toFixed(0):0;
+      }),
+      backgroundColor:palette[i%palette.length], borderRadius:2, stack:'s'
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
+      scales:{
+        x:{grid:{display:false},stacked:true,ticks:{font:{family:'Inter',size:11}}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},stacked:true,ticks:{font:{family:'Inter',size:11}}}
+      }}
+  });
+
+  // ── 요일별 fc vs ac ──────────────────────────
+  const fcByDow=DOWS.map(d=>{
+    const v=[];
+    D.dates.forEach(dt=>{if(getDow(dt)===d){let fc=0;codes.forEach(c=>fc+=(D.fc[c]||{})[dt]||0);if(fc>0)v.push(fc);}});
+    return avg(v)||0;
+  });
+  if(charts.dow) charts.dow.destroy();
+  charts.dow=new Chart(document.getElementById('cDow').getContext('2d'),{
+    type:'bar',
+    data:{labels:DOWS, datasets:[
+      {label:'예측 fc 일평균', data:fcByDow.map(v=>+v.toFixed(0)),
+       backgroundColor:'rgba(58,58,240,0.5)', borderRadius:4},
+      {label:'실출고 ac 일평균', data:dowAvg.map(v=>+v.toFixed(0)),
+       backgroundColor:'rgba(26,138,74,0.65)', borderRadius:4}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{font:{family:'Inter',size:11}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Inter',size:13,weight:700},color:dowColors}},
+        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{family:'Inter',size:11}}}
       }}
   });
 }
-
 // ════════════════════════════════════════
 // DETAIL
 // ════════════════════════════════════════
@@ -2535,7 +3079,7 @@ function fcToggleEdit(){
 // ════════════════════════════════════════
 // Init — 페이지 로드 시 데이터 자동 로드
 renderCoeff();
-// 약간의 딜레이 후 자동 로드 (DOM 완성 대기)
+sbGuideFill();
 setTimeout(()=>{ loadAll(); }, 500);
 </script>
 </body>
