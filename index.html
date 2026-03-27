@@ -195,7 +195,7 @@ tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
 .al-d{background:var(--red-l);border-color:var(--red);color:var(--red)}
 
 /* FILTER */
-.frow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.frow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;align-self:flex-start}
 .frow select,.frow input{
   background:var(--glass-bg-strong);border:1px solid var(--glass-border-subtle);
   border-radius:var(--r-sm);padding:5px 9px;font-size:12px;color:var(--tx);font-family:inherit;
@@ -402,9 +402,76 @@ canvas{display:block}
   .main{margin-left:0;padding:10px}
   .page{display:block!important}.page:not(.on){display:none!important}
 }
+
+/* ── Date Range Picker ─────────────────────────── */
+.drp-btn{display:inline-flex!important;align-items:center!important;align-self:flex-start!important;gap:4px;padding:3px 8px!important;height:auto!important;max-height:26px!important;line-height:1!important;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--tx);font-size:11px;font-family:inherit;cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.drp-btn:hover{border-color:var(--accent)}
+.drp-btn .drp-icon{font-size:11px;opacity:.6}
+.drp-btn .drp-range{color:var(--accent);font-weight:600}
+.drp-btn .drp-range.empty{color:var(--t3);font-weight:400}
+.drp-overlay{display:none;position:fixed;inset:0;z-index:800}
+.drp-overlay.open{display:block}
+.drp-popup{position:fixed;z-index:801;background:var(--glass-bg-strong);border:1px solid var(--glass-border);border-radius:var(--r-xl);box-shadow:var(--glass-shadow-float);padding:16px;backdrop-filter:blur(20px);min-width:460px;max-width:520px}
+.drp-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.drp-inp{flex:1;padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-dark);color:var(--tx);font-size:12px;font-family:inherit;text-align:center}
+.drp-inp:focus{outline:none;border-color:var(--accent)}
+.drp-quick{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.drp-q{padding:3px 10px;border-radius:20px;border:1px solid var(--glass-border-subtle);background:transparent;color:var(--t2);font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
+.drp-q:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+.drp-q.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.drp-cals{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.drp-cal{min-width:0}
+.drp-cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.drp-cal-title{font-size:13px;font-weight:700;color:var(--tx)}
+.drp-nav{display:flex;gap:2px}
+.drp-nav button{padding:2px 6px;border:1px solid var(--glass-border-subtle);border-radius:var(--r-sm);background:var(--glass-bg-dark);color:var(--t2);cursor:pointer;font-size:11px;font-family:inherit}
+.drp-nav button:hover{border-color:var(--accent);color:var(--accent)}
+.drp-dow-row{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;margin-bottom:3px}
+.drp-dow-row span{text-align:center;font-size:10px;color:var(--t4);font-weight:600;padding:2px 0}
+.drp-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.drp-day{text-align:center;padding:5px 2px;font-size:12px;cursor:pointer;border-radius:var(--r-sm);color:var(--t2);transition:all .1s;border:1px solid transparent}
+.drp-day:hover{background:var(--glass-bg-dark);color:var(--tx)}
+.drp-day.empty{cursor:default}
+.drp-day.today{font-weight:700;color:var(--accent)}
+.drp-day.sel-start,.drp-day.sel-end{background:var(--accent)!important;color:#fff!important;font-weight:700}
+.drp-day.in-range{background:rgba(58,58,240,.1);color:var(--accent)}
+.drp-day.sat{color:var(--blue)}
+.drp-day.sun{color:var(--red)}
+.drp-day.other-month{opacity:.3}
+.drp-day.disabled{opacity:.25;cursor:default}
+.drp-foot{display:flex;align-items:center;justify-content:space-between}
+.drp-summary{font-size:11.5px;color:var(--t3)}
+.drp-summary b{color:var(--tx)}
+.drp-actions{display:flex;gap:6px}
 </style>
 </head>
 <body>
+
+<!-- ─── DATE RANGE PICKER (shared popup) ──────── -->
+<div class="drp-overlay" id="drpOverlay" onclick="drpClose()"></div>
+<div class="drp-popup" id="drpPopup" style="display:none">
+  <!-- 직접 입력 -->
+  <div class="drp-top">
+    <input class="drp-inp" id="drpInpS" placeholder="YYYY-MM-DD" maxlength="10" oninput="drpOnInp('s')" onblur="drpOnInpBlur('s')">
+    <span style="color:var(--t4);font-size:13px">~</span>
+    <input class="drp-inp" id="drpInpE" placeholder="YYYY-MM-DD" maxlength="10" oninput="drpOnInp('e')" onblur="drpOnInpBlur('e')">
+  </div>
+  <!-- 빠른 선택 -->
+  <div class="drp-quick" id="drpQuick"></div>
+  <!-- 캘린더 2개 -->
+  <div class="drp-cals">
+    <div class="drp-cal" id="drpCalL"></div>
+    <div class="drp-cal" id="drpCalR"></div>
+  </div>
+  <!-- 하단 요약 + 버튼 -->
+  <div class="drp-foot">
+    <div class="drp-summary" id="drpSummary">기간을 선택하세요</div>
+    <div class="drp-actions">
+      <button class="btn" onclick="drpClose()">취소</button>
+      <button class="btn btn-p" onclick="drpApply()">적용</button>
+    </div>
+  </div>
+</div>
 
 <!-- ─── SIDEBAR ───────────────────────────────── -->
 <aside class="sidebar">
@@ -489,7 +556,12 @@ canvas{display:block}
 <div class="histbar">
   <span class="hb-title">요즘 물량 예측 오차 분석 대시보드</span>
   <span class="hb-sep"></span>
-  <span class="hb-info" id="dateRangeTxt">—</span>
+  <span class="hb-info" id="dateRangeTxt" style="cursor:default;font-size:10.5px">—</span>
+  <span class="hb-sep" style="width:1px"></span>
+  <button class="drp-btn" id="globalDrpBtn" onclick="drpOpen('global',this)" style="display:none">
+    <span class="drp-icon">📅</span>
+    <span class="drp-range empty" id="globalDrpLbl">전체 기간</span>
+  </button>
   <div class="hb-right">
     <button class="btn btn-p" id="loadBtn" onclick="loadAll()">↻ 데이터 로드</button>
   </div>
@@ -521,13 +593,11 @@ canvas{display:block}
       <div class="sub">예측(fc) · 전일결제(pv) · 출고최대(mx) · 실출고(ac) · 미출(mis) 날짜별 통합</div>
     </div>
     <div class="frow">
-      <select id="dailyPeriod" onchange="renderDaily()">
-        <option value="14">최근 14일</option>
-        <option value="30" selected>최근 30일</option>
-        <option value="60">최근 60일</option>
-        <option value="all">전체</option>
-      </select>
-      <select id="dailyGrp" onchange="renderDaily()">
+      <button class="drp-btn" id="dailyDrpBtn" onclick="drpOpen('daily',this)">
+        <span class="drp-icon">📅</span>
+        <span class="drp-range empty" id="dailyDrpLbl">전체 기간</span>
+      </button>
+      <select id="dailyGrp" onchange="renderDaily()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
         <option value="all">전체 품목</option>
         <option value="yogurt">요거트</option>
         <option value="topping">토핑</option>
@@ -550,12 +620,10 @@ canvas{display:block}
   <div class="sh mb12">
     <div><h2>📊 오차 현황</h2><div class="sub">예측(fc) vs 실제출고(ac) 품목별 정확도 요약</div></div>
     <div class="frow">
-      <select id="ovPeriod" onchange="renderOverview()">
-        <option value="all">전체 기간</option>
-        <option value="30">최근 30일</option>
-        <option value="14">최근 14일</option>
-        <option value="7">최근 7일</option>
-      </select>
+      <button class="drp-btn" id="overviewDrpBtn" onclick="drpOpen('overview',this)">
+        <span class="drp-icon">📅</span>
+        <span class="drp-range empty" id="overviewDrpLbl">전체 기간</span>
+      </button>
     </div>
   </div>
 
@@ -644,7 +712,13 @@ canvas{display:block}
 <div class="page" id="page-suggest">
   <div class="sh mb12">
     <div><h2>💡 계수 제안</h2><div class="sub">실출고 데이터 기반 계수 제안 — 클릭 한 번으로 현행 계수에 반영</div></div>
-    <button class="btn btn-p" onclick="renderSuggest()" style="padding:5px 12px">↻ 재계산</button>
+    <div class="frow">
+      <button class="drp-btn" id="suggestDrpBtn" onclick="drpOpen('suggest',this)">
+        <span class="drp-icon">📅</span>
+        <span class="drp-range empty" id="suggestDrpLbl">전체 기간</span>
+      </button>
+      <button class="btn btn-p" onclick="renderSuggest()" style="padding:5px 12px">↻ 재계산</button>
+    </div>
   </div>
 
   <div id="suggestAlerts" class="mb12"></div>
@@ -692,12 +766,18 @@ canvas{display:block}
 <div class="page" id="page-trend">
   <div class="sh mb12">
     <div><h2>📈 추이 분석</h2><div class="sub">월별 출고량 추이 · MoM 성장률 · 요일별 패턴 · 품목 점유율</div></div>
+    <div class="frow">
+    <button class="drp-btn" id="trendDrpBtn" onclick="drpOpen('trend',this)">
+      <span class="drp-icon">📅</span>
+      <span class="drp-range empty" id="trendDrpLbl">전체 기간</span>
+    </button>
     <select id="trendGrp" onchange="renderTrend()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
       <option value="all">전체 품목</option>
       <option value="yogurt">요거트</option>
       <option value="topping">토핑</option>
       <option value="drink">마시는</option>
     </select>
+    </div>
   </div>
 
   <!-- 월별 요약 카드 (동적) -->
@@ -742,9 +822,15 @@ canvas{display:block}
 <div class="page" id="page-detail">
   <div class="sh mb12">
     <div><h2>🔎 품목 상세</h2><div class="sub">선택 품목의 일별 fc/ac/오차 완전 조회</div></div>
-    <select id="detailSel" onchange="renderDetail()" style="padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12.5px;color:var(--tx)">
-      <option value="">품목 선택</option>
-    </select>
+    <div class="frow">
+      <button class="drp-btn" id="detailDrpBtn" onclick="drpOpen('detail',this)">
+        <span class="drp-icon">📅</span>
+        <span class="drp-range empty" id="detailDrpLbl">전체 기간</span>
+      </button>
+      <select id="detailSel" onchange="renderDetail()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12.5px;color:var(--tx)">
+        <option value="">품목 선택</option>
+      </select>
+    </div>
   </div>
   <div id="detailContent"><div class="empty"><div class="ico">🔍</div><div>품목을 선택하고 데이터를 로드하세요</div></div></div>
 </div>
@@ -877,7 +963,8 @@ canvas{display:block}
             <div class="ev-applied" id="evApplied"></div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-            <button class="btn no-print" onclick="event.stopPropagation();evLoadSheet()" id="evLoadBtn" style="padding:3px 10px;font-size:11px">🔄 시트 불러오기</button>
+            <button class="btn no-print" onclick="event.stopPropagation();evLoadSheet('month')" id="evLoadBtn" style="padding:3px 10px;font-size:11px" title="기준주 포함 월의 행사만 로드">📅 이번달 행사</button>
+            <button class="btn no-print" onclick="event.stopPropagation();evLoadSheet('all')" id="evLoadAllBtn" style="padding:3px 10px;font-size:11px" title="전체 행사 로드 후 기준월 행사 적용">🗂 전체 로드</button>
             <button class="btn no-print" onclick="event.stopPropagation();evClear()" style="padding:3px 8px;font-size:11px;color:var(--red)">✕</button>
             <span id="evArr" style="font-size:10px;color:var(--t4);transition:transform .2s">▼</span>
           </div>
@@ -1301,6 +1388,152 @@ async function dbgFetch(){
 
 function filtDailyDates(){return{};}  // legacy stub
 function buildDailyTable(){return'';} // legacy stub
+
+// ════════════════════════════════════════
+// GLOBAL PERIOD FILTER (공유 날짜 필터)
+// ════════════════════════════════════════
+function getFilteredDates(){
+  const p = document.getElementById('globalPeriod')?.value||'all';
+  if(p==='all') return D.dates;
+  return D.dates.slice(-parseInt(p));
+}
+function onGlobalPeriodChange(){
+  if(!D.loaded) return;
+  // 현재 활성 페이지 다시 렌더
+  const active = document.querySelector('.page.on');
+  if(!active) return;
+  const id = active.id.replace('page-','');
+  if(id==='overview') renderOverview();
+  if(id==='daily')    renderDaily();
+  if(id==='trend')    renderTrend();
+  if(id==='detail')   renderDetail();
+}
+
+// ── 일별 현황 ──────────────────────────────────────────────
+const DAILY_OPEN = new Set();
+
+function renderDaily(){
+  const el = document.getElementById('dailyContent');
+  if(!el) return;
+  if(!D.loaded){
+    el.innerHTML='<div class="empty"><div class="ico">📋</div><div>데이터를 로드하면 자동으로 표시됩니다</div></div>';
+    return;
+  }
+  const pVal = document.getElementById('dailyPeriod')?.value||'30';
+  const grp  = document.getElementById('dailyGrp')?.value||'all';
+  const missOnly = document.getElementById('dailyMissOnly')?.checked||false;
+
+  let dates = drpGetRange('daily');
+  const codes = CODES.filter(c=>grp==='all'||GRP[c]===grp);
+
+  const rows = dates.map(dt=>{
+    let fc=0,ac=0,pv=0,mx=0,mis=0;
+    codes.forEach(c=>{
+      fc  +=(D.fc [c]||{})[dt]||0;
+      ac  +=(D.ac [c]||{})[dt]||0;
+      pv  +=(D.pv [c]||{})[dt]||0;
+      mx  +=(D.mx [c]||{})[dt]||0;
+      mis +=(D.mis[c]||{})[dt]||0;
+    });
+    return {dt,fc,ac,pv,mx,mis};
+  }).filter(r=>r.fc||r.ac||r.pv||r.mx);
+
+  const filtered = missOnly ? rows.filter(r=>r.mis>0) : rows;
+
+  if(!filtered.length){
+    document.getElementById('dailySummary').innerHTML='';
+    el.innerHTML='<div class="empty"><div class="ico">📭</div><div>해당 조건의 데이터 없음</div></div>';
+    return;
+  }
+
+  // 요약 카드
+  const sumFC=filtered.reduce((s,r)=>s+r.fc,0);
+  const sumAC=filtered.reduce((s,r)=>s+r.ac,0);
+  const sumMX=filtered.reduce((s,r)=>s+r.mx,0);
+  const sumMIS=filtered.reduce((s,r)=>s+r.mis,0);
+  const avgErr=sumFC>0?((sumAC-sumFC)/sumFC*100):0;
+  const sumEl = document.getElementById('dailySummary');
+  if(sumEl) sumEl.innerHTML=`
+    <div class="daily-summary-row">
+      <div class="daily-sum-card"><div class="sl">기간 예측(fc)</div><div class="sv" style="color:var(--accent)">${sumFC.toLocaleString()}</div></div>
+      <div class="daily-sum-card"><div class="sl">기간 실출고(ac)</div><div class="sv" style="color:var(--green)">${sumAC.toLocaleString()}</div></div>
+      <div class="daily-sum-card"><div class="sl">출고최대(mx)</div><div class="sv" style="color:var(--orange)">${sumMX?sumMX.toLocaleString():'—'}</div></div>
+      <div class="daily-sum-card"><div class="sl">미출(mis)</div><div class="sv" style="color:${sumMIS>0?'var(--red)':'var(--green)'}">${sumMIS.toLocaleString()}</div></div>
+      <div class="daily-sum-card"><div class="sl">평균 오차율</div><div class="sv" style="color:${Math.abs(avgErr)>15?'var(--red)':Math.abs(avgErr)>8?'var(--orange)':'var(--green)'}">${(avgErr>=0?'+':'')+avgErr.toFixed(1)}%</div></div>
+    </div>`;
+
+  const hasPv  = filtered.some(r=>r.pv>0);
+  const hasMx  = filtered.some(r=>r.mx>0);
+  const hasMis = filtered.some(r=>r.mis>0);
+
+  let colHd = `<div class="daily-col-hd">
+    <span style="width:24px;flex-shrink:0"></span>
+    <span style="width:72px;flex-shrink:0">날짜</span>
+    <span style="flex:1;text-align:right">fc</span>
+    ${hasPv?'<span style="flex:1;text-align:right">pv</span>':''}
+    ${hasMx?'<span style="flex:1;text-align:right">mx</span>':''}
+    <span style="flex:1;text-align:right">ac</span>
+    ${hasMis?'<span style="flex:1;text-align:right;color:var(--red)">mis</span>':''}
+    <span style="width:90px;text-align:right;flex-shrink:0">오차율</span>
+    <span style="width:12px"></span>
+  </div>`;
+
+  let rowsHtml = [...filtered].reverse().map(r=>{
+    const dow = getDow(r.dt)||'—';
+    const diff= r.ac-r.fc, pct=r.fc>0?(diff/r.fc*100):0;
+    const st  = errSt(diff,pct);
+    const errColor=st==='danger'?'var(--red)':st==='warn'?'var(--orange)':'var(--green)';
+    const badge=st==='danger'?'🔴':st==='warn'?'🟡':'🟢';
+    const isToday=r.dt===dateStr(new Date());
+    const isOpen=DAILY_OPEN.has(r.dt);
+
+    let bodyHtml='';
+    if(isOpen){
+      const itemRows=codes.map(c=>{
+        const cfc=(D.fc[c]||{})[r.dt]||0, cac=(D.ac[c]||{})[r.dt]||0;
+        const cmx=(D.mx[c]||{})[r.dt]||0, cmis=(D.mis[c]||{})[r.dt]||0;
+        if(!cfc&&!cac&&!cmx&&!cmis) return '';
+        const cdiff=cac-cfc, cpct=cfc>0?(cdiff/cfc*100):0;
+        const cst=errSt(cdiff,cpct), cc=cst==='danger'?'var(--red)':cst==='warn'?'var(--orange)':'var(--t2)';
+        return `<div class="dib-row" style="${cst!=='ok'?'border-left:2px solid '+cc:''}">
+          <span class="dib-tag">${TAG[c]||c}</span>
+          <span class="dib-name">${NAME[c]||c}</span>
+          <span class="dib-fc">${cfc||'—'}</span>
+          ${hasMx?`<span class="dib-mx">${cmx||'—'}</span>`:''}
+          <span class="dib-ac" style="color:${cc}">${cac||'—'}</span>
+          ${hasMis?`<span class="dib-mis">${cmis>0?cmis:'·'}</span>`:''}
+        </div>`;
+      }).join('');
+      bodyHtml=`<div class="dib-grid" style="margin-top:8px">${itemRows||'<span style="color:var(--t4);font-size:11px">데이터 없음</span>'}</div>`;
+    }
+
+    return `<div class="daily-row${isToday?' is-today':''}${r.mis>0?' has-miss':''}${isOpen?' open':''}" id="drow_${r.dt}">
+      <div class="daily-hd" onclick="dailyToggle('${r.dt}')">
+        <span class="d-dow" style="color:${DOW_COLORS[dow]||'var(--t2)'}">${dow}</span>
+        <span class="d-date">${r.dt.slice(5)}</span>
+        <div class="d-cells">
+          <div class="d-cell"><span class="dc-l">fc</span><span class="dc-v${!r.fc?' zero':''}" style="color:var(--accent)">${r.fc?r.fc.toLocaleString():'—'}</span></div>
+          ${hasPv?`<div class="d-cell"><span class="dc-l">pv</span><span class="dc-v${!r.pv?' zero':''}" style="color:var(--blue)">${r.pv?r.pv.toLocaleString():'—'}</span></div>`:''}
+          ${hasMx?`<div class="d-cell"><span class="dc-l">mx</span><span class="dc-v${!r.mx?' zero':''}" style="color:var(--orange)">${r.mx?r.mx.toLocaleString():'—'}</span></div>`:''}
+          <div class="d-cell"><span class="dc-l">ac</span><span class="dc-v${!r.ac?' zero':''}" style="color:var(--green);font-weight:800">${r.ac?r.ac.toLocaleString():'—'}</span></div>
+          ${hasMis?`<div class="d-cell"><span class="dc-l">mis</span><span class="dc-v${!r.mis?' zero':''}" style="color:${r.mis>0?'var(--red)':'var(--t4)'}">${r.mis>0?r.mis.toLocaleString():'·'}</span></div>`:''}
+        </div>
+        <div class="d-right">
+          <span class="d-err" style="color:${errColor}">${badge} ${(pct>=0?'+':'')+pct.toFixed(1)}%</span>
+          <span class="d-arr">▼</span>
+        </div>
+      </div>
+      <div class="daily-body">${bodyHtml}</div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = colHd + rowsHtml;
+}
+
+function dailyToggle(dt){
+  if(DAILY_OPEN.has(dt)) DAILY_OPEN.delete(dt); else DAILY_OPEN.add(dt);
+  renderDaily();
+}
 
 // ════════════════════════════════════════
 // CSV FETCH
@@ -1737,7 +1970,13 @@ async function loadAll() {
     loadBarSet(85, '🎨 화면 렌더링 중...', '');
 
     if (D.dates.length) {
-      document.getElementById('dateRangeTxt').textContent = `${D.dates[0]} ~ ${D.dates[D.dates.length-1]}`;
+      // D.dates = fc+ac 합집합. 실제 ac 데이터 범위 따로 계산
+      const acDates=D.dates.filter(dt=>CODES.some(c=>(D.ac[c]||{})[dt]));
+      const acFirst=acDates[0]||D.dates[0], acLast=acDates[acDates.length-1]||D.dates[D.dates.length-1];
+      document.getElementById('dateRangeTxt').textContent = acFirst + ' ~ ' + acLast;
+      document.getElementById('dateRangeTxt').title = `ac 실출고 기간: ${acFirst}~${acLast} / fc 예측 전체: ${D.dates[0]}~${D.dates[D.dates.length-1]}`;
+      const gp=document.getElementById('globalPeriod');
+      if(gp){ gp.style.display='inline-block'; }
       document.getElementById('lastUpdTxt').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
     } else {
       // 파싱 실패 — 원인 파악용 진단 패널
@@ -1773,11 +2012,15 @@ async function loadAll() {
       sel.appendChild(o);
     });
 
+    drpStoreAcRange();
+    drpInitAfterLoad();
     renderOverview();
     renderCoeff();
     sbGuideFill();
     if(document.getElementById('page-daily').classList.contains('on')) renderDaily();
     applyHolidaysToWeek();
+    // 행사 자동 로드 (데이터 로드 시)
+    try { await evLoadSheet('month'); } catch(_) {}
 
     loadBarSet(100, `✅ 로드 완료 — ${D.dates.length}일 데이터`);
     loadBarStep(steps);
@@ -1838,9 +2081,7 @@ function getDow(d) {
 }
 
 function filtDates() {
-  const p=document.getElementById('ovPeriod')?.value||'all';
-  if (p==='all') return D.dates;
-  return D.dates.slice(-parseInt(p));
+  return drpGetRange('overview');
 }
 
 function avg(arr) { return arr.length?arr.reduce((a,b)=>a+b,0)/arr.length:null; }
@@ -1881,7 +2122,7 @@ function renderOverviewTable() {
   const dates=filtDates();
   const codes=CODES.filter(c=>curGrp==='all'||GRP[c]===curGrp);
   const sums=codes.map(c=>itemSummary(c,dates)).filter(s=>s.n>0);
-  sums.sort((a,b)=>Math.abs(b.aPct)-Math.abs(a.aPct));
+  // 시트 순서 유지 (sort 제거) — 플-소-알-말-라-블-애-오-크-카-푸-초-마S-마L-토핑류
 
   if (!sums.length) {
     document.getElementById('ovTable').innerHTML='<div class="empty"><div class="ico">📭</div><div>해당 기간 데이터 없음</div></div>';
@@ -2056,6 +2297,7 @@ function renderHeatmap() {
 // ════════════════════════════════════════
 function renderSuggest() {
   if (!D.loaded) return;
+  D._sugDates = drpGetRange('suggest');
   renderXSuggest();
   renderDowSuggest();
   renderItemSuggest();
@@ -2288,10 +2530,11 @@ function renderTrend() {
   if (!D.loaded) return;
   const grp = document.getElementById('trendGrp')?.value||'all';
   const codes = CODES.filter(c=>grp==='all'||GRP[c]===grp);
+  const trendDates = drpGetRange('trend');
 
   // ── 월별 집계 ──────────────────────────────
   const bym={};
-  D.dates.forEach(dt=>{
+  trendDates.forEach(dt=>{
     const m=dt.slice(0,7);
     if(!bym[m]) bym[m]={fc:0,ac:0,days:0};
     const dow=getDow(dt);
@@ -2391,7 +2634,7 @@ function renderTrend() {
 
   // ── 품목 점유율 stacked ──────────────────────
   const top=codes.map(c=>{
-    let t=0; D.dates.forEach(d=>t+=(D.ac[c]||{})[d]||0); return{c,t};
+    let t=0; trendDates.forEach(d=>t+=(D.ac[c]||{})[d]||0); return{c,t};
   }).sort((a,b)=>b.t-a.t).slice(0,8);
   const palette=['rgba(58,58,240,.75)','rgba(26,138,74,.75)','rgba(196,90,16,.75)',
     'rgba(26,86,200,.75)','rgba(108,53,204,.75)','rgba(212,32,32,.75)',
@@ -2404,7 +2647,7 @@ function renderTrend() {
       label:TAG[c],
       data:months.map(m=>{
         let t=0;
-        D.dates.filter(d=>d.startsWith(m)).forEach(d=>t+=(D.ac[c]||{})[d]||0);
+        trendDates.filter(d=>d.startsWith(m)).forEach(d=>t+=(D.ac[c]||{})[d]||0);
         return bym[m]?.days?+(t/bym[m].days).toFixed(0):0;
       }),
       backgroundColor:palette[i%palette.length], borderRadius:2, stack:'s'
@@ -2454,13 +2697,20 @@ function jumpDetail(code) {
 }
 
 function renderDetail() {
-  const code=document.getElementById('detailSel').value;
+  // 품목 select 채우기 (로드 후 비어있을 때 대비)
+  const sel=document.getElementById('detailSel');
+  if(sel && sel.options.length<=1 && D.loaded && CODES.length){
+    sel.innerHTML='<option value="">품목 선택</option>';
+    CODES.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=(TAG[c]||c)+' '+NAME[c];sel.appendChild(o);});
+  }
+  const code=sel.value;
   if (!code||!D.loaded){
     document.getElementById('detailContent').innerHTML='<div class="empty"><div class="ico">🔍</div><div>품목을 선택하세요</div></div>';
     return;
   }
-  const s=itemSummary(code,D.dates);
-  const recent=D.dates.slice(-60);
+  const filtDates=drpGetRange('detail');
+  const s=itemSummary(code,filtDates);
+  const recent=filtDates.slice(-60);
   const fcV=recent.map(d=>(D.fc[code]||{})[d]||0);
   const acV=recent.map(d=>(D.ac[code]||{})[d]||0);
   const errV=recent.map((_,i)=>fcV[i]>0?+((acV[i]/fcV[i]-1)*100).toFixed(1):null);
@@ -3047,9 +3297,12 @@ function evAutoApplyForWeek(){
   fcRecalc();
 }
 
-async function evLoadSheet(){
+async function evLoadSheet(mode){
+  // mode: 'month' = 기준월 행사만, 'all' = 전체 로드 (기준월 적용)
   const btn=document.getElementById('evLoadBtn');
   btn.disabled=true;btn.textContent='로딩중...';
+  const allBtnD=document.getElementById('evLoadAllBtn');
+  if(allBtnD) allBtnD.disabled=true;
   document.getElementById('evSheetStatus').textContent='구글 시트에서 불러오는 중...';
   try{
     const [evInfoTxt,evSidTxt]=await Promise.all([
@@ -3086,6 +3339,17 @@ async function evLoadSheet(){
     document.getElementById('evSheetStatus').innerHTML=
       `<span style="color:var(--green)">✅ 전체 ${EV_RAW.length}개 행사 로드 완료 — 이번 주 행사 자동 적용 중...</span>`;
 
+    // 기준월 필터
+    const monDate = FC.monDate || fcMonday(new Date());
+    const curYM = dateStr(monDate).slice(0,7); // "2026-03"
+    const evToApply = (mode==='month')
+      ? EV_RAW.filter(ev=>{
+          // 행사 기간이 기준월과 겹치는 것만
+          const s=(ev.start||'').slice(0,7), en=(ev.end||'').slice(0,7);
+          return s<=curYM && (en>=curYM || !en);
+        })
+      : EV_RAW; // 전체이지만 autoApply는 현재 주 기준으로
+
     evAutoApplyForWeek();
 
     // Update status with this-week count
@@ -3099,7 +3363,9 @@ async function evLoadSheet(){
     document.getElementById('evSheetStatus').innerHTML=
       `<span style="color:var(--red)">❌ ${(err.message||'').replace(/\n/g,'<br>')}</span>`;
   }
-  btn.disabled=false;btn.textContent='🔄 시트 불러오기';
+  btn.disabled=false;btn.textContent='📅 이번달 행사';
+  const allBtn=document.getElementById('evLoadAllBtn');
+  if(allBtn) allBtn.disabled=false;
 }
 
 function evToggle(){
@@ -3272,8 +3538,326 @@ function fcToggleEdit(){
 })();
 
 // ════════════════════════════════════════
-// Init — 페이지 로드 시 데이터 자동 로드
-renderCoeff();
+// DATE RANGE PICKER ENGINE
+// ════════════════════════════════════════
+const DRP = {
+  // state
+  open: false,
+  pageId: null,         // 'global' | 'overview' | 'daily' | 'trend' | 'detail' | 'suggest'
+  triggerEl: null,
+  selS: null,           // selected start 'YYYY-MM-DD'
+  selE: null,           // selected end
+  hoverD: null,         // hover date
+  viewL: null,          // left calendar {y,m}
+  viewR: null,          // right calendar {y,m}
+  clicking: 'start',    // 'start' | 'end'
+};
+
+// Per-page range storage (null = 전체 기간)
+const PAGE_RANGE = { global:null, overview:null, daily:null, trend:null, detail:null, suggest:null };
+
+// Quick select buttons
+const DRP_QUICK = [
+  {label:'어제', fn:()=>{ const d=drpOffset(-1); return[d,d]; }},
+  {label:'지난 7일', fn:()=>[ drpOffset(-6), drpOffset(0) ]},
+  {label:'이번 주', fn:()=>{ const t=new Date(); const day=t.getDay(); const mon=new Date(t); mon.setDate(t.getDate()-(day===0?6:day-1)); return[dateStr(mon),dateStr(t)]; }},
+  {label:'지난 주', fn:()=>{ const t=new Date(); const day=t.getDay(); const mon=new Date(t); mon.setDate(t.getDate()-(day===0?6:day-1)-7); const sun=new Date(mon); sun.setDate(mon.getDate()+6); return[dateStr(mon),dateStr(sun)]; }},
+  {label:'이번 달', fn:()=>{ const t=new Date(); return[`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-01`, dateStr(t)]; }},
+  {label:'지난 달', fn:()=>{ const t=new Date(); const y=t.getMonth()===0?t.getFullYear()-1:t.getFullYear(); const m=t.getMonth()===0?12:t.getMonth(); const last=new Date(t.getFullYear(),t.getMonth(),0); return[`${y}-${String(m).padStart(2,'0')}-01`, dateStr(last)]; }},
+  {label:'지난 30일', fn:()=>[ drpOffset(-29), drpOffset(0) ]},
+  {label:'지난 90일', fn:()=>[ drpOffset(-89), drpOffset(0) ]},
+  {label:'지난 365일', fn:()=>[ drpOffset(-364), drpOffset(0) ]},
+];
+function drpOffset(n){ const d=new Date(); d.setDate(d.getDate()+n); return dateStr(d); }
+
+function drpOpen(pageId, triggerEl){
+  DRP.pageId = pageId;
+  DRP.triggerEl = triggerEl;
+  const cur = PAGE_RANGE[pageId];
+  // Default to ac data range if available
+  const defS = D.loaded ? (D.acRange?D.acRange[0]:D.dates[0]) : null;
+  const defE = D.loaded ? (D.acRange?D.acRange[1]:D.dates[D.dates.length-1]) : null;
+  DRP.selS = cur ? cur[0] : defS;
+  DRP.selE = cur ? cur[1] : defE;
+  DRP.clicking = 'start';
+  DRP.hoverD = null;
+
+  // Init calendar views
+  const today = new Date();
+  if(DRP.selE){
+    const ed=new Date(DRP.selE);
+    DRP.viewR = {y:ed.getFullYear(), m:ed.getMonth()};
+    DRP.viewL = {y:ed.getMonth()===0?ed.getFullYear()-1:ed.getFullYear(), m:ed.getMonth()===0?11:ed.getMonth()-1};
+  } else {
+    DRP.viewR = {y:today.getFullYear(), m:today.getMonth()};
+    DRP.viewL = {y:today.getMonth()===0?today.getFullYear()-1:today.getFullYear(), m:today.getMonth()===0?11:today.getMonth()-1};
+  }
+
+  // Position popup near button
+  const popup = document.getElementById('drpPopup');
+  const rect = triggerEl.getBoundingClientRect();
+  popup.style.display = 'block';
+  document.getElementById('drpOverlay').classList.add('open');
+  // Position
+  let top = rect.bottom + 6;
+  let left = rect.left;
+  const pw = popup.offsetWidth || 500;
+  if(left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+  if(top + 460 > window.innerHeight) top = rect.top - 460;
+  popup.style.top = Math.max(8, top) + 'px';
+  popup.style.left = Math.max(8, left) + 'px';
+
+  drpRender();
+  DRP.open = true;
+}
+
+function drpClose(){
+  document.getElementById('drpPopup').style.display='none';
+  document.getElementById('drpOverlay').classList.remove('open');
+  DRP.open = false;
+}
+
+function drpApply(){
+  if(!DRP.selS) return;
+  const s = DRP.selS, e = DRP.selE||DRP.selS;
+  const range = [s<=e ? s : e, s<=e ? e : s];
+  PAGE_RANGE[DRP.pageId] = range;
+
+  // If global → sync all pages
+  if(DRP.pageId==='global'){
+    Object.keys(PAGE_RANGE).forEach(k=>{ if(k!=='global') PAGE_RANGE[k]=null; });
+  }
+
+  drpUpdateLabel(DRP.pageId, range);
+  drpClose();
+
+  // Re-render active page
+  const pid = DRP.pageId==='global' ? (document.querySelector('.page.on')?.id||'').replace('page-','') : DRP.pageId;
+  if(pid==='overview') renderOverview();
+  if(pid==='daily')    renderDaily();
+  if(pid==='trend')    renderTrend();
+  if(pid==='detail')   renderDetail();
+  if(pid==='suggest')  renderSuggest();
+  if(DRP.pageId==='global') onGlobalPeriodChange();
+}
+
+function drpUpdateLabel(pageId, range){
+  const lbl = document.getElementById(pageId+'DrpLbl');
+  if(!lbl) return;
+  if(!range){ lbl.textContent='전체 기간'; lbl.className='drp-range empty'; return; }
+  const days = Math.round((new Date(range[1])-new Date(range[0]))/86400000)+1;
+  lbl.textContent = range[0].slice(5)+' ~ '+range[1].slice(5)+' ('+days+'일간)';
+  lbl.className = 'drp-range';
+}
+
+function drpGetRange(pageId){
+  // Global → use PAGE_RANGE.global (if set), else all D.dates
+  const r = PAGE_RANGE[pageId] || PAGE_RANGE['global'];
+  if(!r) return D.dates;
+  return D.dates.filter(d=>d>=r[0]&&d<=r[1]);
+}
+
+// drpRender → drpRenderFull (defined below)
+
+function drpRenderCal(y, m, side){
+  const today = dateStr(new Date());
+  const firstDay = new Date(y,m,1).getDay(); // 0=sun
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  const monthName = y+'년 '+(m+1)+'월';
+
+  let h = '<div class="drp-cal-hd">';
+  h += '<div class="drp-nav">';
+  if(side==='L'){
+    h += '<button onclick="drpNav(\'L\',-12)">«</button>';
+    h += '<button onclick="drpNav(\'L\',-1)">‹</button>';
+  } else {
+    h += '<button onclick="drpNav(\'R\',-1)">‹</button>';
+  }
+  h += '</div>';
+  h += '<div class="drp-cal-title">'+monthName+'</div>';
+  h += '<div class="drp-nav">';
+  if(side==='R'){
+    h += '<button onclick="drpNav(\'R\',1)">›</button>';
+    h += '<button onclick="drpNav(\'R\',12)">»</button>';
+  } else {
+    h += '<button onclick="drpNav(\'L\',1)">›</button>';
+  }
+  h += '</div></div>';
+
+  h += '<div class="drp-dow-row"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>';
+  h += '<div class="drp-days">';
+
+  // Empty cells
+  const startCol = firstDay; // sunday=0
+  for(let i=0;i<startCol;i++) h+='<div class="drp-day empty"></div>';
+
+  for(let d=1;d<=daysInMonth;d++){
+    const ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const dow = new Date(y,m,d).getDay();
+    let cls = 'drp-day';
+    if(dow===0) cls+=' sun';
+    if(dow===6) cls+=' sat';
+    if(ds===today) cls+=' today';
+    if(ds===DRP.selS) cls+=' sel-start';
+    if(ds===DRP.selE) cls+=' sel-end';
+    if(DRP.selS && DRP.selE && ds>DRP.selS && ds<DRP.selE) cls+=' in-range';
+    // hover preview
+    if(DRP.clicking==='end' && DRP.selS && DRP.hoverD){
+      const lo=DRP.selS<DRP.hoverD?DRP.selS:DRP.hoverD;
+      const hi=DRP.selS<DRP.hoverD?DRP.hoverD:DRP.selS;
+      if(ds>lo && ds<hi) cls+=' in-range';
+      if(ds===DRP.hoverD) cls+=' sel-end';
+    }
+    h += '<div class="'+cls+'" data-d="'+ds+'" onclick="drpPickDay(\''+ds+'\')" onmouseenter="drpHover(\''+ds+'\')">'+d+'</div>';
+  }
+  h += '</div>';
+  return h;
+}
+
+function drpPickDay(ds){
+  if(DRP.clicking==='start'){
+    DRP.selS=ds; DRP.selE=null; DRP.clicking='end';
+  } else {
+    if(ds<DRP.selS){ DRP.selE=DRP.selS; DRP.selS=ds; }
+    else if(ds===DRP.selS){ DRP.selE=ds; }
+    else { DRP.selE=ds; }
+    DRP.clicking='start';
+    DRP.hoverD=null;
+  }
+  drpRenderFull();
+}
+
+function drpHover(ds){
+  if(DRP.clicking==='end' && DRP.hoverD!==ds){
+    DRP.hoverD=ds;
+    drpUpdateRangeHighlight();
+    // 요약 업데이트
+    const s=DRP.selS, e=ds;
+    const lo=s<e?s:e, hi=s<e?e:s;
+    const days=Math.round((new Date(hi)-new Date(lo))/86400000)+1;
+    const sumEl=document.getElementById('drpSummary');
+    if(sumEl) sumEl.innerHTML='<b>'+lo+'</b> ~ <b>'+hi+'</b> ('+days+'일)';
+  }
+}
+
+function drpUpdateRangeHighlight(){
+  // DOM을 재생성하지 않고 class만 업데이트
+  const s=DRP.selS, e=DRP.hoverD||DRP.selE;
+  const lo=s&&e?(s<e?s:e):s;
+  const hi=s&&e?(s<e?e:s):s;
+  document.querySelectorAll('#drpCalL .drp-day[data-d], #drpCalR .drp-day[data-d]').forEach(el=>{
+    const d=el.dataset.d;
+    el.classList.remove('sel-start','sel-end','in-range');
+    if(d===DRP.selS) el.classList.add('sel-start');
+    if(DRP.selE && d===DRP.selE) el.classList.add('sel-end');
+    else if(!DRP.selE && DRP.hoverD && d===DRP.hoverD) el.classList.add('sel-end');
+    if(lo&&hi && d>lo && d<hi) el.classList.add('in-range');
+  });
+}
+
+function drpRenderFull(){
+  // Quick buttons
+  const qDiv = document.getElementById('drpQuick');
+  if(qDiv) qDiv.innerHTML = DRP_QUICK.map((q,i)=>{
+    const [qs,qe]=q.fn();
+    const on = DRP.selS===qs && DRP.selE===qe;
+    return '<button class="drp-q'+(on?' on':'')+'" onclick="drpQuickSet('+i+')">'+q.label+'</button>';
+  }).join('');
+
+  // Calendars (full re-render only when nav)
+  const calL=document.getElementById('drpCalL'), calR=document.getElementById('drpCalR');
+  if(calL) calL.innerHTML = drpRenderCal(DRP.viewL.y, DRP.viewL.m, 'L');
+  if(calR) calR.innerHTML = drpRenderCal(DRP.viewR.y, DRP.viewR.m, 'R');
+
+  // Inputs
+  const inpS=document.getElementById('drpInpS'), inpE=document.getElementById('drpInpE');
+  if(inpS) inpS.value=DRP.selS||'';
+  if(inpE) inpE.value=DRP.selE||'';
+
+  // Summary
+  const sumEl=document.getElementById('drpSummary');
+  if(sumEl){
+    if(DRP.selS && DRP.selE){
+      const days=Math.round((new Date(DRP.selE)-new Date(DRP.selS))/86400000)+1;
+      sumEl.innerHTML='<b>'+DRP.selS+'</b> ~ <b>'+DRP.selE+'</b> ('+days+'일간)';
+    } else if(DRP.selS){
+      sumEl.innerHTML='<b>'+DRP.selS+'</b> ~ 종료일 선택 중...';
+    } else {
+      sumEl.textContent='시작일을 선택하세요';
+    }
+  }
+}
+
+// alias for legacy calls
+function drpRender(){ drpRenderFull(); }
+
+function drpNav(side, delta){
+  const v = side==='L' ? DRP.viewL : DRP.viewR;
+  let nm = v.m + delta, ny = v.y;
+  while(nm>11){nm-=12;ny++;} while(nm<0){nm+=12;ny--;}
+  if(side==='L') DRP.viewL={y:ny,m:nm};
+  else           DRP.viewR={y:ny,m:nm};
+  drpRender();
+}
+
+function drpQuickSet(i){
+  const [s,e] = DRP_QUICK[i].fn();
+  DRP.selS=s; DRP.selE=e; DRP.clicking='start';
+  // Sync calendars to show the range
+  const ed=new Date(e);
+  DRP.viewR={y:ed.getFullYear(),m:ed.getMonth()};
+  DRP.viewL={y:ed.getMonth()===0?ed.getFullYear()-1:ed.getFullYear(),m:ed.getMonth()===0?11:ed.getMonth()-1};
+  drpRender();
+}
+
+function drpOnInp(side){
+  const inp = document.getElementById(side==='s'?'drpInpS':'drpInpE');
+  const v = inp.value.trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)){
+    if(side==='s') DRP.selS=v; else DRP.selE=v;
+    if(DRP.selS&&DRP.selE){ const ed=new Date(DRP.selE); DRP.viewR={y:ed.getFullYear(),m:ed.getMonth()}; DRP.viewL={y:ed.getMonth()===0?ed.getFullYear()-1:ed.getFullYear(),m:ed.getMonth()===0?11:ed.getMonth()-1}; }
+    drpRender();
+  }
+}
+function drpOnInpBlur(side){
+  // auto-format: 8 digits → YYYY-MM-DD
+  const inp = document.getElementById(side==='s'?'drpInpS':'drpInpE');
+  const v = inp.value.replace(/\D/g,'');
+  if(v.length===8){ inp.value=v.slice(0,4)+'-'+v.slice(4,6)+'-'+v.slice(6,8); drpOnInp(side); }
+}
+
+// Override getFilteredDates to use DRP ranges
+function getFilteredDates(pageId){
+  pageId = pageId || (document.querySelector('.page.on')?.id||'').replace('page-','');
+  return drpGetRange(pageId);
+}
+
+function onGlobalPeriodChange(){
+  if(!D.loaded) return;
+  const active = document.querySelector('.page.on');
+  if(!active) return;
+  const id = active.id.replace('page-','');
+  if(id==='overview') renderOverview();
+  else if(id==='daily')    renderDaily();
+  else if(id==='trend')    renderTrend();
+  else if(id==='detail')   renderDetail();
+  else if(id==='suggest')  renderSuggest();
+}
+
+// Init all labels + show global btn after load
+function drpInitAfterLoad(){
+  ['global','overview','daily','trend','detail','suggest'].forEach(pid=>{
+    drpUpdateLabel(pid, PAGE_RANGE[pid]);
+  });
+  const gb=document.getElementById('globalDrpBtn');
+  if(gb) gb.style.display='inline-flex';
+}
+
+// Store ac range for default
+function drpStoreAcRange(){
+  const acDates = D.dates.filter(dt=>CODES.some(c=>(D.ac[c]||{})[dt]));
+  if(acDates.length) D.acRange=[acDates[0], acDates[acDates.length-1]];
+}
 sbGuideFill();
 setTimeout(()=>{ loadAll(); }, 500);
 </script>
