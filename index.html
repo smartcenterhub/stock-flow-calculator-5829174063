@@ -2602,8 +2602,12 @@ function renderItemSuggest() {
       <td class="r" style="color:var(--t4);font-size:11px">${n}</td>
       <td style="text-align:center">${verdict}</td>
       <td style="text-align:center;white-space:nowrap">
-        ${big ? `<button class="btn" onclick="applyOneItem('${c}',${sugRnd})" style="padding:2px 7px;font-size:10.5px;color:${col}">반영</button>` : ''}
-        ${prevVal!==null ? `<button onclick="revertOneItem('${c}',${prevVal})" title="이전 값(${prevVal})으로 되돌리기" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;color:var(--orange)">↩</button>` : ''}
+        <button onclick="applyOneItem('${c}',${sugRnd})"
+          title="제안값 ${sugRnd} 반영"
+          style="padding:2px 10px;font-size:10.5px;border-radius:var(--r-sm);border:1px solid ${big?col:'var(--glass-border-subtle)'};background:${big?col+'18':'transparent'};color:${big?col:'var(--t4)'};cursor:pointer;font-weight:${big?700:400};transition:all .15s">반영</button>
+        <button onclick="${prevVal!==null?`revertOneItem('${c}',${prevVal})`:'void(0)'}"
+          title="${prevVal!==null?'이전 값('+prevVal+')으로 되돌리기':'되돌릴 이전값 없음'}"
+          style="background:none;border:1px solid ${prevVal!==null?'var(--orange)':'var(--glass-border-subtle)'};border-radius:var(--r-sm);cursor:${prevVal!==null?'pointer':'default'};font-size:13px;padding:2px 6px;color:${prevVal!==null?'var(--orange)':'var(--t4)'};opacity:${prevVal!==null?1:0.35};transition:all .15s">↩</button>
       </td>
     </tr>`;
   });
