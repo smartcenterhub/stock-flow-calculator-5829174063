@@ -429,6 +429,8 @@ canvas{display:block}
     <div class="nav-grp">계수 관리</div>
     <div class="ni" onclick="nav('suggest',this)"><span class="ico">💡</span> 계수 제안</div>
     <div class="ni" onclick="nav('coeff',this)"><span class="ico">⚙️</span> 계수 설정</div>
+    <div class="nav-grp">디버그</div>
+    <div class="ni" onclick="nav('debug',this)"><span class="ico">🔬</span> 시트 진단</div>
 
   </nav>
 
@@ -908,6 +910,27 @@ canvas{display:block}
     </div>
   </div>
 </div>
+<!-- ══ PAGE: 시트 진단 ════════════════════════════ -->
+<div class="page" id="page-debug">
+  <div class="sh mb12">
+    <div><h2>🔬 시트 진단</h2><div class="sub">Raw CSV 직접 조회 — 파싱 문제 원인 파악</div></div>
+  </div>
+
+  <div class="card mb12">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+      <select id="dbgGid" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
+        <option value="250741762">fc_예측</option>
+        <option value="1725354971">ac_실제출고</option>
+        <option value="1996598780">pv_전일결제</option>
+        <option value="605077739">mx_출고최대</option>
+        <option value="910874187">unship_미출</option>
+      </select>
+      <button class="btn btn-p" onclick="dbgFetch()" style="padding:5px 14px">🔍 원본 데이터 조회</button>
+      <span id="dbgStatus" style="font-size:11px;color:var(--t3)"></span>
+    </div>
+    <div id="dbgResult"></div>
+  </div>
+</div>
 
 </main>
 
@@ -1161,172 +1184,99 @@ function nav(id, el) {
   }
 }
 
-// ── Sidebar guide panel ────────────────────
-function sbGuideToggle(){
-  document.getElementById('sbGuide').classList.toggle('open');
-}
-function sbGuideFill(){
-  // 요일 계수 뱃지
-  const dowEl=document.getElementById('guideDoW');
-  if(dowEl) dowEl.innerHTML=Object.entries(CFG.dow).map(([d,v])=>
-    `<span class="gi-badge" style="background:${DOW_COLORS?.[d]||'var(--accent)'}18;color:${DOW_COLORS?.[d]||'var(--accent)'}">${d} ×${v.toFixed(2)}</span>`
-  ).join('');
-  // 행사 계수 뱃지
-  const promoEl=document.getElementById('guidePromo');
-  if(promoEl) promoEl.innerHTML=Object.entries(CFG.promo).filter(([k])=>k!=='없음').map(([k,v])=>{
-    const info=FC_PROMO?.[k];
-    const c=info?info.c:'var(--t2)',bg=info?info.bg:'var(--glass-bg-dark)';
-    return`<span class="gi-badge" style="background:${bg};color:${c}">${k} ×${v.toFixed(3)}</span>`;
-  }).join('');
-  // 공휴일 계수 뱃지
-  const holEl=document.getElementById('guideHol');
-  if(holEl) holEl.innerHTML=Object.entries(CFG.holiday).filter(([k])=>k!=='없음').map(([k,v])=>{
-    const c=v>1?'var(--orange)':'var(--red)';
-    return`<span class="gi-badge" style="background:${c}15;color:${c}">${k} ×${v.toFixed(3)}</span>`;
-  }).join('');
-}
+// ── 시트 진단 ──────────────────────────────────────
+async function dbgFetch(){
+  var gid = document.getElementById('dbgGid').value;
+  var st  = document.getElementById('dbgStatus');
+  var res = document.getElementById('dbgResult');
+  st.textContent = '⏳ 조회 중...';
+  res.innerHTML  = '';
+  try {
+    var txt = await fetchCsvByGid(gid);
+    var rows = parseCSV(txt);
+    var p    = parseSheetData(txt);
+    var dbg  = p._debug||{};
 
-// ── 일별 현황 ──────────────────────────────────
-const DAILY_OPEN = new Set(); // 펼쳐진 날짜 키 기억
+    // 요약
+    var html = '<div class="alert al-o" style="margin-bottom:10px;font-size:12px;line-height:1.8">';
+    html += '✅ CSV 수신 · <b>' + rows.length + '행</b>';
+    html += ' · 유효 날짜 <b>' + dbg.dateCount + '개</b>';
+    html += ' · 품목 <b>' + dbg.itemCount + '개</b><br>';
+    html += '감지: 월행=row' + dbg.monthRowIdx + ' / 요일행=row' + dbg.dowRowIdx + ' / 날짜행=row' + dbg.dateRowIdx + ' / 시작컬럼=col' + dbg.dsc + '<br>';
+    html += '첫 날짜: <b>' + dbg.firstDate + '</b> · 첫 코드: <b>' + dbg.firstCode + '</b><br>';
+    html += '월샘플: <b>' + (dbg.monthSample||'—') + '</b> · 요일샘플: <b>' + (dbg.dowSample||'—') + '</b> · 날짜샘플: <b>' + (dbg.dateSample||'—') + '</b>';
+    html += '</div>';
 
-function renderDaily(){
-  if(!D.loaded){
-    document.getElementById('dailyContent').innerHTML='<div class="empty"><div class="ico">📋</div><div>데이터를 로드하면 자동으로 표시됩니다</div></div>';
-    return;
-  }
-  const pVal = document.getElementById('dailyPeriod')?.value||'30';
-  const grp  = document.getElementById('dailyGrp')?.value||'all';
-  const missOnly = document.getElementById('dailyMissOnly')?.checked||false;
-
-  let dates = pVal==='all' ? D.dates : D.dates.slice(-(parseInt(pVal)||30));
-  // 평일만 (주말 제외)
-  dates = dates.filter(d=>!['토','일'].includes(getDow(d)));
-
-  const codes = CODES.filter(c=>grp==='all'||GRP[c]===grp);
-
-  // 날짜별 합계 계산
-  const rows = dates.map(dt=>{
-    let fc=0,ac=0,pv=0,mx=0,mis=0;
-    codes.forEach(c=>{
-      fc  += (D.fc[c] ||{})[dt]||0;
-      ac  += (D.ac[c] ||{})[dt]||0;
-      pv  += (D.pv[c] ||{})[dt]||0;
-      mx  += (D.mx[c] ||{})[dt]||0;
-      mis += (D.mis[c]||{})[dt]||0;
-    });
-    return {dt, fc, ac, pv, mx, mis};
-  }).filter(r=>r.fc||r.ac||r.pv||r.mx||r.mis);
-
-  const filtered = missOnly ? rows.filter(r=>r.mis>0) : rows;
-
-  if(!filtered.length){
-    document.getElementById('dailySummary').innerHTML='';
-    document.getElementById('dailyContent').innerHTML='<div class="empty"><div class="ico">📭</div><div>해당 조건의 데이터 없음</div></div>';
-    return;
-  }
-
-  // ── 요약 카드 ──────────────────────────────────
-  const sumFC=filtered.reduce((s,r)=>s+r.fc,0);
-  const sumAC=filtered.reduce((s,r)=>s+r.ac,0);
-  const sumMX=filtered.reduce((s,r)=>s+r.mx,0);
-  const sumMIS=filtered.reduce((s,r)=>s+r.mis,0);
-  const avgErr=sumFC>0?((sumAC-sumFC)/sumFC*100):0;
-
-  document.getElementById('dailySummary').innerHTML=`
-    <div class="daily-summary-row">
-      <div class="daily-sum-card"><div class="sl">기간 합계 예측(fc)</div><div class="sv" style="color:var(--accent)">${sumFC.toLocaleString()}</div></div>
-      <div class="daily-sum-card"><div class="sl">기간 합계 실출고(ac)</div><div class="sv" style="color:var(--green)">${sumAC.toLocaleString()}</div></div>
-      <div class="daily-sum-card"><div class="sl">출고최대 합계(mx)</div><div class="sv" style="color:var(--orange)">${sumMX?sumMX.toLocaleString():'—'}</div></div>
-      <div class="daily-sum-card"><div class="sl">미출 합계(mis)</div><div class="sv" style="color:${sumMIS>0?'var(--red)':'var(--green)'}">${sumMIS?sumMIS.toLocaleString():'0'}</div></div>
-      <div class="daily-sum-card"><div class="sl">기간 평균 오차율</div><div class="sv" style="color:${Math.abs(avgErr)>15?'var(--red)':Math.abs(avgErr)>8?'var(--orange)':'var(--green)'}">${(avgErr>=0?'+':'')+avgErr.toFixed(1)}%</div></div>
-    </div>`;
-
-  // ── 컬럼 헤더 ──────────────────────────────────
-  const hasPv  = filtered.some(r=>r.pv>0);
-  const hasMx  = filtered.some(r=>r.mx>0);
-  const hasMis = filtered.some(r=>r.mis>0);
-
-  let colHd = `<div class="daily-col-hd">
-    <span style="width:24px;text-align:left;flex-shrink:0"></span>
-    <span style="width:72px;text-align:left;flex-shrink:0">날짜</span>
-    <span style="flex:1;text-align:right">예측 fc</span>
-    ${hasPv?'<span style="flex:1;text-align:right">전일 pv</span>':''}
-    ${hasMx?'<span style="flex:1;text-align:right">최대 mx</span>':''}
-    <span style="flex:1;text-align:right">실출고 ac</span>
-    ${hasMis?'<span style="flex:1;text-align:right;color:var(--red)">미출 mis</span>':''}
-    <span style="width:90px;text-align:right;flex-shrink:0">오차율</span>
-    <span style="width:12px"></span>
-  </div>`;
-
-  // ── 날짜 행 ──────────────────────────────────
-  let rowsHtml = [...filtered].reverse().map(r=>{
-    const dow = getDow(r.dt)||'—';
-    const diff = r.ac - r.fc;
-    const pct  = r.fc>0?(diff/r.fc*100):0;
-    const st   = errSt(diff, pct);
-    const errColor = st==='danger'?'var(--red)':st==='warn'?'var(--orange)':'var(--green)';
-    const badge    = st==='danger'?'🔴':st==='warn'?'🟡':'🟢';
-    const isToday  = r.dt===dateStr(new Date());
-    const isOpen   = DAILY_OPEN.has(r.dt);
-
-    // 품목별 상세 (펼친 상태)
-    let bodyHtml = '';
-    if(isOpen){
-      const itemRows = codes.map(c=>{
-        const cfc  = (D.fc[c] ||{})[r.dt]||0;
-        const cac  = (D.ac[c] ||{})[r.dt]||0;
-        const cmx  = (D.mx[c] ||{})[r.dt]||0;
-        const cmis = (D.mis[c]||{})[r.dt]||0;
-        if(!cfc&&!cac&&!cmx&&!cmis) return '';
-        const cdiff=cac-cfc, cpct=cfc>0?(cdiff/cfc*100):0;
-        const cst=errSt(cdiff,cpct);
-        const cc=cst==='danger'?'var(--red)':cst==='warn'?'var(--orange)':'var(--t2)';
-        return`<div class="dib-row" style="${cst!=='ok'?'border-left:2px solid '+cc:''}">
-          <span class="dib-tag">${TAG[c]}</span>
-          <span class="dib-name">${NAME[c]}</span>
-          <span class="dib-fc">${cfc||'—'}</span>
-          ${hasMx?`<span class="dib-mx">${cmx||'—'}</span>`:''}
-          <span class="dib-ac" style="color:${cc}">${cac||'—'}</span>
-          ${hasMis?`<span class="dib-mis">${cmis>0?cmis:'·'}</span>`:''}
-        </div>`;
-      }).join('');
-
-      bodyHtml = `<div style="margin-top:7px">
-        <div style="font-size:9px;color:var(--t4);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;gap:20px">
-          <span>태그</span><span style="flex:1"></span>
-          <span>fc</span>${hasMx?'<span>mx</span>':''}<span>ac</span>${hasMis?'<span>mis</span>':''}
-        </div>
-        <div class="dib-grid">${itemRows||'<span style="color:var(--t4);font-size:11px">데이터 없음</span>'}</div>
-      </div>`;
+    // 코드 불일치
+    var sheetCodes = Object.keys(p.items);
+    var matched   = sheetCodes.filter(function(c){return !!TAG[c];});
+    var unmatched = sheetCodes.filter(function(c){return !TAG[c];});
+    if (unmatched.length) {
+      html += '<div class="alert al-w" style="margin-bottom:10px;font-size:11px">';
+      html += '⚠️ TAG 없는 코드(' + unmatched.length + '): <b>' + unmatched.slice(0,10).join(', ') + '</b><br>';
+      html += '✅ TAG 있는 코드(' + matched.length + '): ' + matched.slice(0,8).join(', ');
+      html += '</div>';
+    } else if (matched.length) {
+      html += '<div class="alert al-o" style="margin-bottom:10px;font-size:11px">';
+      html += '✅ 모든 코드가 TAG와 일치 (' + matched.length + '개): ' + matched.slice(0,8).join(', ');
+      html += '</div>';
     }
 
-    return`<div class="daily-row${isToday?' is-today':''}${r.mis>0?' has-miss':''}${isOpen?' open':''}" id="drow_${r.dt}">
-      <div class="daily-hd" onclick="dailyToggle('${r.dt}')">
-        <span class="d-dow" style="color:${DOW_COLORS[dow]||'var(--t2)'}">${dow}</span>
-        <span class="d-date">${r.dt.slice(5)}${isToday?' <b style=\'color:var(--accent);font-size:9px\'>오늘</b>':''}</span>
-        <div class="d-cells">
-          <div class="d-cell"><span class="dc-l">fc</span><span class="dc-v${!r.fc?' zero':''}" style="color:var(--accent)">${r.fc?r.fc.toLocaleString():'—'}</span></div>
-          ${hasPv?`<div class="d-cell"><span class="dc-l">pv</span><span class="dc-v${!r.pv?' zero':''}" style="color:var(--blue)">${r.pv?r.pv.toLocaleString():'—'}</span></div>`:''}
-          ${hasMx?`<div class="d-cell"><span class="dc-l">mx</span><span class="dc-v${!r.mx?' zero':''}" style="color:var(--orange)">${r.mx?r.mx.toLocaleString():'—'}</span></div>`:''}
-          <div class="d-cell"><span class="dc-l">ac</span><span class="dc-v${!r.ac?' zero':''}" style="color:var(--green);font-weight:800">${r.ac?r.ac.toLocaleString():'—'}</span></div>
-          ${hasMis?`<div class="d-cell"><span class="dc-l">mis</span><span class="dc-v${!r.mis?' zero':''}" style="color:${r.mis>0?'var(--red)':'var(--t4)'}">${r.mis>0?r.mis.toLocaleString():'·'}</span></div>`:''}
-        </div>
-        <div class="d-right">
-          <span class="d-err" style="color:${errColor}">${badge} ${(pct>=0?'+':'')+pct.toFixed(1)}%</span>
-          <span class="d-arr">▼</span>
-        </div>
-      </div>
-      <div class="daily-body">${bodyHtml}</div>
-    </div>`;
-  }).join('');
+    // Raw 테이블
+    var cols = Math.min((rows[0]||[]).length, 12);
+    html += '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11px;width:100%"><thead><tr>';
+    html += '<th style="padding:3px 8px;background:var(--glass-bg-dark);color:var(--t3);border:1px solid var(--glass-border-subtle)">행</th>';
+    for (var ci=0; ci<cols; ci++) {
+      html += '<th style="padding:3px 8px;background:var(--glass-bg-dark);color:var(--t3);border:1px solid var(--glass-border-subtle)">col' + ci + '</th>';
+    }
+    html += '</tr></thead><tbody>';
 
-  document.getElementById('dailyContent').innerHTML = colHd + rowsHtml;
-}
+    for (var ri=0; ri<Math.min(rows.length,12); ri++) {
+      var row    = rows[ri]||[];
+      var isMon  = ri===dbg.monthRowIdx;
+      var isDow  = ri===dbg.dowRowIdx;
+      var isDate = ri===dbg.dateRowIdx;
+      var isItem = ri>=dbg.itemStartIdx;
+      var bg     = isMon  ? 'rgba(26,138,74,.10)' :
+                   isDow  ? 'rgba(58,58,240,.10)'  :
+                   isDate ? 'rgba(196,90,16,.10)'  :
+                   isItem ? 'rgba(0,0,0,.02)'       : '';
+      var lbl    = isMon  ? ' 🟢월' :
+                   isDow  ? ' 🔵요일' :
+                   isDate ? ' 🟠날짜' :
+                   isItem ? ' ·' : '';
+      html += '<tr style="background:' + bg + '">';
+      html += '<td style="padding:3px 8px;border:1px solid var(--glass-border-subtle);color:var(--t4);font-weight:700;white-space:nowrap">row' + ri + lbl + '</td>';
+      for (var ci2=0; ci2<cols; ci2++) {
+        var v   = String(row[ci2]||'');
+        var bold = (isMon||isDow||isDate) && v ? 'font-weight:700;color:var(--tx)' : 'color:var(--t2)';
+        html += '<td style="padding:3px 8px;border:1px solid var(--glass-border-subtle);' + bold + ';max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + v.replace(/"/g,'&quot;') + '">' + v.slice(0,20) + '</td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table></div>';
 
-function dailyToggle(dt){
-  if(DAILY_OPEN.has(dt)) DAILY_OPEN.delete(dt);
-  else DAILY_OPEN.add(dt);
-  renderDaily();
+    // 품목 샘플
+    if (sheetCodes.length) {
+      html += '<div style="margin-top:12px;font-size:11px;font-weight:700;margin-bottom:6px">품목 데이터 샘플</div>';
+      sheetCodes.slice(0,4).forEach(function(code){
+        var vals = Object.entries(p.items[code]).slice(0,5);
+        var tagStr = TAG[code] ? ('✅ ' + TAG[code]) : '❌ TAG없음';
+        var color  = TAG[code] ? 'var(--green)' : 'var(--red)';
+        html += '<div style="font-size:11px;margin-bottom:5px;padding:5px 8px;background:var(--glass-bg-dark);border-radius:var(--r-sm)">';
+        html += '<b>' + code + '</b> <span style="color:' + color + '">' + tagStr + '</span>  ';
+        html += vals.map(function(kv){ return kv[0] + ':' + kv[1]; }).join('  ·  ');
+        html += '</div>';
+      });
+    }
+
+    res.innerHTML = html;
+    st.textContent = '✅ 완료';
+  } catch(e) {
+    res.innerHTML = '<div class="alert al-d">' + e.message.replace(/
+/g,'<br>') + '</div>';
+    st.textContent = '❌ 실패';
+  }
 }
 
 function filtDailyDates(){return{};}  // legacy stub
@@ -1393,7 +1343,7 @@ async function fetchCsvByGid(gid) {
   const isLocal = location.protocol === 'file:';
   throw new Error(
     `로드 실패 (gid=${gid})\n\n` +
-    `시도 결과:\n${errs.map((e,i)=>` ${i+1}. ${e}`).join('\n')}\n\n` +
+    '시도 결과:\n'+errs.map((e,i)=>` ${i+1}. ${e}`).join('\n')+'\n\n' +
     `해결 방법:\n` +
     ` 1. Apps Script 재배포 확인 (getCsv 핸들러 포함 버전)\n` +
     ` 2. 구글 시트 공유 → 링크 있는 사람 → 뷰어\n` +
