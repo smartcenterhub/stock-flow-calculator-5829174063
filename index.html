@@ -3135,13 +3135,17 @@ function renderDetail() {
     sel.innerHTML='<option value="">품목 선택</option>';
     CODES.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=(TAG[c]||c)+' '+NAME[c];sel.appendChild(o);});
   }
-  const code=sel.value;
+  const code=sel?.value;
   if (!code||!D.loaded){
     document.getElementById('detailContent').innerHTML='<div class="empty"><div class="ico">🔍</div><div>품목을 선택하세요</div></div>';
     return;
   }
   const filtDates=drpGetRange('detail');
   const s=itemSummary(code,filtDates);
+  if(!s||!s.n){
+    document.getElementById('detailContent').innerHTML='<div class="empty"><div class="ico">📭</div><div>해당 기간 데이터 없음</div></div>';
+    return;
+  }
   const recent=filtDates.slice(-60);
   const fcV=recent.map(d=>(D.fc[code]||{})[d]||0);
   const acV=recent.map(d=>(D.ac[code]||{})[d]||0);
@@ -3149,21 +3153,22 @@ function renderDetail() {
   const badge=s.st==='danger'?'<span class="badge bd">🔴 위험</span>':s.st==='warn'?'<span class="badge bw">🟡 주의</span>':'<span class="badge bo">🟢 정상</span>';
 
   let h=`<div class="stats-row mb12">
-    <div class="stat-card"><div class="sl">품목</div><div class="sv" style="font-size:18px">${TAG[code]}</div><div class="ss">${NAME[code]}</div></div>
-    <div class="stat-card"><div class="sl">평균 예측(fc)</div><div class="sv fc-c">${s.aFc.toFixed(1)}</div><div class="ss">${s.n}일 기준</div></div>
-    <div class="stat-card"><div class="sl">평균 실적(ac)</div><div class="sv ac-c">${s.aAc.toFixed(1)}</div><div class="ss">일평균</div></div>
+    <div class="stat-card"><div class="sl">품목</div><div class="sv" style="font-size:18px">${TAG[code]||code}</div><div class="ss">${NAME[code]||''}</div></div>
+    <div class="stat-card"><div class="sl">평균 예측(fc)</div><div class="sv fc-c">${(s.aFc||0).toFixed(1)}</div><div class="ss">${s.n}일 기준</div></div>
+    <div class="stat-card"><div class="sl">평균 실적(ac)</div><div class="sv ac-c">${(s.aAc||0).toFixed(1)}</div><div class="ss">일평균</div></div>
     <div class="stat-card"><div class="sl">평균 오차율</div>
-      <div class="sv" style="color:${s.st==='danger'?'var(--red)':s.st==='warn'?'var(--orange)':'var(--green)'}">${(s.aPct>=0?'+':'')+s.aPct.toFixed(1)}%</div>
+      <div class="sv" style="color:${s.st==='danger'?'var(--red)':s.st==='warn'?'var(--orange)':'var(--green)'}">${((s.aPct||0)>=0?'+':'')+((s.aPct||0)).toFixed(1)}%</div>
       <div class="ss">${badge}</div></div>
   </div>
-  <div class="card mb12"><div class="card-title">일별 fc vs ac (최근 60일)</div>
+  <div class="card mb12"><div class="card-title">일별 fc vs ac (최근 ${Math.min(60,recent.length)}일)</div>
     <div style="position:relative;height:220px"><canvas id="cDetLine"></canvas></div></div>
   <div class="card mb12"><div class="card-title">일별 오차율%</div>
     <div style="position:relative;height:150px"><canvas id="cDetErr"></canvas></div></div>
-  <div class="card"><div class="card-title">일별 상세 (최근 30일)</div><div class="tbl-wrap">
+  <div class="card"><div class="card-title">일별 상세 (최근 ${Math.min(30,filtDates.length)}일)</div><div class="tbl-wrap">
     <table><thead><tr><th>날짜</th><th>요일</th><th class="r">fc</th><th class="r">ac</th><th class="r">오차</th><th class="r">오차율</th><th>상태</th></tr></thead><tbody>`;
 
-  D.dates.slice(-30).reverse().forEach(dt=>{
+  // 기간 필터 적용 + 최근 30일
+  filtDates.slice(-30).reverse().forEach(dt=>{
     const fc=(D.fc[code]||{})[dt]||0, ac=(D.ac[code]||{})[dt]||0;
     if(fc===0&&ac===0) return;
     const diff=ac-fc, pct=fc>0?(diff/fc)*100:0;
