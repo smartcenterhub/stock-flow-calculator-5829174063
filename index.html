@@ -3267,18 +3267,10 @@ function copyCrossTable(){
     {label:'마시는',codes:CODES.filter(c=>GRP[c]==='drink')}
   ];
 
-  // 3가지 버전: 실제값 / 50단위절사 / 10단위내림 / 10단위올림
-  // 사용자가 선택할 수 있게 프롬프트
-  const mode = ['실제값','50단위 절사','10단위 내림','10단위 올림'].indexOf(
-    prompt('복사할 값을 선택하세요:
-1. 실제값
-2. 50단위 절사
-3. 10단위 내림
-4. 10단위 올림
-
-숫자 입력 (1~4):')
-  );
-  const modeIdx = mode >= 0 ? mode : 0;
+  // 값 종류 선택
+  const modeNames = ['실제값','50단위 절사','10단위 내림','10단위 올림'];
+  const modeIdx = parseInt(prompt('복사할 값:\n1. 실제값\n2. 50단위 절사\n3. 10단위 내림\n4. 10단위 올림\n\n번호 입력 (1~4):'))||1;
+  const modeKey = Math.min(4, Math.max(1, modeIdx)) - 1;
 
   const rows=[];
   // 헤더
@@ -3290,9 +3282,9 @@ function copyCrossTable(){
       const ic=CFG.item[c]||0;
       const vals=DOWS.map(d=>Math.round(X*ic*(CFG.dow[d]||1)));
       const out=vals.map(v=>{
-        if(modeIdx===1) return Math.floor(v/50)*50;
-        if(modeIdx===2) return Math.floor(v/10)*10;
-        if(modeIdx===3) return Math.ceil(v/10)*10;
+        if(modeKey===1) return Math.floor(v/50)*50;
+        if(modeKey===2) return Math.floor(v/10)*10;
+        if(modeKey===3) return Math.ceil(v/10)*10;
         return v;
       });
       const wk=out.reduce((a,b)=>a+b,0);
@@ -3303,7 +3295,7 @@ function copyCrossTable(){
   const tsv=rows.join('
 ');
   navigator.clipboard.writeText(tsv).then(()=>{
-    showToast(`✅ 엑셀 복사 완료 — ${['실제값','50단위 절사','10단위 내림','10단위 올림'][modeIdx]}`);
+    showToast(`✅ 엑셀 복사 완료 — ${modeNames[modeKey]}`);
   }).catch(()=>{
     // fallback
     const el=document.createElement('textarea');
