@@ -1468,12 +1468,23 @@ function parseSheetData(txt) {
     dateKeys.push(null);
   }
 
-  // ── 품목 데이터 ───────────────────────────────────────────
+  // ── 코드 컬럼 감지 (col0 또는 col1 중 Y-/T-/D-/G- 패턴) ───
+  let codeCol = 0;
+  for (let r=itemStartIdx; r<Math.min(rows.length, itemStartIdx+5); r++) {
+    const row = rows[r]||[];
+    for (let c=0; c<=2; c++) {
+      const v = String(row[c]||'').trim();
+      if (/^[A-Z]-[A-Z0-9]/.test(v)) { codeCol=c; break; }
+    }
+    if (codeCol>0) break;
+  }
+
+  // ── 품목 데이터 ──────────────────────────────────────────
   const items={};
   for (let r=itemStartIdx; r<rows.length; r++) {
     const row=rows[r];
-    if (!row||!row[0]) continue;
-    const code=String(row[0]).trim();
+    if (!row) continue;
+    const code=String(row[codeCol]||'').trim();
     if (!code||/합계|total|소계/i.test(code)) continue;
     const data={};
     for (let ci=0; ci<dateKeys.length; ci++) {
