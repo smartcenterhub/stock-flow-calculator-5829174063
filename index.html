@@ -1234,6 +1234,9 @@ let CFG = {
 
 // 마스터 데이터 로드 상태
 let MASTER = { loaded:false, itemSrc:'기본값(하드코딩)', bundleSrc:'기본값(하드코딩)' };
+// 운영여부 OFF 맵 (◆품목기준표 / ◆sku_기준표의 '운영여부' 컬럼 기준)
+const ITEM_OFF   = {};   // { 'Y-V-L0': true, ... }
+const BUNDLE_OFF = {};   // { '13049680413': true, ... }
 
 // ════════════════════════════════════════
 // MASTER DATA LOADER (품목기준표 + sku_기준표)
@@ -1257,6 +1260,7 @@ async function loadMasterData() {
       const iTag   = ci(['태그','tag','약칭','단축']);
       const iCoeff = ci(['품목계수','계수','coeff','coefficient']);
       const iGrp   = ci(['분류','category','그룹','group','type']);
+      const iItemOff = ci(['운영여부','active','활성','off','status']);
 
       if(iCode !== null) {
         const newTAG={}, newNAME={}, newGRP={}, newITEM={};
@@ -1278,6 +1282,11 @@ async function loadMasterData() {
           newNAME[code] = name;
           newGRP[code]  = grpKey;
           newITEM[code] = isNaN(coeff) ? 0 : coeff;
+          // 운영여부: 'OFF' 텍스트면 비운영
+          if(iItemOff!==null){
+            const offVal=(r[iItemOff]||'').trim().toUpperCase();
+            ITEM_OFF[code] = (offVal==='OFF'||offVal==='0'||offVal==='false'||offVal==='비운영'||offVal==='중단');
+          }
         });
 
         if(Object.keys(newTAG).length > 0) {
@@ -1307,6 +1316,7 @@ async function loadMasterData() {
       const iName = ci(['상품명','name','bundle_name','묶음명']);
       const iMain = ci(['메인','isMain','main','주력']);
       const iDesc = ci(['구성','desc','description','컴포지션','composition']);
+      const iBundleOff = ci(['운영여부','active','활성','off','status']);
       // 품목코드 컬럼들: 나머지 열에서 "코드:수량" 형식이거나 코드 자체인 열 찾기
 
       if(iSid !== null && iName !== null) {
@@ -1337,7 +1347,11 @@ async function loadMasterData() {
             }
           });
 
-          newBundles.push({id:sid, name, isMain, comp, compDesc:desc});
+          const bundleOff = iBundleOff!==null
+            ? (()=>{ const v=(r[iBundleOff]||'').trim().toUpperCase(); return v==='OFF'||v==='0'||v==='false'||v==='비운영'||v==='중단'; })()
+            : false;
+          if(bundleOff) BUNDLE_OFF[sid]=true;
+          newBundles.push({id:sid, name, isMain, comp, compDesc:desc, isOff:bundleOff});
         });
 
         if(newBundles.length > 0) {
@@ -3501,25 +3515,29 @@ function renderBGroup(label,blist){
 
     const body=itemGrid+dayBreak+ctrl;
 
+    const isOff = BUNDLE_OFF[b.id]||false;
+    const offStyle = isOff ? 'opacity:0.45;border-style:dashed;filter:grayscale(0.3)' : '';
+    const offBadge = isOff ? `<span style="display:inline-block;padding:1px 6px;border-radius:10px;background:rgba(136,135,128,.15);color:var(--t3);font-size:9px;font-weight:700;margin-left:4px">OFF</span>` : '';
     h+=`<div class="fc-bcard${b.isMain?' is-main':''}${pi?' has-promo':''}${st.open?' open':''}"
       id="fbc_${b.id}"
-      ondragover="fbcDragOver(event,'${b.id}')"
-      ondragleave="fbcDragLeave(event,'${b.id}')"
-      ondrop="fbcDrop(event,'${b.id}')"
-      onclick="fbcCardClick('${b.id}',event)">
-      <div class="fbc-hd" onclick="fbcToggle('${b.id}',event)">
+      style="${offStyle}"
+      ondragover="${isOff?'':'fbcDragOver(event,\''+b.id+'\')' }"
+      ondragleave="${isOff?'':'fbcDragLeave(event,\''+b.id+'\')'}"
+      ondrop="${isOff?'':'fbcDrop(event,\''+b.id+'\')' }"
+      onclick="${isOff?'':'fbcCardClick(\''+b.id+'\',event)'}">
+      <div class="fbc-hd" onclick="${isOff?'':'fbcToggle(\''+b.id+'\',event)'}">
         <div class="fbc-hd-top">
-          <span class="fbc-name">${b.name}</span>
-          <span class="fbc-arr">▼</span>
+          <span class="fbc-name">${b.name}${offBadge}</span>
+          <span class="fbc-arr">${isOff?'':' ▼'}</span>
         </div>
         <div class="fbc-hd-row2">
-          ${promoTag}
-          <span class="fbc-mult" style="color:${rmColor}">등급 ×${rm}</span>
-          ${st.qty>0?`<span style="font-size:9px;color:var(--t3)">일${st.qty}개</span>`:''}
+          ${!isOff?promoTag:''}
+          ${!isOff?`<span class="fbc-mult" style="color:${rmColor}">등급 ×${rm}</span>`:''}
+          ${!isOff&&st.qty>0?`<span style="font-size:9px;color:var(--t3)">일${st.qty}개</span>`:''}
         </div>
-        <span class="fbc-wk">${st.qty>0?wkTot.toLocaleString()+'개/주':'—'}</span>
+        <span class="fbc-wk">${isOff?'—':st.qty>0?wkTot.toLocaleString()+'개/주':'—'}</span>
       </div>
-      <div class="fbc-body" onclick="event.stopPropagation()">${body}</div>
+      ${!isOff?`<div class="fbc-body" onclick="event.stopPropagation()">${body}</div>`:''}
     </div>`;
   });
   return h+`</div></div>`;
@@ -3777,27 +3795,36 @@ function fcRenderTable(){
     const holTag=d.holiday?`<br><span style="font-size:8px;background:${FC_HOL[d.holiday].bg};color:${FC_HOL[d.holiday].c};padding:1px 4px;border-radius:8px;font-weight:700">${d.holiday}</span>`:'';
     return`<th class="r" style="min-width:56px"><div style="color:${DOW_COLORS[d.dow]};font-weight:800;font-size:12px">${d.dow}</div><div style="font-size:9px;color:var(--t3)">${d.date.slice(5)}</div><div style="font-size:9px;color:var(--t4)">\xd7${(dc*hc).toFixed(2)}</div>${holTag}</th>`;
   }).join('');
-  let h=`<table class="fc-tbl"><thead><tr><th style="text-align:left;min-width:140px">품목</th>${hdCols}<th class="r">주합</th></tr></thead><tbody>`;
+  let h=`<table class="fc-tbl"><thead><tr>
+    <th style="min-width:32px;text-align:center;padding:4px 6px"></th>
+    <th style="text-align:left;min-width:140px">품목</th>${hdCols}<th class="r">주합</th></tr></thead><tbody>`;
   const dayTots=FC.days.map(()=>0);
   const grps=[{label:'요거트',codes:codes.filter(c=>GRP[c]==='yogurt')},{label:'토핑',codes:codes.filter(c=>GRP[c]==='topping')},{label:'마시는',codes:codes.filter(c=>GRP[c]==='drink')}].filter(g=>g.codes.length);
   grps.forEach(g=>{
-    h+=`<tr class="grp-row"><td colspan="${FC.days.length+2}">${g.label}</td></tr>`;
+    h+=`<tr class="grp-row"><td colspan="${FC.days.length+3}">${g.label}</td></tr>`;
     const gT=FC.days.map(()=>0);let gW=0;
     g.codes.forEach(code=>{
       let wk=0;
+      const itemIsOff=ITEM_OFF[code]||false;
       const cells=FC.days.map((_,i)=>{
-        const v=fcCalcItem(code,i);wk+=v;gT[i]+=v;dayTots[i]+=v;
+        const v=itemIsOff?0:fcCalcItem(code,i);wk+=v;gT[i]+=v;dayTots[i]+=v;
         const ok=code+'-'+FC.days[i].date,isOv=FC.overrides[ok]!==undefined;
         if(edit)return`<td class="r"><input class="edit-inp${isOv?' ov':''}" type="number" value="${v}" data-key="${ok}" oninput="fcOverride(this)" min="0"></td>`;
         return`<td class="r" style="font-weight:${v?600:400};color:${isOv?'var(--orange)':v?'var(--tx)':'var(--t4)'};font-variant-numeric:tabular-nums">${v||'—'}</td>`;
       });
       gW+=wk;const ic=CFG.item[code]||0;
-      h+=`<tr><td><b>${TAG[code]}</b><span style="color:var(--t4);font-size:9.5px;margin-left:3px">\xd7${ic.toFixed(3)}</span><span style="color:var(--t3);font-size:10.5px;margin-left:5px">${NAME[code]}</span></td>${cells.join('')}<td class="r" style="font-weight:700;color:var(--accent)">${wk||'—'}</td></tr>`;
+      const statusTd=itemIsOff
+        ?`<td style="text-align:center;padding:3px 6px"><span style="display:inline-block;padding:1px 5px;border-radius:8px;background:rgba(136,135,128,.15);color:var(--t4);font-size:9px;font-weight:700">OFF</span></td>`
+        :`<td style="text-align:center;padding:3px 6px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green)"></span></td>`;
+      const rowStyle=itemIsOff?'opacity:0.38;':'';
+      const wkDisp=itemIsOff?'—':(wk||'—');
+      const cellsDisp=itemIsOff?FC.days.map(()=>`<td class="r" style="color:var(--t4)">—</td>`):cells;
+      h+=`<tr style="${rowStyle}">${statusTd}<td><b>${TAG[code]}</b><span style="color:var(--t4);font-size:9.5px;margin-left:3px">\xd7${ic.toFixed(3)}</span><span style="color:var(--t3);font-size:10.5px;margin-left:5px">${NAME[code]}</span></td>${cellsDisp.join('')}<td class="r" style="font-weight:700;color:${itemIsOff?'var(--t4)':'var(--accent)'}">${wkDisp}</td></tr>`;
     });
-    if(grps.length>1)h+=`<tr class="subtotal-row"><td>${g.label} 합계</td>${gT.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${gW.toLocaleString()}</td></tr>`;
+    if(grps.length>1)h+=`<tr class="subtotal-row"><td></td><td>${g.label} 합계</td>${gT.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${gW.toLocaleString()}</td></tr>`;
   });
   const grand=dayTots.reduce((a,b)=>a+b,0);
-  h+=`<tr class="total-row"><td>전체 합계</td>${dayTots.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${grand.toLocaleString()}</td></tr></tbody></table>`;
+  h+=`<tr class="total-row"><td></td><td>전체 합계</td>${dayTots.map(v=>`<td class="r">${v.toLocaleString()}</td>`).join('')}<td class="r">${grand.toLocaleString()}</td></tr></tbody></table>`;
   document.getElementById('fcTableWrap').innerHTML=h;
 }
 function fcOverride(inp){const v=parseInt(inp.value);if(!isNaN(v)&&v>=0){FC.overrides[inp.dataset.key]=v;inp.classList.add('ov');fcUpdateSummary();}}
