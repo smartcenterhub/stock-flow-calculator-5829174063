@@ -1273,8 +1273,7 @@ async function dbgFetch(){
     res.innerHTML = html;
     st.textContent = '✅ 완료';
   } catch(e) {
-    res.innerHTML = '<div class="alert al-d">' + e.message.replace(/
-/g,'<br>') + '</div>';
+    res.innerHTML = '<div class="alert al-d">' + e.message.replace(/\n/g,'<br>')+ '</div>';
     st.textContent = '❌ 실패';
   }
 }
