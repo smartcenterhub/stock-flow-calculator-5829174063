@@ -1335,43 +1335,36 @@ function buildDailyTable(){return'';} // legacy stub
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ5PcJZetp7Pqb90YJdBW8Ofb745jikTtd0DaufAIwsK7nhXbilvsuwEG1cq4x6tsEew/exec';
 const GITHUB_PAGES_URL = 'https://smartcenterhub.github.io/smartstore-dashboard-9037261845/';
 
-async function _ft(url, opts={}, ms=10000){
-  const ctrl=new AbortController();
-  const id=setTimeout(()=>ctrl.abort(),ms);
-  try{ return await fetch(url,{...opts,signal:ctrl.signal}); }
-  finally{ clearTimeout(id); }
-}
-
 // Apps Script 1순위 → gviz → export 순으로 시도
 async function fetchCsvByGid(gid) {
   const errs = [];
 
-  // ① Apps Script proxy — CORS 완전 우회, file:// 로컬에서도 동작
+  // ① Apps Script proxy — CORS 완전 우회
   try {
     const url = `${APPS_SCRIPT_URL}?action=getCsv&gid=${gid}&id=${SHEET_ID}`;
-    const r = await _ft(url, { redirect: 'follow' }, 12000);
+    const r = await fetch(url);
     if (r.ok) {
       const txt = await r.text();
       if (txt && !txt.trimStart().startsWith('<') && txt.includes(',') && txt.split('\n').length > 1)
         return txt;
       errs.push(`Apps Script 응답 이상: ${txt.slice(0,80)}`);
     } else { errs.push(`Apps Script HTTP ${r.status}`); }
-  } catch(e) { errs.push(`Apps Script: ${e.name==='AbortError'?'타임아웃':e.message.slice(0,60)}`); }
+  } catch(e) { errs.push(`Apps Script: ${e.message.slice(0,60)}`); }
 
   // ② gviz API (공개 시트 + HTTPS)
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-    const r = await _ft(url, { redirect:'follow', mode:'cors' });
+    const r = await fetch(url);
     if (r.ok) {
       const txt = await r.text();
       if (txt && !txt.trimStart().startsWith('<') && txt.includes(',')) return txt;
     }
-  } catch(e) { errs.push(`gviz: ${e.name==='AbortError'?'타임아웃':e.message.slice(0,40)}`); }
+  } catch(e) { errs.push(`gviz: ${e.message.slice(0,40)}`); }
 
   // ③ 직접 export
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
-    const r = await _ft(url, { redirect:'follow' });
+    const r = await fetch(url);
     if (r.ok) {
       const txt = await r.text();
       if (txt && !txt.trimStart().startsWith('<') && txt.includes(',')) return txt;
