@@ -2103,12 +2103,10 @@ async function loadAll() {
     loadBarSet(85, '🎨 화면 렌더링 중...', '');
 
     if (D.dates.length) {
-      // D.dates = fc+ac 합집합. 실제 ac 데이터 범위 따로 계산
-      const _allAcD=new Set(); Object.values(D.ac).forEach(b=>Object.keys(b).forEach(d=>_allAcD.add(d)));
-      const _acSorted=[..._allAcD].sort();
-      const acFirst=_acSorted[0]||D.dates[0], acLast=_acSorted[_acSorted.length-1]||D.dates[D.dates.length-1];
-      document.getElementById('dateRangeTxt').textContent = acFirst + ' ~ ' + acLast;
-      document.getElementById('dateRangeTxt').title = `ac 실출고 기간: ${acFirst}~${acLast} / fc 예측 전체: ${D.dates[0]}~${D.dates[D.dates.length-1]}`;
+      // 상단 날짜 = D.dates 전체 범위 (fc+ac 합집합)
+      const _dtFirst=D.dates[0], _dtLast=D.dates[D.dates.length-1];
+      document.getElementById('dateRangeTxt').textContent = _dtFirst + ' ~ ' + _dtLast;
+      document.getElementById('dateRangeTxt').title = `로드된 전체 기간: ${_dtFirst} ~ ${_dtLast} (${D.dates.length}일)`;
       const gp=document.getElementById('globalPeriod');
       if(gp){ gp.style.display='inline-block'; }
       document.getElementById('lastUpdTxt').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
@@ -2473,10 +2471,11 @@ function renderXSuggest() {
         ? `<span style="color:var(--orange)">⚠️ ${diff>0?'+':''}${diff} 조정 권장</span>`
         : '<span style="color:var(--green)">✅ 현행 유지</span>'}
     </div>
-    ${need ? `<div style="display:inline-flex;gap:6px;align-items:center">
-      <button class="btn" onclick="applyXSuggest(${sugX})" style="padding:4px 14px;color:var(--green);font-size:12px">✓ X = ${sugX} 반영</button>
-      <button onclick="cfgUndo()" title="X값 되돌리기" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--orange);padding:2px 4px">↩</button>
-    </div>` : ''}`;
+    <div style="display:inline-flex;gap:6px;align-items:center">
+      ${need ? `<button class="btn" onclick="applyXSuggest(${sugX})" style="padding:4px 14px;color:var(--green);font-size:12px">✓ X = ${sugX} 반영</button>` : `<span style="color:var(--t4);font-size:11px">✅ 현행 유지</span>`}
+      <button onclick="cfgUndo()" title="X값 되돌리기 (이전값으로)"
+        style="background:none;border:1px solid ${CFG_HIST_IDX>=0?'var(--orange)':'var(--glass-border-subtle)'};border-radius:var(--r-sm);cursor:pointer;font-size:14px;padding:2px 7px;color:${CFG_HIST_IDX>=0?'var(--orange)':'var(--t4)'};opacity:${CFG_HIST_IDX>=0?1:0.35}">↩</button>
+    </div>`;
 }
 
 // ── 요일계수 제안 & 반영 ───────────────────────
@@ -2629,12 +2628,21 @@ function renderItemSuggest() {
       <td class="r" style="color:var(--t4);font-size:11px">${n}</td>
       <td style="text-align:center">${verdict}</td>
       <td style="text-align:center;white-space:nowrap">
+        ${/* prevVal있으면 반영됨 상태 → 반영회색, 되돌리기 색처리 */'' }
         <button onclick="applyOneItem('${c}',${sugRnd})"
-          title="제안값 ${sugRnd} 반영"
-          style="padding:2px 10px;font-size:10.5px;border-radius:var(--r-sm);border:1px solid ${big?col:'var(--glass-border-subtle)'};background:${big?col+'18':'transparent'};color:${big?col:'var(--t4)'};cursor:pointer;font-weight:${big?700:400};transition:all .15s">반영</button>
+          title="${prevVal!==null?'다시 반영':'제안값 '+sugRnd+' 반영'}"
+          style="padding:2px 10px;font-size:10.5px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;
+            border:1px solid ${prevVal!==null?'var(--glass-border-subtle)':big?col:'var(--glass-border-subtle)'};
+            background:${prevVal!==null?'transparent':big?col+'18':'transparent'};
+            color:${prevVal!==null?'var(--t4)':big?col:'var(--t4)'};
+            font-weight:${prevVal===null&&big?700:400}">반영</button>
         <button onclick="${prevVal!==null?`revertOneItem('${c}',${prevVal})`:'void(0)'}"
-          title="${prevVal!==null?'이전 값('+prevVal+')으로 되돌리기':'되돌릴 이전값 없음'}"
-          style="background:none;border:1px solid ${prevVal!==null?'var(--orange)':'var(--glass-border-subtle)'};border-radius:var(--r-sm);cursor:${prevVal!==null?'pointer':'default'};font-size:13px;padding:2px 6px;color:${prevVal!==null?'var(--orange)':'var(--t4)'};opacity:${prevVal!==null?1:0.35};transition:all .15s">↩</button>
+          title="${prevVal!==null?'이전 값('+prevVal+')으로 되돌리기':'반영 후 활성화'}"
+          style="border-radius:var(--r-sm);transition:all .15s;font-size:13px;padding:2px 7px;
+            background:${prevVal!==null?'var(--orange)18':'transparent'};
+            border:1px solid ${prevVal!==null?'var(--orange)':'var(--glass-border-subtle)'};
+            cursor:${prevVal!==null?'pointer':'default'};
+            color:${prevVal!==null?'var(--orange)':'var(--t4)'}">↩</button>
       </td>
     </tr>`;
   });
@@ -2759,6 +2767,10 @@ function revertOneItem(code, prevVal){
   CFG.item[code]=prevVal;
   cfgPush(`${TAG[code]||code} 계수 되돌리기`, prev);
   cfgLogAdd(`${TAG[code]||code} 품목계수 되돌리기`, [{tag:TAG[code]||code, prev:CFG.item[code], next:prevVal}]);
+  // 되돌리기 완료 → 해당 코드 로그 제거 (버튼 상태 초기화)
+  const tag = TAG[code]||code;
+  const idx = CFG_LOG.findIndex(l=>l.changes.some(ch=>ch.tag===tag));
+  if(idx>=0) CFG_LOG.splice(idx,1);
   renderItemSuggest();
   cfgAfterChange(`↩ ${TAG[code]||code} 계수 되돌림`);
 }
@@ -4228,13 +4240,8 @@ function drpInitAfterLoad(){
 
 // Store ac range for default
 function drpStoreAcRange(){
-  // D.ac 전체 코드를 직접 스캔 (CODES 의존 제거)
-  const allAcDates = new Set();
-  Object.values(D.ac).forEach(byDate=>{
-    Object.keys(byDate).forEach(dt=>allAcDates.add(dt));
-  });
-  const sorted = [...allAcDates].sort();
-  if(sorted.length) D.acRange=[sorted[0], sorted[sorted.length-1]];
+  // D.dates 전체 범위를 acRange로 (fc+ac 합집합이 실제 데이터 범위)
+  if(D.dates.length) D.acRange=[D.dates[0], D.dates[D.dates.length-1]];
 }
 sbGuideFill();
 cfgUndoRedoUI();
