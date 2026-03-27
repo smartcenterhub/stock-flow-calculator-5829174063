@@ -1426,130 +1426,96 @@ function parseSheetData(txt) {
   const rows = parseCSV(txt);
   if (rows.length < 2) return {items:{}, dates:[], dinfo:{}, _debug:{err:'rows<2'}};
 
+  // ── 시트 구조 (Apps Script 확정) ────────────────────────
+  // Row idx 0: (제목 행)
+  // Row idx 1: 월 헤더  "2026년 3월"  (병합셀 → 빈칸 forward-fill)
+  // Row idx 2: (빈 행)
+  // Row idx 3: 요일     월 화 수 목 금
+  // Row idx 4: 날짜 숫자 1  2  3  4  5
+  // Row idx 5: (빈 행 or 합계)
+  // Row idx 6+: 품목 데이터  Col A(0) = product_code, Col D(3)~= 날짜별 값
+
   const DOW_SET = new Set(['월','화','수','목','금','토','일']);
-  const WDAY_SET = new Set(['월','화','수','목','금']);
 
-  // ── 1. 각 행의 "역할" 자동 감지 ─────────────────────
-  let monthRowIdx=-1, dowRowIdx=-1, dateRowIdx=-1;
+  // ── 1. 행 감지 (고정값 우선, 불일치 시 auto) ───────────
+  let monthRowIdx = 1;
+  let dowRowIdx   = 3;
+  let dateRowIdx  = 4;
+  let itemStartIdx= 6;
 
-  // Apps Script Date → 연도 추출
-  function parseYear(s){ const m=String(s).match(/(\d{4})/); return m?parseInt(m[1]):null; }
-  // 월 텍스트/숫자 → 월 번호 (1-12)
-  function parseMonthNum(s){
-    s=String(s).trim();
-    // "2026년 3월" or "3월"
-    const km=s.match(/(\d{1,2})월/); if(km) return parseInt(km[1]);
-    // 순수 숫자
-    const n=parseFloat(s); if(!isNaN(n)&&n>=1&&n<=12) return n;
-    // Date string "Mar 2026" etc.
-    const mo={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const low=s.toLowerCase(); for(const[k,v] of Object.entries(mo)){if(low.includes(k))return v;}
-    return null;
-  }
-  // 날짜 숫자 (1~31) 판定
-  function isDateNum(s){ const n=parseFloat(String(s).trim()); return !isNaN(n)&&n>=1&&n<=31&&Number.isInteger(n); }
-  // Apps Script Date string → {y,m,d}
-  function parseDateStr(s){
-    s=String(s);
-    // "Mon Jan 06 2026 ..." or "2026-01-06" or "2026.01.06"
-    const iso=s.match(/(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
-    if(iso) return {y:parseInt(iso[1]),m:parseInt(iso[2]),d:parseInt(iso[3])};
-    const eng=s.match(/(\w{3})\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
-    if(eng){const mo={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};return{y:parseInt(eng[4]),m:mo[eng[2]]||0,d:parseInt(eng[3])};}
-    return null;
+  // 검증: row[1]에 "년" or "월" 포함 여부
+  const r1 = (rows[1]||[]).map(c=>String(c||''));
+  if (!r1.some(c=>/\d{4}년|\d{1,2}월/.test(c))) {
+    // 고정 구조와 다름 → 자동 탐지
+    for(let r=0; r<Math.min(rows.length,12); r++){
+      const row=(rows[r]||[]).map(c=>String(c||''));
+      const nonEmpty=row.filter(c=>c.trim());
+      const dowN=nonEmpty.filter(c=>DOW_SET.has(c.trim())).length;
+      if(dowN>=3&&dowRowIdx===3&&r!==3){dowRowIdx=r;}
+      const dateN=nonEmpty.filter(c=>/^\d{1,2}$/.test(c.trim())&&parseInt(c)>=1&&parseInt(c)<=31).length;
+      if(dateN>=5&&r>dowRowIdx&&dateRowIdx===4&&r!==4){dateRowIdx=r;}
+      if(row.some(c=>/\d{4}년/.test(c))&&monthRowIdx===1&&r!==1){monthRowIdx=r;}
+    }
+    itemStartIdx = dateRowIdx + 2;
   }
 
-  for(let r=0; r<Math.min(rows.length,12); r++){
-    const row=rows[r]||[];
-    const nonEmpty=row.filter(c=>c!==''&&c!==null&&c!==undefined);
-    if(!nonEmpty.length) continue;
+  const monthRow = rows[monthRowIdx] || [];
+  const dowRow   = rows[dowRowIdx]   || [];
+  const dateRow  = rows[dateRowIdx]  || [];
 
-    // 요일행
-    const dowN=nonEmpty.filter(c=>DOW_SET.has(String(c).trim())).length;
-    if(dowN>=3&&dowRowIdx<0){dowRowIdx=r;continue;}
-
-    // 날짜행: 과반수가 1~31 정수
-    const dateN=nonEmpty.filter(c=>isDateNum(c)).length;
-    if(dateN>=5&&dateRowIdx<0&&dowRowIdx>=0){dateRowIdx=r;continue;}
-
-    // 월행: "YYYY년" or "M월" or 연도 포함 Date string
-    const hasMonth=row.some(c=>{
-      const s=String(c||'');
-      return /\d{4}년/.test(s)||/\d{1,2}월/.test(s)||(parseDateStr(s)&&parseDateStr(s).y>2000);
-    });
-    if(hasMonth&&monthRowIdx<0){monthRowIdx=r;}
+  // ── 2. 데이터 시작 컬럼 (Apps Script: Col D = idx 3) ───
+  let dsc = 3;
+  // 날짜행에서 첫 번째 숫자 위치 확인
+  for(let c=1; c<dateRow.length; c++){
+    const v = String(dateRow[c]||'').trim();
+    if(/^\d{1,2}$/.test(v) && parseInt(v)>=1 && parseInt(v)<=31){
+      dsc=c; break;
+    }
   }
 
-  // ── 2. 날짜 대안 탐지: 헤더 행이 날짜 Date string인 경우 ──
-  // (Apps Script가 날짜 셀을 Date 객체로 돌려줄 때)
-  let useDateHeader = false;
-  if(dateRowIdx<0&&monthRowIdx>=0){
-    const hrow=rows[monthRowIdx]||[];
-    const dateCount=hrow.filter(c=>parseDateStr(String(c||''))!==null&&parseDateStr(String(c||'')).y>2020).length;
-    if(dateCount>=3){ useDateHeader=true; dateRowIdx=monthRowIdx; }
-  }
-
-  // fallback
-  if(monthRowIdx<0) monthRowIdx=1;
-  if(dowRowIdx<0)   dowRowIdx=3;
-  if(dateRowIdx<0)  dateRowIdx=4;
-
-  const monthRow=rows[monthRowIdx]||[];
-  const dowRow  =rows[dowRowIdx]  ||[];
-  const dateRow =rows[dateRowIdx] ||[];
-
-  // ── 3. 데이터 시작 컬럼 ──────────────────────────────
-  let dsc=1;
-  for(let c=1;c<dateRow.length;c++){
-    if(isDateNum(dateRow[c])||parseDateStr(String(dateRow[c]||''))){dsc=c;break;}
-  }
-
-  // ── 4. 날짜 키 빌드 ──────────────────────────────────
-  // 월 forward-fill
+  // ── 3. 월 forward-fill ──────────────────────────────
   let curY=new Date().getFullYear(), curM=1;
   const mByC={};
-  for(let c=0;c<monthRow.length;c++){
+  for(let c=0; c<monthRow.length; c++){
     const s=String(monthRow[c]||'').trim();
     if(s){
-      const y=parseYear(s); const m=parseMonthNum(s);
-      if(y&&y>2020) curY=y;
-      if(m) curM=m;
+      const ym=s.match(/(\d{4})년\s*(\d{1,2})월/);
+      if(ym){curY=parseInt(ym[1]); curM=parseInt(ym[2]);}
+      else {
+        const mo=s.match(/(\d{1,2})월/); if(mo) curM=parseInt(mo[1]);
+        const yr=s.match(/(\d{4})년/);   if(yr) curY=parseInt(yr[1]);
+      }
     }
-    mByC[c]={y:curY,m:curM};
+    mByC[c]={y:curY, m:curM};
   }
 
+  // ── 4. 날짜 키 빌드 ─────────────────────────────────
   const dateKeys=[], dinfo={};
-  for(let c=dsc;c<dateRow.length;c++){
-    const cell=dateRow[c];
-    const dow=(dowRow[c]||'').toString().trim();
-    let key=null;
-
-    // Case A: Apps Script Date string in date row
-    const pd=parseDateStr(String(cell||''));
-    if(pd&&pd.y>2020){
-      key=`${pd.y}-${String(pd.m).padStart(2,'0')}-${String(pd.d).padStart(2,'0')}`;
+  for(let c=dsc; c<dateRow.length; c++){
+    const cell=String(dateRow[c]||'').trim();
+    const dow =String(dowRow[c] ||'').trim();
+    const {y,m}=mByC[c]||{y:curY,m:curM};
+    if(/^\d{1,2}$/.test(cell)){
+      const d=parseInt(cell);
+      if(d>=1&&d<=31){
+        const key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        dateKeys.push(key);
+        dinfo[key]={dow,col:c};
+        continue;
+      }
     }
-    // Case B: plain day number + month from monthRow
-    else if(isDateNum(cell)){
-      const {y,m}=mByC[c]||{y:curY,m:curM};
-      const d=parseInt(String(cell).trim());
-      key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    }
-
-    if(key){dateKeys.push(key); dinfo[key]={dow,col:c};}
-    else dateKeys.push(null);
+    dateKeys.push(null);
   }
 
-  // ── 5. 품목 데이터 ──────────────────────────────────
-  const itemStartRow=Math.max(dateRowIdx,dowRowIdx)+1;
+  // ── 5. 품목 데이터 (row idx 6+) ──────────────────────
   const items={};
-  for(let r=itemStartRow;r<rows.length;r++){
+  for(let r=itemStartIdx; r<rows.length; r++){
     const row=rows[r];
     if(!row||!row[0]) continue;
     const code=String(row[0]).trim();
-    if(!code||code==='합계'||code==='total'||code==='소계') continue;
+    if(!code||/합계|total|소계|^#/.test(code)) continue;
     const data={};
-    for(let ci=0;ci<dateKeys.length;ci++){
+    for(let ci=0; ci<dateKeys.length; ci++){
       if(!dateKeys[ci]) continue;
       const raw=String(row[dsc+ci]||'').trim().replace(/,/g,'');
       const v=parseFloat(raw);
@@ -1560,8 +1526,10 @@ function parseSheetData(txt) {
 
   const validDates=dateKeys.filter(Boolean);
   return {items, dates:validDates, dinfo,
-    _debug:{monthRowIdx,dowRowIdx,dateRowIdx,dsc,dateCount:validDates.length,itemCount:Object.keys(items).length,
-            firstDate:validDates[0]||'none', firstCode:Object.keys(items)[0]||'none'}};
+    _debug:{monthRowIdx,dowRowIdx,dateRowIdx,itemStartIdx,dsc,
+            dateCount:validDates.length, itemCount:Object.keys(items).length,
+            firstDate:validDates[0]||'none', firstCode:Object.keys(items)[0]||'none',
+            totalRows:rows.length}};
 }
 
 // ════════════════════════════════════════
