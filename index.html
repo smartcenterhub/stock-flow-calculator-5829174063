@@ -486,7 +486,6 @@ canvas{display:block}
     <div class="ni" onclick="nav('forecast',this)"><span class="ico">🗓️</span> 주간 예측표</div>
 
     <div class="nav-grp">출고 데이터</div>
-    <div class="ni" onclick="nav('daily',this)"><span class="ico">📋</span> 일별 현황</div>
     <div class="ni" onclick="nav('trend',this)"><span class="ico">📈</span> 추이 분석</div>
     <div class="ni" onclick="nav('detail',this)"><span class="ico">🔎</span> 품목 상세</div>
 
@@ -970,16 +969,6 @@ canvas{display:block}
   <div class="card mb12">
     <div class="card-title">품목계수 교차표 (X = <span id="xCrossLbl">100</span> 기준)</div>
     <div class="tbl-wrap" id="crossDiv"></div>
-  </div>
-
-  <div class="card mb12">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-      <div class="card-title" style="margin:0">📋 계수 변경 로그</div>
-      <button class="btn" onclick="cfgLogClear()" style="padding:3px 10px;font-size:11px;color:var(--red)">전체 삭제</button>
-    </div>
-    <div id="coeffLogDiv" style="max-height:220px;overflow-y:auto">
-      <div style="color:var(--t4);font-size:11px;padding:8px 0">계수 변경 내역이 여기에 기록됩니다.</div>
-    </div>
   </div>
 
   <div class="g2">
@@ -2457,7 +2446,10 @@ function renderXSuggest() {
         ? `<span style="color:var(--orange)">⚠️ ${diff>0?'+':''}${diff} 조정 권장</span>`
         : '<span style="color:var(--green)">✅ 현행 유지</span>'}
     </div>
-    ${need ? `<button class="btn" onclick="applyXSuggest(${sugX})" style="padding:4px 14px;color:var(--green);font-size:12px">✓ X = ${sugX} 반영</button>` : ''}`;
+    ${need ? `<div style="display:inline-flex;gap:6px;align-items:center">
+      <button class="btn" onclick="applyXSuggest(${sugX})" style="padding:4px 14px;color:var(--green);font-size:12px">✓ X = ${sugX} 반영</button>
+      <button onclick="cfgUndo()" title="X값 되돌리기" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--orange);padding:2px 4px">↩</button>
+    </div>` : ''}`;
 }
 
 // ── 요일계수 제안 & 반영 ───────────────────────
@@ -2544,14 +2536,13 @@ function renderItemSuggest() {
   let bigCount = 0;
 
   let h=`<table style="width:100%"><thead><tr>
-    <th style="text-align:left">품목</th>
+    <th style="text-align:left">품목 <span style="font-size:9px;color:var(--t4);font-weight:400">클릭 → 근거 보기</span></th>
     <th class="r">현행</th>
     <th class="r">제안</th>
     <th class="r">차이%</th>
     <th class="r">N일</th>
     <th style="text-align:center">판단</th>
     <th style="text-align:center">반영 / 되돌리기</th>
-    <th style="text-align:center" title="산출 근거">ℹ</th>
   </tr></thead><tbody>`;
 
   CODES.forEach(c=>{
@@ -2569,7 +2560,7 @@ function renderItemSuggest() {
         <td class="r">${cur.toFixed(3)}×</td><td class="r" style="color:var(--t4)">—</td>
         <td class="r" style="color:var(--t4)">—</td>
         <td class="r" style="color:var(--t4);font-size:11px">0</td>
-        <td colspan="3" style="text-align:center;color:var(--t4);font-size:11px">데이터 없음</td></tr>`;
+        <td colspan="2" style="text-align:center;color:var(--t4);font-size:11px">데이터 없음</td></tr>`;
       return;
     }
     const dp  = cur ? (sug-cur)/cur*100 : 0;
@@ -2594,23 +2585,25 @@ function renderItemSuggest() {
       `· 요일계수 · X(${CFG.X}) 제거 후 순수 품목 기여분\\n` +
       (big ? `· ⚠️ 현행 대비 ${Math.abs(dp)>=10?'10%':'5%'} 이상 차이 — 검토 권장` : '· ✅ 현행 계수와 근접');
 
+    const noteId='note_'+c.replace(/-/g,'_');
     h+=`<tr style="${big?'background:var(--glass-bg-dark)':''}">
-      <td><b>${TAG[c]}</b> <span style="color:var(--t3);font-size:11px">${NAME[c]}</span></td>
+      <td>
+        <span style="cursor:pointer;font-weight:700;color:var(--tx)" onclick="sugToggleNote('${noteId}')">${TAG[c]}</span>
+        <span style="color:var(--t3);font-size:11px"> ${NAME[c]}</span>
+        <div id="${noteId}" style="display:none;margin-top:5px;padding:7px 10px;background:var(--glass-bg-dark);border-radius:var(--r-sm);font-size:10.5px;color:var(--t3);line-height:1.8;border-left:2px solid var(--accent)">
+          📊 분석 ${n}일 · 평균 ${sug!==null?sug.toFixed(4):'—'} · 최소 ${minV} · 중앙 ${medV} · 최대 ${maxV}<br>
+          현행 ${cur.toFixed(3)} 대비 <b style="color:${col}">${dp>=0?'+':''}${dp.toFixed(1)}%</b>
+          ${big?' · ⚠️ 검토 권장':' · ✅ 근접'}
+        </div>
+      </td>
       <td class="r" style="color:var(--accent)">${cur.toFixed(3)}×</td>
       <td class="r" style="color:${col};font-weight:${big?600:400}">${sug.toFixed(3)}×</td>
       <td class="r" style="color:${big?col:'var(--t2)'};font-weight:${big?700:400}">${dp>=0?'+':''}${dp.toFixed(1)}%</td>
       <td class="r" style="color:var(--t4);font-size:11px">${n}</td>
       <td style="text-align:center">${verdict}</td>
-      <td style="text-align:center;white-space:nowrap;display:flex;gap:3px;justify-content:center;padding:4px 6px">
-        ${big ? `<button class="btn" onclick="applyOneItem('${c}',${sugRnd})"
-          style="padding:2px 7px;font-size:10.5px;color:${col}">반영</button>` : ''}
-        ${prevVal!==null ? `<button class="btn" onclick="revertOneItem('${c}',${prevVal})"
-          title="이전 값 ${prevVal}으로 되돌리기"
-          style="padding:2px 7px;font-size:10.5px;color:var(--orange)">↩${prevVal}</button>` : ''}
-      </td>
-      <td style="text-align:center">
-        <button onclick="alert('${infoTip}')" title="${infoTip}"
-          style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:12px;padding:2px 4px">ℹ️</button>
+      <td style="text-align:center;white-space:nowrap">
+        ${big ? `<button class="btn" onclick="applyOneItem('${c}',${sugRnd})" style="padding:2px 7px;font-size:10.5px;color:${col}">반영</button>` : ''}
+        ${prevVal!==null ? `<button onclick="revertOneItem('${c}',${prevVal})" title="이전 값(${prevVal})으로 되돌리기" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 4px;color:var(--orange)">↩</button>` : ''}
       </td>
     </tr>`;
   });
@@ -2780,6 +2773,11 @@ function applyItemSuggest(mode){
   cfgLogAdd(`품목계수 ${changes.length}개 반영`, changes);
   renderItemSuggest();
   cfgAfterChange(`✅ 품목계수 ${changes.length}개 반영 완료`);
+}
+
+function sugToggleNote(id){
+  const el=document.getElementById(id);
+  if(el) el.style.display=el.style.display==='none'?'block':'none';
 }
 
 // ── 토스트 알림 ──────────────────────────────
@@ -3063,14 +3061,15 @@ function doUpdateX() {
 }
 
 function renderCoeff() {
-  // Dow coeff display
-  let h='';
+  let h='<div style="display:flex;flex-wrap:wrap;gap:6px">';
   DOWS.forEach(d=>{
-    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--glass-border-subtle)">
-      <span style="font-weight:600;color:var(--tx)">${d}요일</span>
-      <span style="color:var(--accent);font-weight:600">${CFG.dow[d].toFixed(3)}×</span>
+    const c=DOW_COLORS[d]||'var(--accent)';
+    h+=`<div style="flex:1;min-width:60px;padding:8px 10px;border-radius:var(--r);border:1px solid ${c}44;background:${c}10;text-align:center">
+      <div style="font-size:11px;font-weight:700;color:${c}">${d}</div>
+      <div style="font-size:16px;font-weight:800;color:${c};margin-top:3px">${CFG.dow[d].toFixed(2)}×</div>
     </div>`;
   });
+  h+='</div>';
   document.getElementById('dowCoeffDisp').innerHTML=h;
   renderCrossTable();
   renderPromoCoeff();
@@ -3108,12 +3107,13 @@ function renderCrossTable() {
 }
 
 function renderPromoCoeff() {
-  const clrs={'없음':'var(--t2)','슈퍼적립':'var(--green)','+세일':'var(--pink)','자체행사':'var(--teal)','신상품런칭':'var(--accent)','한입발견회':'var(--purple)','푸드페스타':'var(--blue)','오늘끝딜':'var(--red)'};
-  let h='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
-  Object.entries(CFG.promo).forEach(([nm,v])=>{
-    h+=`<div style="padding:10px 12px;background:var(--glass-bg-dark);border-radius:var(--r);border:1px solid var(--glass-border-subtle)">
-      <div style="font-size:11px;color:var(--t3);margin-bottom:4px">${nm}</div>
-      <div style="font-size:20px;font-weight:700;color:${clrs[nm]||'var(--tx)'}">${v.toFixed(3)}×</div>
+  const clrs={'없음':'var(--t3)','슈퍼적립':'var(--green)','+세일':'#e060c0','자체행사':'#0ea47a','신상품런칭':'var(--accent)','한입발견회':'#7c3aed','푸드페스타':'var(--blue)','오늘끝딜':'var(--red)'};
+  let h='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  Object.entries(CFG.promo).filter(([k])=>k!=='없음').forEach(([nm,v])=>{
+    const c=clrs[nm]||'var(--tx)';
+    h+=`<div style="padding:8px 12px;border-radius:var(--r);border:1px solid ${c}44;background:${c}10;text-align:center;min-width:80px">
+      <div style="font-size:10px;color:${c};font-weight:600;margin-bottom:3px">${nm}</div>
+      <div style="font-size:17px;font-weight:800;color:${c}">${v.toFixed(3)}×</div>
     </div>`;
   });
   h+='</div>';
@@ -3121,14 +3121,15 @@ function renderPromoCoeff() {
 }
 
 function renderHolCoeff() {
-  let h='';
-  Object.entries(CFG.holiday).forEach(([nm,v])=>{
-    const col=v>1?'var(--orange)':v<1?'var(--red)':'var(--t2)';
-    h+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--glass-border-subtle)">
-      <span style="color:var(--t2)">${nm}</span>
-      <span style="font-weight:700;color:${col}">${v.toFixed(3)}×</span>
+  let h='<div style="display:flex;flex-wrap:wrap;gap:6px">';
+  Object.entries(CFG.holiday).filter(([k])=>k!=='없음').forEach(([nm,v])=>{
+    const c=v>1?'var(--orange)':'var(--red)';
+    h+=`<div style="padding:8px 12px;border-radius:var(--r);border:1px solid ${c}44;background:${c}10;text-align:center;flex:1;min-width:90px">
+      <div style="font-size:10px;color:${c};font-weight:600;margin-bottom:3px">${nm}</div>
+      <div style="font-size:17px;font-weight:800;color:${c}">${v.toFixed(3)}×</div>
     </div>`;
   });
+  h+='</div>';
   document.getElementById('holCoeffDiv').innerHTML=h;
 }
 
