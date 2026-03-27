@@ -1418,118 +1418,113 @@ function parseCSVRow(line) {
 }
 
 function parseCSV(txt) {
+  // 빈 줄 필터 안 함 — row index가 시트 행 번호와 1:1 대응해야 함
   if (!txt) return [];
-  return txt.split(/\r?\n/).filter(l=>l.trim()).map(parseCSVRow);
+  return txt.split(/\r?\n/).map(parseCSVRow);
 }
 
 function parseSheetData(txt) {
   const rows = parseCSV(txt);
   if (rows.length < 2) return {items:{}, dates:[], dinfo:{}, _debug:{err:'rows<2'}};
 
-  // ── 시트 구조 (Apps Script 확정) ────────────────────────
-  // Row idx 0: (제목 행)
-  // Row idx 1: 월 헤더  "2026년 3월"  (병합셀 → 빈칸 forward-fill)
-  // Row idx 2: (빈 행)
-  // Row idx 3: 요일     월 화 수 목 금
-  // Row idx 4: 날짜 숫자 1  2  3  4  5
-  // Row idx 5: (빈 행 or 합계)
-  // Row idx 6+: 품목 데이터  Col A(0) = product_code, Col D(3)~= 날짜별 값
-
   const DOW_SET = new Set(['월','화','수','목','금','토','일']);
 
-  // ── 1. 행 감지 (고정값 우선, 불일치 시 auto) ───────────
-  let monthRowIdx = 1;
-  let dowRowIdx   = 3;
-  let dateRowIdx  = 4;
-  let itemStartIdx= 6;
+  // ── 콘텐츠 기반 행 감지 (인덱스 가정 없음) ────────────────
+  let monthRowIdx=-1, dowRowIdx=-1, dateRowIdx=-1;
 
-  // 검증: row[1]에 "년" or "월" 포함 여부
-  const r1 = (rows[1]||[]).map(c=>String(c||''));
-  if (!r1.some(c=>/\d{4}년|\d{1,2}월/.test(c))) {
-    // 고정 구조와 다름 → 자동 탐지
-    for(let r=0; r<Math.min(rows.length,12); r++){
-      const row=(rows[r]||[]).map(c=>String(c||''));
-      const nonEmpty=row.filter(c=>c.trim());
-      const dowN=nonEmpty.filter(c=>DOW_SET.has(c.trim())).length;
-      if(dowN>=3&&dowRowIdx===3&&r!==3){dowRowIdx=r;}
-      const dateN=nonEmpty.filter(c=>/^\d{1,2}$/.test(c.trim())&&parseInt(c)>=1&&parseInt(c)<=31).length;
-      if(dateN>=5&&r>dowRowIdx&&dateRowIdx===4&&r!==4){dateRowIdx=r;}
-      if(row.some(c=>/\d{4}년/.test(c))&&monthRowIdx===1&&r!==1){monthRowIdx=r;}
-    }
-    itemStartIdx = dateRowIdx + 2;
+  for (let r=0; r<Math.min(rows.length,15); r++) {
+    const row = (rows[r]||[]).map(c=>String(c||'').trim());
+    const ne  = row.filter(Boolean);
+    if (!ne.length) continue;
+
+    // 요일행: 3개 이상이 요일 글자
+    const dowN = ne.filter(c=>DOW_SET.has(c)).length;
+    if (dowN>=3 && dowRowIdx<0) { dowRowIdx=r; continue; }
+
+    // 날짜행: 5개 이상이 1~31 정수 (요일행 이후)
+    const dateN = ne.filter(c=>/^\d{1,2}$/.test(c)&&parseInt(c)>=1&&parseInt(c)<=31).length;
+    if (dateN>=5 && dowRowIdx>=0 && dateRowIdx<0) { dateRowIdx=r; continue; }
+
+    // 월행: "YYYY년" 포함
+    if (row.some(c=>/\d{4}년/.test(c)) && monthRowIdx<0) { monthRowIdx=r; }
   }
 
-  const monthRow = rows[monthRowIdx] || [];
-  const dowRow   = rows[dowRowIdx]   || [];
-  const dateRow  = rows[dateRowIdx]  || [];
+  // fallback (Apps Script 구조: row1=월, row3=요일, row4=날짜)
+  if (monthRowIdx<0) monthRowIdx=1;
+  if (dowRowIdx<0)   dowRowIdx=3;
+  if (dateRowIdx<0)  dateRowIdx=4;
+  const itemStartIdx = dateRowIdx + 2;
 
-  // ── 2. 데이터 시작 컬럼 (Apps Script: Col D = idx 3) ───
-  let dsc = 3;
-  // 날짜행에서 첫 번째 숫자 위치 확인
-  for(let c=1; c<dateRow.length; c++){
-    const v = String(dateRow[c]||'').trim();
-    if(/^\d{1,2}$/.test(v) && parseInt(v)>=1 && parseInt(v)<=31){
+  const monthRow = (rows[monthRowIdx]||[]).map(c=>String(c||'').trim());
+  const dowRow   = (rows[dowRowIdx]  ||[]).map(c=>String(c||'').trim());
+  const dateRow  = (rows[dateRowIdx] ||[]).map(c=>String(c||'').trim());
+
+  // ── 데이터 시작 컬럼 ──────────────────────────────────────
+  let dsc=3;
+  for (let c=0; c<dateRow.length; c++) {
+    if (/^\d{1,2}$/.test(dateRow[c]) && parseInt(dateRow[c])>=1 && parseInt(dateRow[c])<=31) {
       dsc=c; break;
     }
   }
 
-  // ── 3. 월 forward-fill ──────────────────────────────
+  // ── 월 forward-fill ──────────────────────────────────────
   let curY=new Date().getFullYear(), curM=1;
   const mByC={};
-  for(let c=0; c<monthRow.length; c++){
-    const s=String(monthRow[c]||'').trim();
-    if(s){
+  for (let c=0; c<monthRow.length; c++) {
+    const s=monthRow[c];
+    if (s) {
       const ym=s.match(/(\d{4})년\s*(\d{1,2})월/);
-      if(ym){curY=parseInt(ym[1]); curM=parseInt(ym[2]);}
+      if (ym){curY=parseInt(ym[1]);curM=parseInt(ym[2]);}
       else {
         const mo=s.match(/(\d{1,2})월/); if(mo) curM=parseInt(mo[1]);
         const yr=s.match(/(\d{4})년/);   if(yr) curY=parseInt(yr[1]);
       }
     }
-    mByC[c]={y:curY, m:curM};
+    mByC[c]={y:curY,m:curM};
   }
 
-  // ── 4. 날짜 키 빌드 ─────────────────────────────────
+  // ── 날짜 키 빌드 ──────────────────────────────────────────
   const dateKeys=[], dinfo={};
-  for(let c=dsc; c<dateRow.length; c++){
-    const cell=String(dateRow[c]||'').trim();
-    const dow =String(dowRow[c] ||'').trim();
-    const {y,m}=mByC[c]||{y:curY,m:curM};
-    if(/^\d{1,2}$/.test(cell)){
+  for (let c=dsc; c<dateRow.length; c++) {
+    const cell=dateRow[c], dow=dowRow[c]||'';
+    if (/^\d{1,2}$/.test(cell)) {
       const d=parseInt(cell);
-      if(d>=1&&d<=31){
+      const {y,m}=mByC[c]||{y:curY,m:curM};
+      if (d>=1&&d<=31) {
         const key=`${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-        dateKeys.push(key);
-        dinfo[key]={dow,col:c};
-        continue;
+        dateKeys.push(key); dinfo[key]={dow,col:c}; continue;
       }
     }
     dateKeys.push(null);
   }
 
-  // ── 5. 품목 데이터 (row idx 6+) ──────────────────────
+  // ── 품목 데이터 ───────────────────────────────────────────
   const items={};
-  for(let r=itemStartIdx; r<rows.length; r++){
+  for (let r=itemStartIdx; r<rows.length; r++) {
     const row=rows[r];
-    if(!row||!row[0]) continue;
+    if (!row||!row[0]) continue;
     const code=String(row[0]).trim();
-    if(!code||/합계|total|소계|^#/.test(code)) continue;
+    if (!code||/합계|total|소계/i.test(code)) continue;
     const data={};
-    for(let ci=0; ci<dateKeys.length; ci++){
-      if(!dateKeys[ci]) continue;
+    for (let ci=0; ci<dateKeys.length; ci++) {
+      if (!dateKeys[ci]) continue;
       const raw=String(row[dsc+ci]||'').trim().replace(/,/g,'');
       const v=parseFloat(raw);
-      if(!isNaN(v)&&v>=0) data[dateKeys[ci]]=v;
+      if (!isNaN(v)&&v>=0) data[dateKeys[ci]]=v;
     }
-    if(Object.keys(data).length>0) items[code]=data;
+    if (Object.keys(data).length>0) items[code]=data;
   }
 
   const validDates=dateKeys.filter(Boolean);
   return {items, dates:validDates, dinfo,
     _debug:{monthRowIdx,dowRowIdx,dateRowIdx,itemStartIdx,dsc,
-            dateCount:validDates.length, itemCount:Object.keys(items).length,
-            firstDate:validDates[0]||'none', firstCode:Object.keys(items)[0]||'none',
-            totalRows:rows.length}};
+            totalRows:rows.length, dateCount:validDates.length,
+            itemCount:Object.keys(items).length,
+            firstDate:validDates[0]||'none',
+            firstCode:Object.keys(items)[0]||'none',
+            monthSample:monthRow.filter(Boolean).slice(0,2).join(' | '),
+            dowSample:dowRow.filter(Boolean).slice(0,5).join(' '),
+            dateSample:dateRow.filter(Boolean).slice(0,5).join(' ')}};
 }
 
 // ════════════════════════════════════════
@@ -1664,17 +1659,18 @@ async function loadAll() {
     const fcP = parseSheetData(fcTxt);
     const acP = parseSheetData(acTxt);
 
-    // ── 진단 정보 콘솔 출력 ──────────────────────
-    console.group('📊 데이터 파싱 진단');
-    console.log('fc 파싱:', fcP._debug, '| 날짜수:', fcP.dates.length, '| 품목수:', Object.keys(fcP.items).length);
-    console.log('ac 파싱:', acP._debug, '| 날짜수:', acP.dates.length, '| 품목수:', Object.keys(acP.items).length);
-    console.log('fc 품목코드 샘플:', Object.keys(fcP.items).slice(0,5));
-    console.log('CODES (TAG 기준):', CODES.slice(0,5));
-    console.log('fc 날짜 샘플:', fcP.dates.slice(0,3));
-    // RAW 첫 5행 덤프
-    const fcRawRows = parseCSV(fcTxt);
-    console.log('fc RAW rows[0..5]:');
-    fcRawRows.slice(0,8).forEach((r,i)=>console.log(`  row${i}:`, r.slice(0,8)));
+    // ── 파싱 진단 ───────────────────────────────────
+    const fcDbg = fcP._debug||{};
+    console.group('📊 fc 파싱 진단');
+    console.table({
+      '월행idx': fcDbg.monthRowIdx, '요일행idx': fcDbg.dowRowIdx,
+      '날짜행idx': fcDbg.dateRowIdx, '시작컬럼': fcDbg.dsc,
+      '날짜수': fcDbg.dateCount, '품목수': fcDbg.itemCount,
+      '첫날짜': fcDbg.firstDate, '첫코드': fcDbg.firstCode,
+      '월샘플': fcDbg.monthSample, '요일샘플': fcDbg.dowSample, '날짜샘플': fcDbg.dateSample
+    });
+    // RAW rows 덤프
+    parseCSV(fcTxt).slice(0,10).forEach((r,i)=>console.log(`row${i}:`, r.slice(0,8).join(' | ')));
     console.groupEnd();
 
     // ── TAG에 없는 코드도 D.fc에 포함 (시트에 새 품목 추가된 경우 대비) ──
