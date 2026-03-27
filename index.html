@@ -1657,6 +1657,10 @@ async function loadAll() {
     console.log('fc 품목코드 샘플:', Object.keys(fcP.items).slice(0,5));
     console.log('CODES (TAG 기준):', CODES.slice(0,5));
     console.log('fc 날짜 샘플:', fcP.dates.slice(0,3));
+    // RAW 첫 5행 덤프
+    const fcRawRows = parseCSV(fcTxt);
+    console.log('fc RAW rows[0..5]:');
+    fcRawRows.slice(0,8).forEach((r,i)=>console.log(`  row${i}:`, r.slice(0,8)));
     console.groupEnd();
 
     // ── TAG에 없는 코드도 D.fc에 포함 (시트에 새 품목 추가된 경우 대비) ──
@@ -1704,25 +1708,31 @@ async function loadAll() {
       document.getElementById('dateRangeTxt').textContent = `${D.dates[0]} ~ ${D.dates[D.dates.length-1]}`;
       document.getElementById('lastUpdTxt').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
     } else {
-      // 날짜가 없으면 진단 정보 표시
-      const fcDbg = fcP._debug||{};
-      document.getElementById('ovTable').innerHTML =
-        `<div class="alert al-w" style="white-space:pre-wrap;font-size:12px;line-height:1.8">
-⚠️ <b>시트 로드는 됐지만 데이터 파싱 실패</b>
-
-fc_예측 파싱 결과:
- · 총 행수: ${parseCSV(fcTxt).length}행
- · 감지된 월행: row${fcDbg.monthRowIdx} / 요일행: row${fcDbg.dowRowIdx} / 날짜행: row${fcDbg.dateRowIdx}
- · 데이터 시작 컬럼: col${fcDbg.dsc}
- · 날짜 인식 수: ${fcDbg.dateCount}개
- · 품목 인식 수: ${fcDbg.itemCount}개
-
-첫 3행 미리보기:
-${parseCSV(fcTxt).slice(0,4).map((r,i)=>`  row${i}: ${JSON.stringify(r.slice(0,6))}`).join('\n')}
-
-→ 개발자도구 콘솔(F12)에서 상세 진단 확인 가능</div>`;
+      // 파싱 실패 — 원인 파악용 진단 패널
+      const fcRaw = parseCSV(fcTxt);
+      const dbg = fcP._debug||{};
+      const rowDump = fcRaw.slice(0,8).map((r,i)=>
+        `<tr><td style="color:var(--t4);padding:2px 8px;font-size:10px;font-weight:700">row${i}</td>${
+          r.slice(0,8).map(c=>`<td style="padding:2px 8px;font-size:11px;border-left:1px solid var(--glass-border-subtle);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${String(c).slice(0,25)}</td>`).join('')
+        }</tr>`
+      ).join('');
+      document.getElementById('ovTable').innerHTML = `
+        <div class="alert al-w" style="font-size:12px;line-height:1.8">
+          <b>⚠️ 시트 연결은 됐으나 데이터 구조 인식 실패</b><br>
+          월행: row${dbg.monthRowIdx} / 요일행: row${dbg.dowRowIdx} / 날짜행: row${dbg.dateRowIdx} / 시작컬럼: col${dbg.dsc}<br>
+          날짜 인식: ${dbg.dateCount}개 / 품목 인식: ${dbg.itemCount}개<br>
+          <small style="color:var(--t4)">아래 표에서 구조 확인 후 개발자에게 전달하세요</small>
+        </div>
+        <div class="card" style="margin-top:8px">
+          <div class="card-title" style="font-size:11px">fc_예측 RAW 데이터 (첫 8행 × 8열)</div>
+          <div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:11px;width:100%">
+            <thead><tr><th style="padding:2px 8px;color:var(--t4)">행</th>${
+              [0,1,2,3,4,5,6,7].map(i=>`<th style="padding:2px 8px;color:var(--t3);border-left:1px solid var(--glass-border-subtle)">col${i}</th>`).join('')
+            }</tr></thead>
+            <tbody>${rowDump}</tbody>
+          </table></div>
+        </div>`;
     }
-
     const sel = document.getElementById('detailSel');
     sel.innerHTML = '<option value="">품목 선택</option>';
     CODES.forEach(c => {
