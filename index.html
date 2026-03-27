@@ -560,7 +560,7 @@ canvas{display:block}
   <span style="font-size:9.5px;color:var(--t4);margin-right:2px">데이터</span>
   <span class="hb-info" id="dateRangeTxt" style="cursor:default;font-size:10.5px;color:var(--t3)">—</span>
   <span class="hb-sep" style="width:1px"></span>
-  <button class="drp-btn" id="globalDrpBtn" onclick="drpOpen('global',this)" style="display:none">
+  <button class="drp-btn" id="globalDrpBtn" onclick="drpOpen('global',this)" style="display:none;margin:0;align-self:center">
     <span class="drp-icon">📅</span>
     <span class="drp-range empty" id="globalDrpLbl">전체 기간</span>
   </button>
@@ -595,10 +595,13 @@ canvas{display:block}
       <div class="sub">예측(fc) · 전일결제(pv) · 출고최대(mx) · 실출고(ac) · 미출(mis) 날짜별 통합</div>
     </div>
     <div class="frow">
+      <div style="display:inline-flex;align-items:center;gap:3px">
       <button class="drp-btn" id="dailyDrpBtn" onclick="drpOpen('daily',this)">
         <span class="drp-icon">📅</span>
         <span class="drp-range empty" id="dailyDrpLbl">전체 기간</span>
       </button>
+      <button onclick="drpReset('daily')" title="상단 기간으로 초기화" style="padding:2px 5px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;line-height:1;height:26px" id="dailyDrpReset">↺</button>
+      </div>
       <select id="dailyGrp" onchange="renderDaily()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
         <option value="all">전체 품목</option>
         <option value="yogurt">요거트</option>
@@ -622,10 +625,13 @@ canvas{display:block}
   <div class="sh mb12">
     <div><h2>📊 오차 현황</h2><div class="sub">예측(fc) vs 실제출고(ac) 품목별 정확도 요약</div></div>
     <div class="frow">
+      <div style="display:inline-flex;align-items:center;gap:3px">
       <button class="drp-btn" id="overviewDrpBtn" onclick="drpOpen('overview',this)">
         <span class="drp-icon">📅</span>
         <span class="drp-range empty" id="overviewDrpLbl">전체 기간</span>
       </button>
+      <button onclick="drpReset('overview')" title="상단 기간으로 초기화" style="padding:2px 5px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;line-height:1;height:26px" id="overviewDrpReset">↺</button>
+      </div>
     </div>
   </div>
 
@@ -715,10 +721,13 @@ canvas{display:block}
   <div class="sh mb12">
     <div><h2>💡 계수 제안</h2><div class="sub">실출고 데이터 기반 계수 제안 — 클릭 한 번으로 현행 계수에 반영</div></div>
     <div class="frow">
+      <div style="display:inline-flex;align-items:center;gap:3px">
       <button class="drp-btn" id="suggestDrpBtn" onclick="drpOpen('suggest',this)">
         <span class="drp-icon">📅</span>
         <span class="drp-range empty" id="suggestDrpLbl">전체 기간</span>
       </button>
+      <button onclick="drpReset('suggest')" title="상단 기간으로 초기화" style="padding:2px 5px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;line-height:1;height:26px" id="suggestDrpReset">↺</button>
+      </div>
       <button class="btn btn-p" onclick="renderSuggest()" style="padding:5px 12px">↻ 재계산</button>
     </div>
   </div>
@@ -773,6 +782,7 @@ canvas{display:block}
       <span class="drp-icon">📅</span>
       <span class="drp-range empty" id="trendDrpLbl">전체 기간</span>
     </button>
+    <button onclick="drpReset('trend')" title="상단 기간으로 초기화" style="padding:2px 5px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;line-height:1;height:26px" id="trendDrpReset">↺</button>
     <select id="trendGrp" onchange="renderTrend()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12px;color:var(--tx)">
       <option value="all">전체 품목</option>
       <option value="yogurt">요거트</option>
@@ -825,10 +835,13 @@ canvas{display:block}
   <div class="sh mb12">
     <div><h2>🔎 품목 상세</h2><div class="sub">선택 품목의 일별 fc/ac/오차 완전 조회</div></div>
     <div class="frow">
+      <div style="display:inline-flex;align-items:center;gap:3px">
       <button class="drp-btn" id="detailDrpBtn" onclick="drpOpen('detail',this)">
         <span class="drp-icon">📅</span>
         <span class="drp-range empty" id="detailDrpLbl">전체 기간</span>
       </button>
+      <button onclick="drpReset('detail')" title="상단 기간으로 초기화" style="padding:2px 5px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:transparent;color:var(--t3);font-size:11px;cursor:pointer;line-height:1;height:26px" id="detailDrpReset">↺</button>
+      </div>
       <select id="detailSel" onchange="renderDetail()" style="padding:5px 9px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);font-family:inherit;font-size:12.5px;color:var(--tx)">
         <option value="">품목 선택</option>
       </select>
@@ -1973,8 +1986,9 @@ async function loadAll() {
 
     if (D.dates.length) {
       // D.dates = fc+ac 합집합. 실제 ac 데이터 범위 따로 계산
-      const acDates=D.dates.filter(dt=>CODES.some(c=>dt in (D.ac[c]||{})));
-      const acFirst=acDates[0]||D.dates[0], acLast=acDates[acDates.length-1]||D.dates[D.dates.length-1];
+      const _allAcD=new Set(); Object.values(D.ac).forEach(b=>Object.keys(b).forEach(d=>_allAcD.add(d)));
+      const _acSorted=[..._allAcD].sort();
+      const acFirst=_acSorted[0]||D.dates[0], acLast=_acSorted[_acSorted.length-1]||D.dates[D.dates.length-1];
       document.getElementById('dateRangeTxt').textContent = acFirst + ' ~ ' + acLast;
       document.getElementById('dateRangeTxt').title = `ac 실출고 기간: ${acFirst}~${acLast} / fc 예측 전체: ${D.dates[0]}~${D.dates[D.dates.length-1]}`;
       const gp=document.getElementById('globalPeriod');
@@ -2022,7 +2036,8 @@ async function loadAll() {
     if(document.getElementById('page-daily').classList.contains('on')) renderDaily();
     applyHolidaysToWeek();
     // 행사 자동 로드 (데이터 로드 시)
-    try { await evLoadSheet('month'); } catch(_) {}
+    // 행사 자동 로드 (initForecast 이후에 BUNDLES가 준비됨)
+    setTimeout(async()=>{ try{ await evLoadSheet('month'); }catch(_){} }, 1000);
 
     loadBarSet(100, `✅ 로드 완료 — ${D.dates.length}일 데이터`);
     loadBarStep(steps);
@@ -3192,9 +3207,20 @@ let EV_RAW=[];
 // Parse date string "2026.03.24" or "2026-03-24" → Date
 function evParseDate(s){
   if(!s) return null;
-  const n=s.replace(/\./g,'-').trim();
-  if(!/\d{4}-\d{2}-\d{2}/.test(n)) return null;
-  return new Date(n+'T00:00:00');
+  s=String(s).trim();
+  // 1899년 이전 → 빈셀 (Apps Script 빈 날짜 기본값)
+  if(s.includes('1899')||s.includes('1900')) return null;
+  // "YYYY-MM-DD" or "YYYY.MM.DD"
+  const iso=s.replace(/\./g,'-');
+  const m1=iso.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m1) return new Date(m1[1]+'-'+m1[2].padStart(2,'0')+'-'+m1[3].padStart(2,'0')+'T00:00:00');
+  // "Mon Mar 16 2026 ..." (Apps Script Date toString)
+  const m2=s.match(/(\w{3})\s+(\w{3})\s+(\d{1,2})\s+(\d{4})/);
+  if(m2){const mo={Jan:1,Feb:2,Mar:3,Apr:4,May:5,Jun:6,Jul:7,Aug:8,Sep:9,Oct:10,Nov:11,Dec:12};const mn=mo[m2[2]];if(mn)return new Date(parseInt(m2[4]),mn-1,parseInt(m2[3]));}
+  // "2026년 3월 16일"
+  const m3=s.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
+  if(m3) return new Date(parseInt(m3[1]),parseInt(m3[2])-1,parseInt(m3[3]));
+  return null;
 }
 
 // Check if event overlaps with current week
@@ -3622,35 +3648,64 @@ function drpClose(){
 
 function drpApply(){
   if(!DRP.selS) return;
-  const s = DRP.selS, e = DRP.selE||DRP.selS;
-  const range = [s<=e ? s : e, s<=e ? e : s];
-  PAGE_RANGE[DRP.pageId] = range;
+  const s=DRP.selS, e=DRP.selE||DRP.selS;
+  const range=[s<=e?s:e, s<=e?e:s];
 
-  // If global → sync all pages
   if(DRP.pageId==='global'){
-    Object.keys(PAGE_RANGE).forEach(k=>{ if(k!=='global') PAGE_RANGE[k]=null; });
+    PAGE_RANGE['global']=range;
+    // 하위 페이지 라벨 → global 기간으로 표시 (null 유지)
+    ['overview','daily','trend','detail','suggest'].forEach(k=>{
+      PAGE_RANGE[k]=null;
+      drpUpdateLabel(k, null);
+      const rb=document.getElementById(k+'DrpReset');
+      if(rb) rb.style.opacity='0.35';
+    });
+    drpUpdateLabel('global', range);
+  } else {
+    PAGE_RANGE[DRP.pageId]=range;
+    drpUpdateLabel(DRP.pageId, range);
+    const rb=document.getElementById(DRP.pageId+'DrpReset');
+    if(rb) rb.style.opacity='1';
   }
 
-  drpUpdateLabel(DRP.pageId, range);
   drpClose();
+  const pid=DRP.pageId==='global'?(document.querySelector('.page.on')?.id||'').replace('page-',''):DRP.pageId;
+  if(pid==='overview'||DRP.pageId==='global') renderOverview();
+  if(pid==='daily')   renderDaily();
+  if(pid==='trend')   renderTrend();
+  if(pid==='detail')  renderDetail();
+  if(pid==='suggest') renderSuggest();
+}
 
-  // Re-render active page
-  const pid = DRP.pageId==='global' ? (document.querySelector('.page.on')?.id||'').replace('page-','') : DRP.pageId;
-  if(pid==='overview') renderOverview();
-  if(pid==='daily')    renderDaily();
-  if(pid==='trend')    renderTrend();
-  if(pid==='detail')   renderDetail();
-  if(pid==='suggest')  renderSuggest();
-  if(DRP.pageId==='global') onGlobalPeriodChange();
+function drpReset(pageId){
+  PAGE_RANGE[pageId]=null;
+  drpUpdateLabel(pageId, null);
+  const rb=document.getElementById(pageId+'DrpReset');
+  if(rb) rb.style.opacity='0.35';
+  if(pageId==='overview') renderOverview();
+  if(pageId==='daily')    renderDaily();
+  if(pageId==='trend')    renderTrend();
+  if(pageId==='detail')   renderDetail();
+  if(pageId==='suggest')  renderSuggest();
 }
 
 function drpUpdateLabel(pageId, range){
-  const lbl = document.getElementById(pageId+'DrpLbl');
+  const lbl=document.getElementById(pageId+'DrpLbl');
   if(!lbl) return;
-  if(!range){ lbl.textContent='전체 기간'; lbl.className='drp-range empty'; return; }
-  const days = Math.round((new Date(range[1])-new Date(range[0]))/86400000)+1;
-  lbl.textContent = range[0]+' ~ '+range[1]+' ('+days+'일간)';
-  lbl.className = 'drp-range';
+  if(!range){
+    const gr=PAGE_RANGE['global'];
+    if(gr && pageId!=='global'){
+      const days=Math.round((new Date(gr[1])-new Date(gr[0]))/86400000)+1;
+      lbl.textContent=gr[0]+' ~ '+gr[1]+' ('+days+'일간)';
+      lbl.className='drp-range'; lbl.style.opacity='0.55';
+    } else {
+      lbl.textContent='전체 기간'; lbl.className='drp-range empty'; lbl.style.opacity='1';
+    }
+    return;
+  }
+  const days=Math.round((new Date(range[1])-new Date(range[0]))/86400000)+1;
+  lbl.textContent=range[0]+' ~ '+range[1]+' ('+days+'일간)';
+  lbl.className='drp-range'; lbl.style.opacity='1';
 }
 
 function drpGetRange(pageId){
@@ -3864,6 +3919,8 @@ function onGlobalPeriodChange(){
 function drpInitAfterLoad(){
   ['global','overview','daily','trend','detail','suggest'].forEach(pid=>{
     drpUpdateLabel(pid, PAGE_RANGE[pid]);
+    const rb=document.getElementById(pid+'DrpReset');
+    if(rb) rb.style.opacity='0.35';
   });
   const gb=document.getElementById('globalDrpBtn');
   if(gb) gb.style.display='inline-flex';
@@ -3871,8 +3928,13 @@ function drpInitAfterLoad(){
 
 // Store ac range for default
 function drpStoreAcRange(){
-  const acDates = D.dates.filter(dt=>CODES.some(c=>dt in (D.ac[c]||{})));
-  if(acDates.length) D.acRange=[acDates[0], acDates[acDates.length-1]];
+  // D.ac 전체 코드를 직접 스캔 (CODES 의존 제거)
+  const allAcDates = new Set();
+  Object.values(D.ac).forEach(byDate=>{
+    Object.keys(byDate).forEach(dt=>allAcDates.add(dt));
+  });
+  const sorted = [...allAcDates].sort();
+  if(sorted.length) D.acRange=[sorted[0], sorted[sorted.length-1]];
 }
 sbGuideFill();
 setTimeout(()=>{ loadAll(); }, 500);
