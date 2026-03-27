@@ -492,6 +492,21 @@ canvas{display:block}
     <button class="btn btn-p" id="loadBtn" onclick="loadAll()">↻ 데이터 로드</button>
   </div>
 </div>
+<!-- 로딩 바 -->
+<div id="loadBar" style="display:none;position:fixed;top:40px;left:0;right:0;z-index:200;background:var(--glass-bg-strong);border-bottom:1px solid var(--glass-border);padding:8px 20px;backdrop-filter:blur(12px)">
+  <div style="display:flex;align-items:center;gap:12px;max-width:900px;margin:0 auto">
+    <div style="flex:1">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span id="loadBarLabel" style="font-size:11px;font-weight:600;color:var(--t2)">로딩 중...</span>
+        <span id="loadBarPct" style="font-size:11px;color:var(--t3)">0%</span>
+      </div>
+      <div style="height:5px;background:var(--glass-bg-dark);border-radius:10px;overflow:hidden">
+        <div id="loadBarFill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--blue));border-radius:10px;transition:width .3s ease"></div>
+      </div>
+      <div id="loadBarSteps" style="display:flex;gap:8px;margin-top:5px;flex-wrap:wrap"></div>
+    </div>
+  </div>
+</div>
 
 <!-- ─── MAIN ──────────────────────────────────── -->
 <main class="main">
@@ -1336,48 +1351,53 @@ const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJ5PcJZetp7Pqb
 const GITHUB_PAGES_URL = 'https://smartcenterhub.github.io/smartstore-dashboard-9037261845/';
 
 // Apps Script 1순위 → gviz → export 순으로 시도
+// credentials:'omit' 으로 인증 리다이렉트 방지
 async function fetchCsvByGid(gid) {
   const errs = [];
+  const OPTS = { credentials: 'omit', redirect: 'follow' };
 
-  // ① Apps Script proxy — CORS 완전 우회
+  // ① Apps Script proxy — CORS 완전 우회, 인증 불필요
   try {
     const url = `${APPS_SCRIPT_URL}?action=getCsv&gid=${gid}&id=${SHEET_ID}`;
-    const r = await fetch(url);
+    const r = await fetch(url, OPTS);
     if (r.ok) {
       const txt = await r.text();
-      if (txt && !txt.trimStart().startsWith('<') && txt.includes(',') && txt.split('\n').length > 1)
+      if (txt && !txt.trimStart().startsWith('<') && !txt.startsWith('{') && txt.includes(',') && txt.split('\n').length > 1)
         return txt;
-      errs.push(`Apps Script 응답 이상: ${txt.slice(0,80)}`);
-    } else { errs.push(`Apps Script HTTP ${r.status}`); }
-  } catch(e) { errs.push(`Apps Script: ${e.message.slice(0,60)}`); }
+      // Apps Script가 JSON 에러 반환하는 경우
+      errs.push(`Apps Script 응답 이상: ${txt.slice(0,100)}`);
+    } else { errs.push(`Apps Script: HTTP ${r.status}`); }
+  } catch(e) { errs.push(`Apps Script: ${e.message.slice(0,80)}`); }
 
-  // ② gviz API (공개 시트 + HTTPS)
+  // ② gviz API (공개 시트)
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}`;
-    const r = await fetch(url);
+    const r = await fetch(url, OPTS);
     if (r.ok) {
       const txt = await r.text();
       if (txt && !txt.trimStart().startsWith('<') && txt.includes(',')) return txt;
-    }
+    } else { errs.push(`gviz: HTTP ${r.status}`); }
   } catch(e) { errs.push(`gviz: ${e.message.slice(0,40)}`); }
 
-  // ③ 직접 export
+  // ③ 직접 export CSV
   try {
     const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
-    const r = await fetch(url);
+    const r = await fetch(url, OPTS);
     if (r.ok) {
       const txt = await r.text();
       if (txt && !txt.trimStart().startsWith('<') && txt.includes(',')) return txt;
-      errs.push('export: HTML 응답');
+      errs.push('export: HTML 응답 (시트 공개 설정 확인)');
     } else { errs.push(`export: HTTP ${r.status}`); }
   } catch(e) { errs.push(`export: ${e.message.slice(0,40)}`); }
 
   const isLocal = location.protocol === 'file:';
   throw new Error(
-    `로드 실패 (gid=${gid})\n\n시도 결과:\n${errs.map((e,i)=>` ${i+1}. ${e}`).join('\n')}\n\n` +
-    `해결:\n 1. Apps Script doGet에 getCsv 핸들러 추가 후 새 버전 배포\n` +
+    `로드 실패 (gid=${gid})\n\n` +
+    `시도 결과:\n${errs.map((e,i)=>` ${i+1}. ${e}`).join('\n')}\n\n` +
+    `해결 방법:\n` +
+    ` 1. Apps Script 재배포 확인 (getCsv 핸들러 포함 버전)\n` +
     ` 2. 구글 시트 공유 → 링크 있는 사람 → 뷰어\n` +
-    (isLocal ? ` 3. python3 -m http.server 8080 후 localhost 접속` : ` 3. 시트 공개 여부 확인`)
+    (isLocal ? ` 3. 로컬 실행: python3 -m http.server 8080` : ` 3. GitHub Pages 배포 확인`)
   );
 }
 function parseCSVRow(line) {
@@ -1537,29 +1557,76 @@ function applyHolidaysToWeek(){
   if(changed) fcRecalc();
 }
 
+// ── 로딩 바 헬퍼 ─────────────────────────────
+function loadBarShow(){ document.getElementById('loadBar').style.display='block'; }
+function loadBarHide(){ document.getElementById('loadBar').style.display='none'; }
+function loadBarSet(pct, label, stepHtml){
+  document.getElementById('loadBarFill').style.width = pct+'%';
+  document.getElementById('loadBarPct').textContent = pct+'%';
+  if(label) document.getElementById('loadBarLabel').textContent = label;
+  if(stepHtml!==undefined) document.getElementById('loadBarSteps').innerHTML = stepHtml;
+}
+function loadBarStep(steps){ // steps: [{label, status: 'ok'|'warn'|'loading'|'error'}]
+  const html = steps.map(s=>{
+    const c = s.status==='ok'?'var(--green)':s.status==='warn'?'var(--orange)':s.status==='error'?'var(--red)':'var(--t3)';
+    const ico = s.status==='ok'?'✅':s.status==='warn'?'⚠️':s.status==='error'?'❌':'⏳';
+    return `<span style="font-size:9.5px;color:${c};white-space:nowrap">${ico} ${s.label}</span>`;
+  }).join('');
+  document.getElementById('loadBarSteps').innerHTML = html;
+}
+
 async function loadAll() {
   const btn=document.getElementById('loadBtn');
   btn.disabled=true;
-  btn.innerHTML='<div class="spin" style="width:14px;height:14px;border-width:2px"></div> 로딩중...';
+  btn.innerHTML='⏳ 로딩중...';
+  loadBarShow();
+
+  const steps = [
+    {label:'fc_예측', status:'loading'},
+    {label:'ac_실제출고', status:'loading'},
+    {label:'pv_전일결제', status:'loading'},
+    {label:'mx_출고최대', status:'loading'},
+    {label:'미출', status:'loading'},
+  ];
 
   try {
-    // fc + ac 필수 / pv·mx·mis 선택 (실패해도 계속)
-    const [fcTxt, acTxt] = await Promise.all([
-      fetchCsvByGid(GIDS.fc),
-      fetchCsvByGid(GIDS.ac),
-    ]);
+    loadBarSet(5, '📡 fc_예측 · ac_실제출고 연결 중...', '');
+    loadBarStep(steps);
+
+    // ① fc + ac 필수
+    let fcTxt, acTxt;
+    try {
+      [fcTxt, acTxt] = await Promise.all([
+        fetchCsvByGid(GIDS.fc),
+        fetchCsvByGid(GIDS.ac),
+      ]);
+      steps[0].status='ok'; steps[1].status='ok';
+    } catch(e) {
+      steps[0].status='error'; steps[1].status='error';
+      loadBarStep(steps);
+      throw e;
+    }
+    loadBarSet(35, '📊 데이터 파싱 중...', '');
+    loadBarStep(steps);
 
     detectHolidaysFromFc(fcTxt);
-
     const fcP = parseSheetData(fcTxt);
     const acP = parseSheetData(acTxt);
 
-    // pv / mx / mis — 실패해도 빈 객체로 처리
-    const [pvTxt, mxTxt, misTxt] = await Promise.allSettled([
+    loadBarSet(50, '📡 pv · mx · 미출 연결 중...', '');
+
+    // ② pv / mx / mis 선택
+    const suppResults = await Promise.allSettled([
       fetchCsvByGid(GIDS.pv),
       fetchCsvByGid(GIDS.mx),
       fetchCsvByGid(GIDS.mis),
-    ]).then(rs => rs.map(r => r.status==='fulfilled' ? r.value : ''));
+    ]);
+    const [pvTxt, mxTxt, misTxt] = suppResults.map(r => r.status==='fulfilled' ? r.value : '');
+    steps[2].status = pvTxt  ? 'ok' : 'warn';
+    steps[3].status = mxTxt  ? 'ok' : 'warn';
+    steps[4].status = misTxt ? 'ok' : 'warn';
+    loadBarSet(70, '🔧 데이터 합산 중...', '');
+    loadBarStep(steps);
 
     const pvP  = pvTxt  ? parseSheetData(pvTxt)  : {items:{}, dates:[], dinfo:{}};
     const mxP  = mxTxt  ? parseSheetData(mxTxt)  : {items:{}, dates:[], dinfo:{}};
@@ -1578,6 +1645,7 @@ async function loadAll() {
     });
 
     D.loaded = true;
+    loadBarSet(85, '🎨 화면 렌더링 중...', '');
 
     if (D.dates.length) {
       document.getElementById('dateRangeTxt').textContent = `${D.dates[0]} ~ ${D.dates[D.dates.length-1]}`;
@@ -1595,15 +1663,23 @@ async function loadAll() {
     renderOverview();
     renderCoeff();
     sbGuideFill();
-    // 일별 현황 페이지가 보이면 즉시 렌더
     if(document.getElementById('page-daily').classList.contains('on')) renderDaily();
     applyHolidaysToWeek();
 
+    loadBarSet(100, `✅ 로드 완료 — ${D.dates.length}일 데이터`);
+    loadBarStep(steps);
+    setTimeout(loadBarHide, 2000);
+
   } catch(e) {
     const msg = (e.message||'알 수 없는 오류');
+    loadBarSet(100, '❌ 로드 실패');
+    loadBarStep(steps);
     document.getElementById('ovTable').innerHTML =
-      `<div class="alert al-d" style="white-space:pre-wrap;line-height:1.7">❌ <b>데이터 로드 실패</b>\n\n${msg}\n\n👉 <a href="${GITHUB_PAGES_URL}" target="_blank" style="color:var(--accent)">${GITHUB_PAGES_URL}</a> 에 파일 업로드 후 실행하세요.</div>`;
+      `<div class="alert al-d" style="white-space:pre-wrap;line-height:1.8;font-size:12px">` +
+      `❌ <b>데이터 로드 실패</b>\n\n${msg}\n\n` +
+      `👉 <a href="${GITHUB_PAGES_URL}" target="_blank" style="color:var(--accent)">${GITHUB_PAGES_URL}</a> 에 파일 업로드 후 실행</div>`;
     console.error(e);
+    setTimeout(loadBarHide, 5000);
   }
 
   btn.disabled=false;
