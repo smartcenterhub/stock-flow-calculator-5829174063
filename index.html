@@ -404,7 +404,8 @@ canvas{display:block}
 }
 
 /* ── Date Range Picker ─────────────────────────── */
-.drp-btn{display:inline-flex!important;align-items:center!important;align-self:flex-start!important;gap:4px;padding:3px 8px!important;height:auto!important;max-height:26px!important;line-height:1!important;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--tx);font-size:11px;font-family:inherit;cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.drp-btn{display:inline-flex!important;align-items:center!important;gap:4px;padding:3px 8px!important;height:26px!important;line-height:1!important;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--tx);font-size:11px;font-family:inherit;cursor:pointer;white-space:nowrap;transition:border-color .15s}
+.sh .drp-btn,.frow .drp-btn{align-self:flex-start}
 .drp-btn:hover{border-color:var(--accent)}
 .drp-btn .drp-icon{font-size:11px;opacity:.6}
 .drp-btn .drp-range{color:var(--accent);font-weight:600}
@@ -556,7 +557,8 @@ canvas{display:block}
 <div class="histbar">
   <span class="hb-title">요즘 물량 예측 오차 분석 대시보드</span>
   <span class="hb-sep"></span>
-  <span class="hb-info" id="dateRangeTxt" style="cursor:default;font-size:10.5px">—</span>
+  <span style="font-size:9.5px;color:var(--t4);margin-right:2px">데이터</span>
+  <span class="hb-info" id="dateRangeTxt" style="cursor:default;font-size:10.5px;color:var(--t3)">—</span>
   <span class="hb-sep" style="width:1px"></span>
   <button class="drp-btn" id="globalDrpBtn" onclick="drpOpen('global',this)" style="display:none">
     <span class="drp-icon">📅</span>
@@ -1971,7 +1973,7 @@ async function loadAll() {
 
     if (D.dates.length) {
       // D.dates = fc+ac 합집합. 실제 ac 데이터 범위 따로 계산
-      const acDates=D.dates.filter(dt=>CODES.some(c=>(D.ac[c]||{})[dt]));
+      const acDates=D.dates.filter(dt=>CODES.some(c=>dt in (D.ac[c]||{})));
       const acFirst=acDates[0]||D.dates[0], acLast=acDates[acDates.length-1]||D.dates[D.dates.length-1];
       document.getElementById('dateRangeTxt').textContent = acFirst + ' ~ ' + acLast;
       document.getElementById('dateRangeTxt').title = `ac 실출고 기간: ${acFirst}~${acLast} / fc 예측 전체: ${D.dates[0]}~${D.dates[D.dates.length-1]}`;
@@ -3558,6 +3560,7 @@ const PAGE_RANGE = { global:null, overview:null, daily:null, trend:null, detail:
 
 // Quick select buttons
 const DRP_QUICK = [
+  {label:'전체 기간', fn:()=>{ if(!D.loaded||!D.dates.length) return[null,null]; return[D.dates[0], D.dates[D.dates.length-1]]; }, isAll:true},
   {label:'어제', fn:()=>{ const d=drpOffset(-1); return[d,d]; }},
   {label:'지난 7일', fn:()=>[ drpOffset(-6), drpOffset(0) ]},
   {label:'이번 주', fn:()=>{ const t=new Date(); const day=t.getDay(); const mon=new Date(t); mon.setDate(t.getDate()-(day===0?6:day-1)); return[dateStr(mon),dateStr(t)]; }},
@@ -3646,7 +3649,7 @@ function drpUpdateLabel(pageId, range){
   if(!lbl) return;
   if(!range){ lbl.textContent='전체 기간'; lbl.className='drp-range empty'; return; }
   const days = Math.round((new Date(range[1])-new Date(range[0]))/86400000)+1;
-  lbl.textContent = range[0].slice(5)+' ~ '+range[1].slice(5)+' ('+days+'일간)';
+  lbl.textContent = range[0]+' ~ '+range[1]+' ('+days+'일간)';
   lbl.className = 'drp-range';
 }
 
@@ -3801,13 +3804,26 @@ function drpNav(side, delta){
 }
 
 function drpQuickSet(i){
-  const [s,e] = DRP_QUICK[i].fn();
-  DRP.selS=s; DRP.selE=e; DRP.clicking='start';
-  // Sync calendars to show the range
-  const ed=new Date(e);
-  DRP.viewR={y:ed.getFullYear(),m:ed.getMonth()};
-  DRP.viewL={y:ed.getMonth()===0?ed.getFullYear()-1:ed.getFullYear(),m:ed.getMonth()===0?11:ed.getMonth()-1};
-  drpRender();
+  const q = DRP_QUICK[i];
+  // 전체 기간 선택 시 → range 초기화
+  if(q.isAll){
+    DRP.selS=null; DRP.selE=null; DRP.clicking='start'; DRP.hoverD=null;
+    PAGE_RANGE[DRP.pageId]=null;
+    drpUpdateLabel(DRP.pageId, null);
+    drpClose();
+    const pid=DRP.pageId==='global'?(document.querySelector('.page.on')?.id||'').replace('page-',''):DRP.pageId;
+    if(pid==='overview') renderOverview();
+    if(pid==='daily')    renderDaily();
+    if(pid==='trend')    renderTrend();
+    if(pid==='detail')   renderDetail();
+    if(pid==='suggest')  renderSuggest();
+    if(DRP.pageId==='global') onGlobalPeriodChange();
+    return;
+  }
+  const [s,e] = q.fn();
+  DRP.selS=s; DRP.selE=e; DRP.clicking='start'; DRP.hoverD=null;
+  if(e){ const ed=new Date(e); DRP.viewR={y:ed.getFullYear(),m:ed.getMonth()}; DRP.viewL={y:ed.getMonth()===0?ed.getFullYear()-1:ed.getFullYear(),m:ed.getMonth()===0?11:ed.getMonth()-1}; }
+  drpRenderFull();
 }
 
 function drpOnInp(side){
@@ -3855,7 +3871,7 @@ function drpInitAfterLoad(){
 
 // Store ac range for default
 function drpStoreAcRange(){
-  const acDates = D.dates.filter(dt=>CODES.some(c=>(D.ac[c]||{})[dt]));
+  const acDates = D.dates.filter(dt=>CODES.some(c=>dt in (D.ac[c]||{})));
   if(acDates.length) D.acRange=[acDates[0], acDates[acDates.length-1]];
 }
 sbGuideFill();
