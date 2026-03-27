@@ -1184,6 +1184,27 @@ function nav(id, el) {
   }
 }
 
+function sbGuideToggle(){
+  document.getElementById('sbGuide').classList.toggle('open');
+}
+
+function sbGuideFill(){
+  const dowEl=document.getElementById('guideDoW');
+  if(dowEl) dowEl.innerHTML=DOWS.map(d=>{
+    const v=CFG.dow[d]||1, c=DOW_COLORS[d]||'var(--accent)';
+    return '<span class="gi-badge" style="background:'+c+'18;color:'+c+'">'+d+' <span style="opacity:.7">×'+v.toFixed(2)+'</span></span>';
+  }).join('');
+  const promoEl=document.getElementById('guidePromo');
+  if(promoEl) promoEl.innerHTML=Object.entries(FC_PROMO||{}).map(([k,v])=>
+    '<span class="gi-badge" style="background:'+v.bg+';color:'+v.c+'">'+k+' <span style="opacity:.7">×'+v.v.toFixed(3)+'</span></span>'
+  ).join('');
+  const holEl=document.getElementById('guideHol');
+  if(holEl) holEl.innerHTML=Object.entries(FC_HOL||{}).filter(([k])=>k!=='없음').map(([k,v])=>{
+    const c=v.v>1?'var(--orange)':'var(--red)';
+    return '<span class="gi-badge" style="background:'+c+'15;color:'+c+'">'+k+' <span style="opacity:.7">×'+v.v.toFixed(3)+'</span></span>';
+  }).join('');
+}
+
 // ── 시트 진단 ──────────────────────────────────────
 async function dbgFetch(){
   var gid = document.getElementById('dbgGid').value;
