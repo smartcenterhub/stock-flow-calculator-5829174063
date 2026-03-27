@@ -2472,9 +2472,21 @@ function renderXSuggest() {
         : '<span style="color:var(--green)">✅ 현행 유지</span>'}
     </div>
     <div style="display:inline-flex;gap:6px;align-items:center">
-      ${need ? `<button class="btn" onclick="applyXSuggest(${sugX})" style="padding:4px 14px;color:var(--green);font-size:12px">✓ X = ${sugX} 반영</button>` : `<span style="color:var(--t4);font-size:11px">✅ 현행 유지</span>`}
-      <button onclick="cfgUndo()" title="X값 되돌리기 (이전값으로)"
-        style="background:none;border:1px solid ${CFG_HIST_IDX>=0?'var(--orange)':'var(--glass-border-subtle)'};border-radius:var(--r-sm);cursor:pointer;font-size:14px;padding:2px 7px;color:${CFG_HIST_IDX>=0?'var(--orange)':'var(--t4)'};opacity:${CFG_HIST_IDX>=0?1:0.35}">↩</button>
+      <button onclick="${_X_APPLIED.applied?'void(0)':`applyXSuggest(${sugX})`}"
+        style="padding:4px 14px;font-size:12px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;
+          border:1px solid ${need&&!_X_APPLIED.applied?'var(--green)':'var(--glass-border-subtle)'};
+          background:${need&&!_X_APPLIED.applied?'rgba(26,138,74,.12)':'transparent'};
+          color:${need&&!_X_APPLIED.applied?'var(--green)':'var(--t4)'};
+          font-weight:${need&&!_X_APPLIED.applied?700:400}">
+        ${_X_APPLIED.applied?`X = ${CFG.X} 반영됨`:(need?`✓ X = ${sugX} 반영`:'현행 유지')}
+      </button>
+      <button onclick="${_X_APPLIED.applied?'revertXApplied()':'void(0)'}"
+        title="${_X_APPLIED.applied?'이전 값('+_X_APPLIED.prevVal+')으로 되돌리기':'반영 후 활성화'}"
+        style="border-radius:var(--r-sm);transition:all .15s;font-size:13px;padding:2px 7px;
+          background:${_X_APPLIED.applied?'rgba(196,90,16,.12)':'transparent'};
+          border:1px solid ${_X_APPLIED.applied?'var(--orange)':'var(--glass-border-subtle)'};
+          cursor:${_X_APPLIED.applied?'pointer':'default'};
+          color:${_X_APPLIED.applied?'var(--orange)':'var(--t4)'}">↩</button>
     </div>`;
 }
 
@@ -2521,17 +2533,6 @@ function renderDowSuggest() {
   if(btn){ btn.style.display = anyBig ? 'inline-block' : 'none'; }
 }
 
-function applyXSuggest(x) {
-  CFG.X = x;
-  document.getElementById('fcX').value = x;
-  document.getElementById('xBadge').textContent = x;
-  document.getElementById('xInp') && (document.getElementById('xInp').value=x);
-  document.getElementById('xDisp') && (document.getElementById('xDisp').textContent=x);
-  fcRecalc();
-  renderXSuggest();
-  showToast(`✅ X = ${x} 반영 완료`);
-}
-
 function applyDowSuggest() {
   DOWS.forEach(d=>{ if(_dowSug[d]) CFG.dow[d]=_dowSug[d]; });
   fcRecalc();
@@ -2542,6 +2543,10 @@ function applyDowSuggest() {
 
 // ── 품목계수 제안 & 반영 ───────────────────────
 let _itemSug = {};
+// 품목계수 반영 상태 추적
+const _ITEM_APPLIED = {};
+// X값 반영 상태 추적
+let _X_APPLIED = {applied:false, prevVal:null};
 function renderItemSuggest() {
   // 기간 필터 적용 (suggest 페이지 기간)
   const sugDates = drpGetRange('suggest');
@@ -2577,9 +2582,10 @@ function renderItemSuggest() {
     const sugRnd = sug!==null ? +(sug.toFixed(3)) : cur;
     _itemSug[c] = sugRnd;
 
-    // 이전 반영 값 (CFG_LOG에서)
-    const lastLog = CFG_LOG.find(l=>l.changes.some(ch=>ch.tag===(TAG[c]||c)));
-    const prevVal = lastLog ? lastLog.changes.find(ch=>ch.tag===(TAG[c]||c))?.prev : null;
+    // 반영 상태 (전용 상태 맵에서)
+    const _st = _ITEM_APPLIED[c];
+    const isApplied = _st && _st.applied;
+    const prevVal = isApplied ? _st.prevVal : null;
 
     if(sug===null){
       h+=`<tr><td><b>${TAG[c]}</b> <span style="color:var(--t3);font-size:11px">${NAME[c]}</span></td>
@@ -2628,21 +2634,20 @@ function renderItemSuggest() {
       <td class="r" style="color:var(--t4);font-size:11px">${n}</td>
       <td style="text-align:center">${verdict}</td>
       <td style="text-align:center;white-space:nowrap">
-        ${/* prevVal있으면 반영됨 상태 → 반영회색, 되돌리기 색처리 */'' }
         <button onclick="applyOneItem('${c}',${sugRnd})"
-          title="${prevVal!==null?'다시 반영':'제안값 '+sugRnd+' 반영'}"
+          title="제안값 ${sugRnd} 반영"
           style="padding:2px 10px;font-size:10.5px;border-radius:var(--r-sm);cursor:pointer;transition:all .15s;
-            border:1px solid ${prevVal!==null?'var(--glass-border-subtle)':big?col:'var(--glass-border-subtle)'};
-            background:${prevVal!==null?'transparent':big?col+'18':'transparent'};
-            color:${prevVal!==null?'var(--t4)':big?col:'var(--t4)'};
-            font-weight:${prevVal===null&&big?700:400}">반영</button>
-        <button onclick="${prevVal!==null?`revertOneItem('${c}',${prevVal})`:'void(0)'}"
-          title="${prevVal!==null?'이전 값('+prevVal+')으로 되돌리기':'반영 후 활성화'}"
+            border:1px solid ${!isApplied&&big?col:'var(--glass-border-subtle)'};
+            background:${!isApplied&&big?col+'18':'transparent'};
+            color:${!isApplied&&big?col:'var(--t4)'};
+            font-weight:${!isApplied&&big?700:400}">반영</button>
+        <button onclick="${isApplied?`revertOneItem('${c}',${prevVal})`:'void(0)'}"
+          title="${isApplied?'이전 값('+prevVal+')으로 되돌리기':'반영 후 활성화'}"
           style="border-radius:var(--r-sm);transition:all .15s;font-size:13px;padding:2px 7px;
-            background:${prevVal!==null?'var(--orange)18':'transparent'};
-            border:1px solid ${prevVal!==null?'var(--orange)':'var(--glass-border-subtle)'};
-            cursor:${prevVal!==null?'pointer':'default'};
-            color:${prevVal!==null?'var(--orange)':'var(--t4)'}">↩</button>
+            background:${isApplied?'var(--orange)18':'transparent'};
+            border:1px solid ${isApplied?'var(--orange)':'var(--glass-border-subtle)'};
+            cursor:${isApplied?'pointer':'default'};
+            color:${isApplied?'var(--orange)':'var(--t4)'}">↩</button>
       </td>
     </tr>`;
   });
@@ -2756,6 +2761,7 @@ function applyOneItem(code, val){
   const prev=cfgSnapshot();
   const prevVal=CFG.item[code]||0;
   CFG.item[code]=val;
+  _ITEM_APPLIED[code]={applied:true, prevVal};
   cfgPush(`${TAG[code]||code} 계수 반영`, prev);
   cfgLogAdd(`${TAG[code]||code} 품목계수 변경`, [{tag:TAG[code]||code, prev:prevVal, next:val}]);
   renderItemSuggest();
@@ -2765,12 +2771,9 @@ function applyOneItem(code, val){
 function revertOneItem(code, prevVal){
   const prev=cfgSnapshot();
   CFG.item[code]=prevVal;
+  _ITEM_APPLIED[code]={applied:false, prevVal:null};
   cfgPush(`${TAG[code]||code} 계수 되돌리기`, prev);
   cfgLogAdd(`${TAG[code]||code} 품목계수 되돌리기`, [{tag:TAG[code]||code, prev:CFG.item[code], next:prevVal}]);
-  // 되돌리기 완료 → 해당 코드 로그 제거 (버튼 상태 초기화)
-  const tag = TAG[code]||code;
-  const idx = CFG_LOG.findIndex(l=>l.changes.some(ch=>ch.tag===tag));
-  if(idx>=0) CFG_LOG.splice(idx,1);
   renderItemSuggest();
   cfgAfterChange(`↩ ${TAG[code]||code} 계수 되돌림`);
 }
@@ -2779,6 +2782,7 @@ function applyXSuggest(x){
   const prev=cfgSnapshot();
   const prevX=CFG.X;
   CFG.X=x;
+  _X_APPLIED={applied:true, prevVal:prevX};
   document.getElementById('fcX').value=x;
   document.getElementById('xBadge').textContent=x;
   document.getElementById('xInp')&&(document.getElementById('xInp').value=x);
@@ -2786,6 +2790,21 @@ function applyXSuggest(x){
   cfgPush(`X값 ${prevX}→${x}`, prev);
   cfgLogAdd(`X 기준값 변경`, [{tag:'X', prev:prevX, next:x}]);
   cfgAfterChange(`✅ X = ${x} 반영`);
+  renderXSuggest();
+}
+
+function revertXApplied(){
+  if(!_X_APPLIED.applied) return;
+  const prev=cfgSnapshot();
+  const prevX=_X_APPLIED.prevVal;
+  CFG.X=prevX;
+  _X_APPLIED={applied:false, prevVal:null};
+  document.getElementById('fcX').value=prevX;
+  document.getElementById('xBadge').textContent=prevX;
+  document.getElementById('xInp')&&(document.getElementById('xInp').value=prevX);
+  document.getElementById('xDisp')&&(document.getElementById('xDisp').textContent=prevX);
+  cfgPush(`X값 되돌리기 → ${prevX}`, prev);
+  cfgAfterChange(`↩ X = ${prevX} 되돌림`);
   renderXSuggest();
 }
 
