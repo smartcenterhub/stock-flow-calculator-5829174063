@@ -564,7 +564,13 @@ canvas{display:block}
     <span class="drp-icon">📅</span>
     <span class="drp-range empty" id="globalDrpLbl">전체 기간</span>
   </button>
-  <div class="hb-right">
+  <div class="hb-right" style="gap:6px">
+    <button id="undoBtn" onclick="cfgUndo()" title="계수 변경 실행취소 (Ctrl+Z)" disabled
+      style="padding:3px 8px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--t3);font-size:13px;cursor:pointer;opacity:.4;transition:opacity .15s"
+    >↩</button>
+    <button id="redoBtn" onclick="cfgRedo()" title="계수 변경 다시 실행 (Ctrl+Y)" disabled
+      style="padding:3px 8px;border-radius:var(--r-sm);border:1px solid var(--glass-border-subtle);background:var(--glass-bg-strong);color:var(--t3);font-size:13px;cursor:pointer;opacity:.4;transition:opacity .15s"
+    >↪</button>
     <button class="btn btn-p" id="loadBtn" onclick="loadAll()">↻ 데이터 로드</button>
   </div>
 </div>
@@ -762,13 +768,99 @@ canvas{display:block}
     <div class="tbl-wrap" id="itemSuggestDiv"><div class="empty"><div class="ico">📊</div><div>데이터 로드 필요</div></div></div>
   </div>
 
-  <div class="card">
+  <div class="card mb12">
     <div class="card-title">⚠️ 미반영 보류 항목</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px">
       <div class="alert al-i" style="margin:0">행사전날예열 ×1.150 — 데이터 부족, 보류</div>
       <div class="alert al-i" style="margin:0">행사종료+1일 ×1.260 — 반짝 수요 패턴 확인 후</div>
       <div class="alert al-i" style="margin:0">연휴 첫날 별도 계수 — 데이터 더 쌓이면</div>
       <div class="alert al-i" style="margin:0">계절 고정계수 — 12개월 이상 후 YoY 전환</div>
+    </div>
+  </div>
+
+  <!-- 행사 진행 품목 계수 제작 가이드 -->
+  <div class="card">
+    <div class="card-title" style="margin-bottom:14px">📖 행사 진행 품목 계수 제작 가이드</div>
+    <div style="font-size:12px;line-height:1.9;color:var(--t2)">
+
+      <div style="font-weight:700;color:var(--tx);margin-bottom:6px;font-size:13px">🔗 계수 3단계 구조</div>
+      <div style="background:var(--glass-bg-dark);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;font-family:monospace;font-size:11.5px;line-height:2">
+        <span style="color:var(--accent)">예측 물량</span> = X × <span style="color:var(--orange)">요일계수</span> × <span style="color:var(--green)">품목계수</span> × <span style="color:var(--purple)">행사계수</span> × <span style="color:var(--red)">공휴일계수</span> × 성장계수
+      </div>
+
+      <div style="font-weight:700;color:var(--tx);margin-bottom:8px">📋 행사별 고려 요소</div>
+      <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:14px">
+        <thead><tr style="border-bottom:2px solid var(--glass-border-subtle)">
+          <th style="text-align:left;padding:6px 10px;color:var(--t3);font-size:10px">고려 요소</th>
+          <th style="text-align:left;padding:6px 10px;color:var(--t3);font-size:10px">내용</th>
+          <th style="text-align:left;padding:6px 10px;color:var(--t3);font-size:10px">계수 영향</th>
+        </tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--glass-border-subtle)">
+            <td style="padding:7px 10px;font-weight:600;color:var(--purple)">행사 유형</td>
+            <td style="padding:7px 10px">네이버 대형(슈퍼적립·푸드페스타) vs 자체·소규모</td>
+            <td style="padding:7px 10px;color:var(--accent)">행사계수 ×1.17 ~ ×3.25</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--glass-border-subtle)">
+            <td style="padding:7px 10px;font-weight:600;color:var(--purple)">행사 기간</td>
+            <td style="padding:7px 10px">당일·주말 집중 vs 주간 분산 (3일 이하 vs 7일 이상)</td>
+            <td style="padding:7px 10px;color:var(--accent)">짧을수록 당일 피크 ↑</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--glass-border-subtle)">
+            <td style="padding:7px 10px;font-weight:600;color:var(--green)">메인 상품 여부</td>
+            <td style="padding:7px 10px">메인 노출 상품 vs 서브 구성 상품</td>
+            <td style="padding:7px 10px;color:var(--accent)">메인 ×1.5, 서브대 ×1.2, 서브소 ×1.1</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--glass-border-subtle)">
+            <td style="padding:7px 10px;font-weight:600;color:var(--green)">상품 구성 품목</td>
+            <td style="padding:7px 10px">단품 vs 세트 (플레인 단독 vs 플+소 조합)</td>
+            <td style="padding:7px 10px;color:var(--accent)">세트 품목은 각 품목계수 × 구성 수량</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--glass-border-subtle)">
+            <td style="padding:7px 10px;font-weight:600;color:var(--green)">품목 개수 구성</td>
+            <td style="padding:7px 10px">100g 1개 vs 6개입·12개입 세트</td>
+            <td style="padding:7px 10px;color:var(--accent)">구성 수량만큼 품목계수 누적</td>
+          </tr>
+          <tr style="border-bottom:1px solid var(--glass-border-subtle)">
+            <td style="padding:7px 10px;font-weight:600;color:var(--orange)">요일 위치</td>
+            <td style="padding:7px 10px">행사가 월(×1.6) vs 금(×0.6)에 걸리는지</td>
+            <td style="padding:7px 10px;color:var(--accent)">요일계수 자동 반영</td>
+          </tr>
+          <tr>
+            <td style="padding:7px 10px;font-weight:600;color:var(--red)">공휴일 겹침</td>
+            <td style="padding:7px 10px">행사 기간에 공휴일·연휴 포함 여부</td>
+            <td style="padding:7px 10px;color:var(--accent)">공휴일 당일 ×0.787 자동 반영</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-weight:700;color:var(--tx);margin-bottom:8px">✅ 필요충분조건 체크리스트</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:rgba(58,58,240,.06);border:1px solid rgba(58,58,240,.2);border-radius:var(--r);padding:10px 12px">
+          <div style="font-weight:700;color:var(--accent);margin-bottom:6px;font-size:11.5px">행사계수 설정 전</div>
+          <div style="font-size:11px;line-height:1.8;color:var(--t2)">
+            ☑ 행사 유형 확인 (FC_PROMO 매핑)<br>
+            ☑ 행사 기간 / 요일 위치 확인<br>
+            ☑ 해당 행사 SID 목록 ◆행사SID목록에 등록<br>
+            ☑ 메인/서브 등급 설정
+          </div>
+        </div>
+        <div style="background:rgba(26,138,74,.06);border:1px solid rgba(26,138,74,.2);border-radius:var(--r);padding:10px 12px">
+          <div style="font-weight:700;color:var(--green);margin-bottom:6px;font-size:11.5px">품목계수 설정 전</div>
+          <div style="font-size:11px;line-height:1.8;color:var(--t2)">
+            ☑ 상품 구성 품목 확인 (sku_기준표)<br>
+            ☑ 품목별 개수 확인 (×3개 = 계수 ×3 누적)<br>
+            ☑ 실출고 데이터 최소 10일 이상 확보<br>
+            ☑ 행사 기간 데이터 분리 여부 확인
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;padding:10px 14px;background:var(--glass-bg-dark);border-radius:var(--r);border-left:3px solid var(--orange);font-size:11px;color:var(--t2);line-height:1.8">
+        💡 <b>예시:</b> 푸드페스타 행사에서 "플레인 6개입" 상품이 메인 노출 → 월요일 기준<br>
+        = X(100) × 요일(1.6) × 품목계수(2.5) × 구성(6개) × 행사계수(1.875) × 메인(1.5) = <b>6,750개</b><br>
+        품목계수 2.5가 과도하면 제안값으로 낮추고, 행사 없는 기간 데이터로 재산출 권장
+      </div>
     </div>
   </div>
 </div>
@@ -878,6 +970,16 @@ canvas{display:block}
   <div class="card mb12">
     <div class="card-title">품목계수 교차표 (X = <span id="xCrossLbl">100</span> 기준)</div>
     <div class="tbl-wrap" id="crossDiv"></div>
+  </div>
+
+  <div class="card mb12">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div class="card-title" style="margin:0">📋 계수 변경 로그</div>
+      <button class="btn" onclick="cfgLogClear()" style="padding:3px 10px;font-size:11px;color:var(--red)">전체 삭제</button>
+    </div>
+    <div id="coeffLogDiv" style="max-height:220px;overflow-y:auto">
+      <div style="color:var(--t4);font-size:11px;padding:8px 0">계수 변경 내역이 여기에 기록됩니다.</div>
+    </div>
   </div>
 
   <div class="g2">
@@ -2423,11 +2525,14 @@ function applyDowSuggest() {
 // ── 품목계수 제안 & 반영 ───────────────────────
 let _itemSug = {};
 function renderItemSuggest() {
+  // 기간 필터 적용 (suggest 페이지 기간)
+  const sugDates = drpGetRange('suggest');
+
   const norm = {};
   CODES.forEach(c=>norm[c]=[]);
-  D.dates.forEach(dt=>{
+  sugDates.forEach(dt=>{
     const dow=getDow(dt);
-    const dc =CFG.dow[dow]||1;
+    const dc=CFG.dow[dow]||1;
     CODES.forEach(c=>{
       const ac=(D.ac[c]||{})[dt]||0;
       if(ac>0) norm[c].push(ac/(dc*CFG.X));
@@ -2440,24 +2545,31 @@ function renderItemSuggest() {
 
   let h=`<table style="width:100%"><thead><tr>
     <th style="text-align:left">품목</th>
-    <th class="r">현행</th><th class="r">제안</th>
-    <th class="r">차이%</th><th class="r">N일</th>
+    <th class="r">현행</th>
+    <th class="r">제안</th>
+    <th class="r">차이%</th>
+    <th class="r">N일</th>
     <th style="text-align:center">판단</th>
-    <th style="text-align:center">반영</th>
+    <th style="text-align:center">반영 / 되돌리기</th>
+    <th style="text-align:center" title="산출 근거">ℹ</th>
   </tr></thead><tbody>`;
 
   CODES.forEach(c=>{
     const cur = CFG.item[c]||0;
     const sug = avg(norm[c]);
-    _itemSug[c] = sug !== null ? +(sug.toFixed(3)) : cur;
+    const sugRnd = sug!==null ? +(sug.toFixed(3)) : cur;
+    _itemSug[c] = sugRnd;
+
+    // 이전 반영 값 (CFG_LOG에서)
+    const lastLog = CFG_LOG.find(l=>l.changes.some(ch=>ch.tag===(TAG[c]||c)));
+    const prevVal = lastLog ? lastLog.changes.find(ch=>ch.tag===(TAG[c]||c))?.prev : null;
 
     if(sug===null){
       h+=`<tr><td><b>${TAG[c]}</b> <span style="color:var(--t3);font-size:11px">${NAME[c]}</span></td>
         <td class="r">${cur.toFixed(3)}×</td><td class="r" style="color:var(--t4)">—</td>
         <td class="r" style="color:var(--t4)">—</td>
         <td class="r" style="color:var(--t4);font-size:11px">0</td>
-        <td style="text-align:center;color:var(--t4);font-size:11px">데이터 없음</td>
-        <td></td></tr>`;
+        <td colspan="3" style="text-align:center;color:var(--t4);font-size:11px">데이터 없음</td></tr>`;
       return;
     }
     const dp  = cur ? (sug-cur)/cur*100 : 0;
@@ -2469,6 +2581,19 @@ function renderItemSuggest() {
       : '<span style="color:var(--t4);font-size:11px">유지</span>';
     if(Math.abs(dp)>=10){ alerts.push({c,dp,cur,sug}); bigCount++; }
 
+    // 정보 툴팁 텍스트
+    const vals = norm[c];
+    const minV = vals.length ? Math.min(...vals).toFixed(3) : '—';
+    const maxV = vals.length ? Math.max(...vals).toFixed(3) : '—';
+    const medV = vals.length ? (vals.slice().sort((a,b)=>a-b)[Math.floor(vals.length/2)]).toFixed(3) : '—';
+    const infoTip = `${NAME[c]} 계수 산출 근거:\\n` +
+      `· 분석 일수: ${n}일\\n` +
+      `· 평균 정규화 계수: ${sug!==null?sug.toFixed(4):'—'}\\n` +
+      `· 최솟값: ${minV} / 중앙값: ${medV} / 최댓값: ${maxV}\\n` +
+      `· 현행 계수 ${cur.toFixed(3)} 대비 ${dp>=0?'+':''}${dp.toFixed(1)}%\\n` +
+      `· 요일계수 · X(${CFG.X}) 제거 후 순수 품목 기여분\\n` +
+      (big ? `· ⚠️ 현행 대비 ${Math.abs(dp)>=10?'10%':'5%'} 이상 차이 — 검토 권장` : '· ✅ 현행 계수와 근접');
+
     h+=`<tr style="${big?'background:var(--glass-bg-dark)':''}">
       <td><b>${TAG[c]}</b> <span style="color:var(--t3);font-size:11px">${NAME[c]}</span></td>
       <td class="r" style="color:var(--accent)">${cur.toFixed(3)}×</td>
@@ -2476,55 +2601,185 @@ function renderItemSuggest() {
       <td class="r" style="color:${big?col:'var(--t2)'};font-weight:${big?700:400}">${dp>=0?'+':''}${dp.toFixed(1)}%</td>
       <td class="r" style="color:var(--t4);font-size:11px">${n}</td>
       <td style="text-align:center">${verdict}</td>
+      <td style="text-align:center;white-space:nowrap;display:flex;gap:3px;justify-content:center;padding:4px 6px">
+        ${big ? `<button class="btn" onclick="applyOneItem('${c}',${sugRnd})"
+          style="padding:2px 7px;font-size:10.5px;color:${col}">반영</button>` : ''}
+        ${prevVal!==null ? `<button class="btn" onclick="revertOneItem('${c}',${prevVal})"
+          title="이전 값 ${prevVal}으로 되돌리기"
+          style="padding:2px 7px;font-size:10.5px;color:var(--orange)">↩${prevVal}</button>` : ''}
+      </td>
       <td style="text-align:center">
-        ${big ? `<button class="btn" onclick="applyOneItem('${c}',${sug.toFixed(3)})"
-          style="padding:2px 8px;font-size:10.5px;color:${col}">반영</button>` : ''}
+        <button onclick="alert('${infoTip}')" title="${infoTip}"
+          style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:12px;padding:2px 4px">ℹ️</button>
       </td>
     </tr>`;
   });
   h+='</tbody></table>';
   document.getElementById('itemSuggestDiv').innerHTML = h;
 
-  // 버튼 표시
-  const allBtn = document.getElementById('applyAllItemBtn');
-  const bigBtn = document.getElementById('applyBigItemBtn');
+  const allBtn=document.getElementById('applyAllItemBtn');
+  const bigBtn=document.getElementById('applyBigItemBtn');
   if(allBtn) allBtn.style.display='inline-block';
-  if(bigBtn) bigBtn.style.display = bigCount>0 ? 'inline-block' : 'none';
+  if(bigBtn) bigBtn.style.display=bigCount>0?'inline-block':'none';
 
-  // 알림
   let al='';
   if(alerts.length){
     al=`<div class="alert al-w">⚠️ <b>${alerts.length}개 품목</b> 현행 대비 ±10% 이상: ${alerts.map(a=>`${TAG[a.c]}(${(a.dp>=0?'+':'')+a.dp.toFixed(0)}%)`).join(', ')}</div>`;
   } else {
-    al=`<div class="alert al-o">✅ 모든 품목 계수가 현행 대비 ±10% 이내입니다.</div>`;
+    al=`<div class="alert al-o">✅ 모든 품목 계수 현행 대비 ±10% 이내</div>`;
   }
-  document.getElementById('suggestAlerts').innerHTML = al;
+  document.getElementById('suggestAlerts').innerHTML=al;
 }
 
+// ════════════════════════════════════════
+// CFG HISTORY ENGINE (undo/redo)
+// ════════════════════════════════════════
+const CFG_HISTORY = [];  // [{snapshot, desc, ts}]
+let CFG_HIST_IDX = -1;   // current position
+const CFG_LOG = [];       // [{ts, desc, prev, next}] — 반영 로그
+
+function cfgSnapshot(){ return {X:CFG.X, dow:{...CFG.dow}, item:{...CFG.item}}; }
+
+function cfgPush(desc, prevSnap){
+  // Truncate redo stack
+  CFG_HISTORY.splice(CFG_HIST_IDX+1);
+  CFG_HISTORY.push({snap:prevSnap, desc, ts:new Date()});
+  CFG_HIST_IDX = CFG_HISTORY.length-1;
+  // Max 50 steps
+  if(CFG_HISTORY.length>50){ CFG_HISTORY.shift(); CFG_HIST_IDX--; }
+  cfgUndoRedoUI();
+}
+
+function cfgUndo(){
+  if(CFG_HIST_IDX<0) return;
+  const cur = cfgSnapshot();
+  const {snap, desc} = CFG_HISTORY[CFG_HIST_IDX];
+  // Save forward step
+  CFG_HISTORY[CFG_HIST_IDX] = {snap:cur, desc, ts:CFG_HISTORY[CFG_HIST_IDX].ts};
+  // Restore
+  CFG.X=snap.X; CFG.dow={...snap.dow}; CFG.item={...snap.item};
+  CFG_HIST_IDX--;
+  cfgAfterChange(`↩ 되돌림: ${desc}`);
+}
+
+function cfgRedo(){
+  if(CFG_HIST_IDX>=CFG_HISTORY.length-1) return;
+  CFG_HIST_IDX++;
+  const cur=cfgSnapshot();
+  const {snap, desc}=CFG_HISTORY[CFG_HIST_IDX];
+  CFG_HISTORY[CFG_HIST_IDX]={snap:cur, desc, ts:CFG_HISTORY[CFG_HIST_IDX].ts};
+  CFG.X=snap.X; CFG.dow={...snap.dow}; CFG.item={...snap.item};
+  cfgAfterChange(`↪ 다시 실행: ${desc}`);
+}
+
+function cfgUndoRedoUI(){
+  const u=document.getElementById('undoBtn'), r=document.getElementById('redoBtn');
+  if(u){ u.disabled=CFG_HIST_IDX<0; u.style.opacity=CFG_HIST_IDX<0?'0.3':'1'; }
+  if(r){ const canR=CFG_HIST_IDX<CFG_HISTORY.length-1; r.disabled=!canR; r.style.opacity=canR?'1':'0.3'; }
+}
+
+function cfgAfterChange(toastMsg){
+  fcRecalc(); renderCoeff(); sbGuideFill();
+  if(document.getElementById('page-suggest').classList.contains('on')) renderSuggest();
+  cfgUndoRedoUI();
+  if(toastMsg) showToast(toastMsg);
+}
+
+// 반영 로그 기록
+function cfgLogAdd(desc, changes){
+  CFG_LOG.unshift({ts:new Date(), desc, changes});
+  if(CFG_LOG.length>100) CFG_LOG.pop();
+  renderCoeffLog();
+}
+function cfgLogClear(){ CFG_LOG.length=0; renderCoeffLog(); }
+
+function renderCoeffLog(){
+  const el=document.getElementById('coeffLogDiv');
+  if(!el) return;
+  if(!CFG_LOG.length){
+    el.innerHTML='<div style="color:var(--t4);font-size:11px;padding:8px 0">계수 변경 내역이 여기에 기록됩니다.</div>';
+    return;
+  }
+  el.innerHTML=CFG_LOG.map(log=>{
+    const ts=log.ts.toLocaleTimeString('ko-KR');
+    const chg=log.changes.map(c=>`<span style="color:var(--accent);font-weight:600">${c.tag}</span> ${c.prev.toFixed(3)}→<span style="color:var(--green);font-weight:700">${c.next.toFixed(3)}</span>`).join(' · ');
+    return `<div style="padding:6px 0;border-bottom:1px solid var(--glass-border-subtle);font-size:11px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+        <span style="font-weight:600;color:var(--t2)">${log.desc}</span>
+        <span style="color:var(--t4);font-size:10px">${ts}</span>
+      </div>
+      <div style="line-height:1.7">${chg||'—'}</div>
+    </div>`;
+  }).join('');
+}
+
+// Keyboard shortcut
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='z'&&!e.shiftKey){ e.preventDefault(); cfgUndo(); }
+  if((e.ctrlKey||e.metaKey)&&(e.key==='y'||(e.key==='z'&&e.shiftKey))){ e.preventDefault(); cfgRedo(); }
+});
+
+// ── 계수 반영 함수 (with history + log) ──────────────────
 function applyOneItem(code, val){
-  CFG.item[code] = val;
+  const prev=cfgSnapshot();
+  const prevVal=CFG.item[code]||0;
+  CFG.item[code]=val;
+  cfgPush(`${TAG[code]||code} 계수 반영`, prev);
+  cfgLogAdd(`${TAG[code]||code} 품목계수 변경`, [{tag:TAG[code]||code, prev:prevVal, next:val}]);
   renderItemSuggest();
-  fcRecalc();
-  renderCoeff();
-  showToast(`✅ ${TAG[code]} 계수 → ${val} 반영`);
+  cfgAfterChange(`✅ ${TAG[code]||code} 계수 → ${val} 반영`);
+}
+
+function revertOneItem(code, prevVal){
+  const prev=cfgSnapshot();
+  CFG.item[code]=prevVal;
+  cfgPush(`${TAG[code]||code} 계수 되돌리기`, prev);
+  cfgLogAdd(`${TAG[code]||code} 품목계수 되돌리기`, [{tag:TAG[code]||code, prev:CFG.item[code], next:prevVal}]);
+  renderItemSuggest();
+  cfgAfterChange(`↩ ${TAG[code]||code} 계수 되돌림`);
+}
+
+function applyXSuggest(x){
+  const prev=cfgSnapshot();
+  const prevX=CFG.X;
+  CFG.X=x;
+  document.getElementById('fcX').value=x;
+  document.getElementById('xBadge').textContent=x;
+  document.getElementById('xInp')&&(document.getElementById('xInp').value=x);
+  document.getElementById('xDisp')&&(document.getElementById('xDisp').textContent=x);
+  cfgPush(`X값 ${prevX}→${x}`, prev);
+  cfgLogAdd(`X 기준값 변경`, [{tag:'X', prev:prevX, next:x}]);
+  cfgAfterChange(`✅ X = ${x} 반영`);
+  renderXSuggest();
+}
+
+function applyDowSuggest(){
+  const prev=cfgSnapshot();
+  const changes=[];
+  DOWS.forEach(d=>{ if(_dowSug[d]){ changes.push({tag:d, prev:CFG.dow[d], next:_dowSug[d]}); CFG.dow[d]=_dowSug[d]; }});
+  cfgPush('요일계수 일괄 반영', prev);
+  cfgLogAdd('요일계수 제안값 반영', changes);
+  cfgAfterChange('✅ 요일계수 제안값 반영 완료');
 }
 
 function applyItemSuggest(mode){
-  let count=0;
+  const prev=cfgSnapshot();
+  const changes=[];
   CODES.forEach(c=>{
     const cur=CFG.item[c]||0;
     const sug=_itemSug[c];
     if(sug===undefined||sug===null) return;
     const dp=cur?(sug-cur)/cur*100:0;
     if(mode==='all'||(mode==='big'&&Math.abs(dp)>=10)){
-      CFG.item[c]=sug; count++;
+      changes.push({tag:TAG[c]||c, prev:cur, next:sug});
+      CFG.item[c]=sug;
     }
   });
+  if(!changes.length){ showToast('변경할 항목 없음'); return; }
+  cfgPush(`품목계수 ${changes.length}개 ${mode==='big'?'(±10%이상)':'(전체)'} 반영`, prev);
+  cfgLogAdd(`품목계수 ${changes.length}개 반영`, changes);
   renderItemSuggest();
-  fcRecalc();
-  renderCoeff();
-  sbGuideFill();
-  showToast(`✅ 품목계수 ${count}개 반영 완료`);
+  cfgAfterChange(`✅ 품목계수 ${changes.length}개 반영 완료`);
 }
 
 // ── 토스트 알림 ──────────────────────────────
@@ -2838,7 +3093,13 @@ function renderCrossTable() {
       const wk=vals.reduce((a,b)=>a+b,0);
       h+=`<tr><td><b>${TAG[c]}</b></td><td style="color:var(--t2)">${NAME[c]}</td>
         <td class="r" style="color:var(--accent)">${ic.toFixed(3)}×</td>
-        ${vals.map(v=>`<td class="r">${v||'—'}</td>`).join('')}
+        ${vals.map(v=>{
+          if(!v) return '<td class="r">—</td>';
+          const r50=Math.floor(v/50)*50;
+          const r10d=Math.floor(v/10)*10;
+          const r10u=Math.ceil(v/10)*10;
+          return `<td class="r" style="position:relative" title="${v} → (${r50}/${r10d}/${r10u})">${v}<br><span style="font-size:8.5px;color:var(--t4);font-weight:400">${r50}/${r10d}/${r10u}</span></td>`;
+        }).join('')}
         <td class="r" style="font-weight:600">${wk||'—'}</td></tr>`;
     });
   });
@@ -3937,6 +4198,7 @@ function drpStoreAcRange(){
   if(sorted.length) D.acRange=[sorted[0], sorted[sorted.length-1]];
 }
 sbGuideFill();
+cfgUndoRedoUI();
 setTimeout(()=>{ loadAll(); }, 500);
 </script>
 </body>
